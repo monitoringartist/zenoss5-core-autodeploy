@@ -99,7 +99,7 @@ Part of autodeployement:
 ![Zenoss Core 5 - part of autodeployement](https://raw.githubusercontent.com/jangaraj/zenoss5-core-autodeploy/master/doc/zenoss5-core-autodeploy-2.png)
 Host stat in Control Center:
 ![Zenoss Core 5 - host stat in Control Center](https://raw.githubusercontent.com/jangaraj/zenoss5-core-autodeploy/master/doc/cc-host-stat.png)
-Application Zenoss Core 5 overview in Control Center:
+Zenoss Core 5 application overview in Control Center:
 ![Zenoss Core 5 - app overview in Control Center](https://raw.githubusercontent.com/jangaraj/zenoss5-core-autodeploy/master/doc/cc-app-overview.png)
 4 instances of MariaDB in Control Center:
 ![Zenoss Core 5 - 4 instances of MariaDB in Control Center](https://raw.githubusercontent.com/jangaraj/zenoss5-core-autodeploy/master/doc/cc-app-mariadb-4-instances.png)
