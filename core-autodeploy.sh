@@ -418,8 +418,10 @@ fi
 echo -e "${blue}2 Preparing the master host - (`date -R`)${endColor}"
 
 echo -e "${yellow}2.1 IP configurations${endColor}"
-privateipv4=$(ifconfig | grep -A 1 'eth0' | tail -1 | awk '{print $2}')
-privateipv42=$(ifconfig | grep -A 1 'eno' | tail -1 | awk '{print $2}')
+# ifconfig is not available in min installation - ip addr show used
+privateipv4=$(ip addr show | grep -A 1 'eth0' | grep inet | awk '{print $2}' | awk -F'/' '{print $1}')
+privateipv42=$(ip addr show | grep -A 1 'en0' | grep inet | awk '{print $2}' | awk -F'/' '{print $1}')
+# AWS/HP Cloud public IPv4 address
 publicipv4=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4 | tr '\n' ' ')
 if [[ ! $publicipv4 =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
     if [ -z "$privateipv4" ]; then
