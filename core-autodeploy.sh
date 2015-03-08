@@ -43,6 +43,18 @@ Filesystem                  Type	Min size
 /opt/serviced/var/volumes   ${servicedvolumes_fs_type}	${servicedvolumes_fs_min_size}GB
 /opt/serviced/var/backups   ${servicedbackups_fs_type}	${servicedbackups_fs_min_size}GB"
 
+# lang check, only en_GB.UTF-8/en_US.UTF-8 are supported
+languages=$(locale | awk -F'=' '{print $2}' | tr -d '"' | grep -v '^$' | sort | uniq | tr -d '\r' | tr -d '\n')
+if [ "$languages" != "en_GB.UTF-8" ] && [ "$languages" != "en_US.UTF-8" ]; then
+    echo -e "${yellow}Warning: some non US/GB English or non UTF-8 locales are detected (see output from the command locale).\nOnly en_GB.UTF-8/en_US.UTF-8 are supported in core-autodeploy.sh script.\nYou can try to continue. Do you want to continue (y/n)?${endColor}"
+    read answer    
+    if echo "$answer" | grep -iq "^y" ;then
+        echo " ... continuing"  
+    else
+        exit 1
+    fi
+fi
+          
 while getopts "d:s:v:b:" arg; do
   case $arg in
     d)
@@ -286,11 +298,11 @@ echo -e "${yellow}1.3 OS version check${endColor}"
 if [ -f /etc/redhat-release ]; then
     elv=`cat /etc/redhat-release | gawk 'BEGIN {FS="release "} {print $2}' | gawk 'BEGIN {FS="."} {print $1}'`
     if [ $elv -ne 7 ]; then
-	    echo -e "${red}Not supported OS version. Only RedHat 7 and CentOS 7 are supported by autoinstall script at the moment.${endColor}"
+	    echo -e "${red}Not supported OS version. Only RedHat 7 and CentOS 7 are supported by autodeploy script at the moment.${endColor}"
         exit 1
     fi
 else
-	echo -e "${red}Not supported OS version. Only RedHat 7 and CentOS 7 are supported by autoinstall script at the moment.${endColor}"
+	echo -e "${red}Not supported OS version. Only RedHat 7 and CentOS 7 are supported by autodeploy script at the moment.${endColor}"
     exit 1   
 fi
 echo -e "${green}Done${endColor}"
