@@ -17,7 +17,7 @@ The script will take several minutes (around 15-30) to complete. When done,
 you should be able to visit Control Center in a web browser to start 
 Zenoss Core 5 application.
 
-Script requires mounted directories:
+Script requires mounted filesystems:
 
 ```
 /var/lib/docker 
