@@ -18,8 +18,8 @@ servicedbackups_fs_min_size=1 #GB
 servicedbackups_fs_type="btrfs"
 g2k=1048576
 user="serviceman"
-version="2015-03-08"
-retries_max=30
+version="2015-03-12"
+retries_max=90
 sleep_duration=10
 install_doc="http://wiki.zenoss.org/download/core/docs/Zenoss_Core_Installation_Guide_r5.0.0_d1051.15.055.pdf"
     
@@ -432,7 +432,15 @@ echo -e "${blue}2 Preparing the master host - (`date -R`)${endColor}"
 echo -e "${yellow}2.1 IP configurations${endColor}"
 # ifconfig is not available in min installation - ip addr show used
 privateipv4=$(ip addr show | grep -A 1 'eth0' | grep inet | awk '{print $2}' | awk -F'/' '{print $1}')
-privateipv42=$(ip addr show | grep -A 1 'en0' | grep inet | awk '{print $2}' | awk -F'/' '{print $1}')
+privateipv42=$(ip addr show | grep -A 1 'eno' | grep inet | awk '{print $2}' | awk -F'/' '{print $1}')
+# test of empty - ask input from user
+if [ -z "$privateipv4" ] && [ -z "$privateipv42" ]; then
+    echo "Network interface auto detection failed. Available interfaces in your system:"
+    ls /sys/class/net | grep -v lo
+    echo "Please write interface, which you want to use for deployement, e.g. eth1 or ens160:"
+    read interface
+    privateipv4=$(ip addr show | grep -A 1 $interface | grep inet | awk '{print $2}' | awk -F'/' '{print $1}')
+fi
 # AWS/HP Cloud public IPv4 address
 publicipv4=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4 | tr '\n' ' ')
 if [[ ! $publicipv4 =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
@@ -629,6 +637,8 @@ fi
 echo -e "${blue}4 Zenoss Core 5 deployement - (`date -R`)${endColor}"
 
 echo -e "${yellow}4.1 Adding current host to the default resource pool${endColor}"
+echo -e "${yellow}Please be patient, because docker image zenoss/serviced-isvcs must be downloaded before first start${endColor}"
+echo -e "${yellow}Script is trying to check status every 10s. Time limit is 15 minutes.${endColor}"
 echo "serviced host list 2>&1"
 test=$(serviced host list 2>&1)
 # wait for serviced start
