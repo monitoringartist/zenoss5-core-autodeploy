@@ -637,7 +637,7 @@ fi
 echo -e "${blue}4 Zenoss Core 5 deployement - (`date -R`)${endColor}"
 
 echo -e "${yellow}4.1 Adding current host to the default resource pool${endColor}"
-echo -e "${yellow}Please be patient, because docker image zenoss/serviced-isvcs must be downloaded before first start${endColor}"
+echo -e "${yellow}Please be patient, because docker image zenoss/serviced-isvcs must be downloaded before first start.${endColor}"
 echo -e "${yellow}Script is trying to check status every 10s. Timeout for this step is 15 minutes.${endColor}"
 echo "serviced host list 2>&1"
 test=$(serviced host list 2>&1)
@@ -674,6 +674,8 @@ else
 fi
 
 echo -e "${yellow}4.2 Deploy Zenoss.core application (the deployment step can take 15-30 minutes)${endColor}"
+echo -e "${yellow}Please be patient, because all Zenoss docker images must be downloaded before first start.${endColor}"
+echo -e "${yellow}Progress from serviced log file is presented. No timeout for this step.${endColor}"
 echo "serviced template list 2>&1 | grep 'Zenoss.core' | awk '{print \$1}'"
 TEMPLATEID=$(serviced template list 2>&1 | grep 'Zenoss.core' | awk '{print $1}')
 echo 'serviced service list 2>/dev/null | wc -l'
@@ -685,7 +687,7 @@ if [ "$services" == "0" ]; then
   bgjobs=$(jobs -p | wc -l)
   ((bgjobs++))
   echo "serviced template deploy $TEMPLATEID default zenoss"
-  journalctl -u serviced -f &
+  journalctl -u serviced -f -n 0 &
   serviced template deploy $TEMPLATEID default zenoss
   rc=$?
   # kill log watching

@@ -8,7 +8,7 @@ and Zenoss Core 5 for you.
 
 ```
 # cd /tmp
-# wget https://raw.githubusercontent.com/jangaraj/zenoss5-core-autodeploy/master/core-autodeploy.sh
+# curl -O https://raw.githubusercontent.com/jangaraj/zenoss5-core-autodeploy/master/core-autodeploy.sh
 # chmod +x core-autodeploy.sh
 # ./core-autodeploy.sh
 ```
