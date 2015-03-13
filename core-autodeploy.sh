@@ -18,7 +18,7 @@ servicedbackups_fs_min_size=1 #GB
 servicedbackups_fs_type="btrfs"
 g2k=1048576
 user="serviceman"
-version="2015-03-12"
+version="2015-03-13"
 retries_max=90
 sleep_duration=10
 install_doc="http://wiki.zenoss.org/download/core/docs/Zenoss_Core_Installation_Guide_r5.0.0_d1051.15.055.pdf"
@@ -638,7 +638,7 @@ echo -e "${blue}4 Zenoss Core 5 deployement - (`date -R`)${endColor}"
 
 echo -e "${yellow}4.1 Adding current host to the default resource pool${endColor}"
 echo -e "${yellow}Please be patient, because docker image zenoss/serviced-isvcs must be downloaded before first start${endColor}"
-echo -e "${yellow}Script is trying to check status every 10s. Time limit is 15 minutes.${endColor}"
+echo -e "${yellow}Script is trying to check status every 10s. Timeout for this step is 15 minutes.${endColor}"
 echo "serviced host list 2>&1"
 test=$(serviced host list 2>&1)
 # wait for serviced start
@@ -646,7 +646,7 @@ retry=1
 while [ "$test" = "rpc: can't find service Master.GetHosts" ] || [[ "$test" =~ "could not create a client to the master: dial tcp" ]] && [ $retry -lt $retries_max ]
 do
    echo $test
-   echo "Retry #${retry}: Control Service is not fully started, I'm trying in next ${sleep_duration} seconds"
+   echo "#${retry}: Control Service is not fully started, I'm trying in next ${sleep_duration} seconds"
    retry=$(( $retry + 1 ))
    sleep $sleep_duration    
    test=$(serviced host list 2>&1)   
@@ -678,7 +678,9 @@ echo "serviced template list 2>&1 | grep 'Zenoss.core' | awk '{print \$1}'"
 TEMPLATEID=$(serviced template list 2>&1 | grep 'Zenoss.core' | awk '{print $1}')
 echo 'serviced service list 2>/dev/null | wc -l'
 services=$(serviced service list 2>/dev/null | wc -l)                      
-if [ "$TEMPLATEID" == "05d70f0fb778ff5d1b9461dca75fa4bb" ] && [ "$services" == "0" ]; then
+#if [ "$TEMPLATEID" == "05d70f0fb778ff5d1b9461dca75fa4bb" ] && [ "$services" == "0" ]; then
+# no TEMPLATEID, because it depends on release - last f7e337606c87626b37cf1f4fb2fbb07e
+if [ "$services" == "0" ]; then
   # log progress watching from journalctl in background
   bgjobs=$(jobs -p | wc -l)
   ((bgjobs++))
@@ -697,7 +699,7 @@ else
   if [ "$services" -gt "0" ]; then
     echo -e "${yellow}Skipping - some services are already deployed, check: serviced service list${endColor}"
   else
-    echo -e "${red}Skipping deloying an application - check output from template test: $TEMPLATEID${endColor}"
+    echo -e "${red}Skipping deploying an application - check output from template test: $TEMPLATEID${endColor}"
     exit 1
   fi
 fi
@@ -709,5 +711,11 @@ echo -e "${green}Please visit Control Center https://$publicipv4/ in your favori
 echo -e "${green}Add following line to your hosts file:${endColor}"
 echo -e "${green}$publicipv4 $hostname hbase.$hostname opentsdb.$hostname rabbitmq.$hostname zenoss5.$hostname${endColor}"
 echo -e "${green}or edit /etc/default/serviced and set SERVICED_VHOST_ALIASES to your FQDN${endColor}"
+# selinux test
+output=$(id)
+substring="context="
+if [ "$output" != "${output%$substring*}" ]; then
+  echo -e "${red}Please also reboot machine, because SELINUX is still active!${endColor}"
+fi
 echo -e "Install guide: ${install_doc}"
 echo -e "${blue}Credit: www.jangaraj.com${endColor}"
