@@ -106,6 +106,13 @@ Zenoss Core 5 application overview in Control Center:
 htop of running Zenoss Core 5 with 0 monitored devices:
 ![Zenoss Core 5 - htop of running Zenoss Core 5](https://raw.githubusercontent.com/jangaraj/zenoss5-core-autodeploy/master/doc/htop-cc-master-zenoss-core-5.png)
 
+Troubleshooting
+===============
+
+If you have any problems, please ask Zenoss community (IRC/forum/Github issue  
+tracker) for help and provide full output (http://pastebin.com) from auto-deploy script  
+and *journalctl -u systemd -f* command please. Or follow manual installation guide.
+
 Author
 ======
  
