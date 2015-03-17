@@ -21,7 +21,7 @@ user="serviceman"
 version="2015-03-13"
 retries_max=90
 sleep_duration=10
-install_doc="http://wiki.zenoss.org/download/core/docs/Zenoss_Core_Installation_Guide_r5.0.0_d1051.15.055.pdf"
+install_doc="http://wiki.zenoss.org/download/core/docs/Zenoss_Core_Installation_Guide_r5.0.0_d1051.15.063.pdf"
     
 green='\e[0;32m'
 yellow='\e[0;33m'
@@ -436,7 +436,7 @@ privateipv42=$(ip addr show | grep -A 1 'eno' | grep inet | awk '{print $2}' | a
 # test of empty - ask input from user
 if [ -z "$privateipv4" ] && [ -z "$privateipv42" ]; then
     echo "Network interface auto detection failed. Available interfaces in your system:"
-    ls /sys/class/net | grep -v lo
+    ls /sys/class/net | grep -v lo | grep -v docker0
     echo "Please write interface, which you want to use for deployement, e.g. eth1 or ens160:"
     read interface
     privateipv4=$(ip addr show | grep -A 1 $interface | grep inet | awk '{print $2}' | awk -F'/' '{print $1}')
