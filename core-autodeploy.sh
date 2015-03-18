@@ -431,26 +431,29 @@ echo -e "${blue}2 Preparing the master host - (`date -R`)${endColor}"
 
 echo -e "${yellow}2.1 IP configurations${endColor}"
 # ifconfig is not available in min installation - ip addr show used
-privateipv4=$(ip addr show | grep -A 1 'eth0' | grep inet | awk '{print $2}' | awk -F'/' '{print $1}')
-privateipv42=$(ip addr show | grep -A 1 'eno' | grep inet | awk '{print $2}' | awk -F'/' '{print $1}')
-# test of empty - ask input from user
-if [ -z "$privateipv4" ] && [ -z "$privateipv42" ]; then
+is=$(ls /sys/class/net | grep -v ^lo | grep -v ^docker0 | grep -v ^veth)
+no=$(echo ${is} | tr ' ' "\n" | wc -l)
+if [ "$no" -gt "1" ]; then
     echo "Network interface auto detection failed. Available interfaces in your system:"
-    ls /sys/class/net | grep -v lo | grep -v docker0
-    echo "Please write interface, which you want to use for deployement, e.g. eth1 or ens160:"
+    echo $is
+    echo "Please write interface, which you want to use for deployement (see listing above), e.g. eth1 or ens160:"
     read interface
     privateipv4=$(ip addr show | grep -A 1 $interface | grep inet | awk '{print $2}' | awk -F'/' '{print $1}')
-fi
+    if [ -z "$privateipv4" ]; then
+        echo -e "${red}IPv4 address for selected interface ${interface} was not detected.${endColor}"
+        exit 1
+    fi
+else
+    echo "Detected interface: ${is}"
+    privateipv4=$(ip addr show | grep -A 1 $is | grep inet | awk '{print $2}' | awk -F'/' '{print $1}')
+fi    
+
 # AWS/HP Cloud public IPv4 address
 publicipv4=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4 | tr '\n' ' ')
 if [[ ! $publicipv4 =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
-    if [ -z "$privateipv4" ]; then
-        publicipv4=$privateipv42
-        privateipv4=$privateipv42
-    else
-        publicipv4=$privateipv4
-    fi
-fi 
+    publicipv4=$privateipv4
+fi
+ 
 hostname=$(uname -n)
 if [ "$hostname" == "localhost" ] || [ "$hostname" == "localhost.localdomain" ]; then
     hostname=$(echo $publicipv4 | tr '.' '-')
@@ -462,7 +465,8 @@ if [ $? -ne 0 ]; then
     echo "echo \"$privateipv4 $hostname\" >> /etc/hosts"
     echo "$privateipv4 $hostname" >> /etc/hosts
 fi
-echo "IPv4: $publicipv4"
+echo "Public IPv4: $publicipv4"
+echo "Private IPv4: $privateipv4"
 echo -e "${green}Done${endColor}"
 
 echo -e "${yellow}2.2 Disable the firewall${endColor}"
