@@ -1,10 +1,13 @@
 Zenoss Core 5 autodeploy script
 ===============================
+
+If you like or use this project, please provide feedback to author - Star it ★. 
+
 Auto-deployment script for Zenoss Core 5 on CentOS 7.x or Red Hat Enterprise 
 Linux 7.x. Ubuntu is not supported at the moment. A 64-bit build is required.
 
 The script included in this directory will automatically deploy Control Center 
-and Zenoss Core 5 for you. 
+and Zenoss Core 5 for you. Usage of auto-deployment script: 
 
 ```
 # cd /tmp
