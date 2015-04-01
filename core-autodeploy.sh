@@ -18,7 +18,7 @@ servicedbackups_fs_min_size=1 #GB
 servicedbackups_fs_type="btrfs"
 g2k=1048576
 user="ccuser"
-version="2015-03-19"
+version="2015-04-02"
 retries_max=90
 sleep_duration=10
 install_doc="http://wiki.zenoss.org/download/core/docs/Zenoss_Core_Installation_Guide_r5.0.0_latest.pdf"
@@ -628,7 +628,28 @@ else
   echo -e "${green}Done${endColor}"
 fi
 
-echo -e "${yellow}3.8 Start the Control Center service${endColor}"
+# rpcbind bug http://www.zenoss.org/forum/4726 http://pastebin.com/9hn92W33
+echo -e "${yellow}3.8 rpcbind workaround${endColor}"
+echo 'systemctl status rpcbind &>/dev/null'
+systemctl status rpcbind &>/dev/null
+if [ $? -ne 0 ]; then
+  echo -e "${yellow}Applying rpcbind workaround${endColor}"
+  echo 'systemctl start rpcbind'
+  systemctl start rpcbind
+  if [ $? -ne 0 ]; then
+    echo -e "${red}Problem with rpcbind start${endColor}"
+    exit 1
+  fi
+  echo 'echo "systemctl start rpcbind" >> /etc/rc.d/rc.local && chmod +x /etc/rc.d/rc.local'
+  echo "systemctl start rpcbind" >> /etc/rc.d/rc.local && chmod +x /etc/rc.d/rc.local
+  if [ $? -ne 0 ]; then
+    echo -e "${red}Problem with installing rpcbind autostart workaround${endColor}"
+    exit 1  
+  fi    
+  echo -e "${green}Done${endColor}"
+fi
+
+echo -e "${yellow}3.9 Start the Control Center service${endColor}"
 echo "systemctl enable serviced && systemctl start serviced"
 systemctl enable serviced && systemctl start serviced
 if [ $? -ne 0 ]; then
