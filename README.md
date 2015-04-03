@@ -39,6 +39,18 @@ Confirmation is needed before formatting. Available options:
 # ./core-autodeploy.sh -d /dev/sdb1 -s /dev/sdb2 -v /dev/sdc1 -b /dev/sdd1
 ```
 
+For advandced users only (you are familiar with documentation, so you will be able identify some script warnings/errors, which can be ignored):
+```
+# # install Zenoss Core 5 host
+# ./core-autodeploy.sh -h <MASTER IP>
+
+# # install Resource Manager 5 master, it will fail if your Docker hub account doesn't have access to private Zenoss repositories
+# ./core-autodeploy.sh -r resmgr -u <DOCKER HUB USERNAME> -e <DOCKER HUB EMAIL> -p '<DOCKER HUB PASSWORD>'
+
+# # install Resource Manager 5 host, it will fail if your Docker hub account doesn't have access to private Zenoss repositories
+# ./core-autodeploy.sh -r resmgr -h <MASTER IP> -u <DOCKER HUB USERNAME> -e <DOCKER HUB EMAIL> -p '<DOCKER HUB PASSWORD>'
+```
+
 Example
 =======
 

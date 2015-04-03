@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script for single-host Control Center and Zenoss Core 5 deployement
+# Script for Control Center and Zenoss Core 5/Zenoss Resource Manager 5 deployement
 # Copyright (C) 2015 Jan Garaj - www.jangaraj.com
 
 # Variables
@@ -18,10 +18,21 @@ servicedbackups_fs_min_size=1 #GB
 servicedbackups_fs_type="btrfs"
 g2k=1048576
 user="ccuser"
-version="2015-04-02"
+version="2015-04-03"
 retries_max=90
 sleep_duration=10
 install_doc="http://wiki.zenoss.org/download/core/docs/Zenoss_Core_Installation_Guide_r5.0.0_latest.pdf"
+install_doc_enteprise="Please contact your Zenoss support for Zenoss Resource Manager 5 documentation"
+zenoss_package="zenoss-core-service"
+zenoss_package_enteprise="zenoss-resmgr-service"
+zenoss_installation="Zenoss Core 5"
+zenoss_installation_enteprise="Zenoss Resource Manager 5"
+zenoss_template="Zenoss.core"
+zenoss_template_enteprise="Zenoss.resmgr"
+docker_registry_user=""
+docker_registry_email=""
+docker_registry_password=""
+MHOST=""
     
 green='\e[0;32m'
 yellow='\e[0;33m'
@@ -29,7 +40,7 @@ red='\e[0;31m'
 blue='\e[0;34m'
 endColor='\e[0m'
 
-echo -e "${yellow}Autodeploy script ${version} for Control Center master host and Zenoss 5 Core${endColor}"
+echo -e "${yellow}Autodeploy script ${version} for Control Center master host and Zenoss Core 5/Zenoss Resource Manager 5${endColor}"
 echo -e "Install guide: ${install_doc}"
 
 echo -e "${yellow}Requirements:${endColor}
@@ -55,8 +66,31 @@ if [ "$languages" != "en_GB.UTF-8" ] && [ "$languages" != "en_US.UTF-8" ]; then
     fi
 fi
           
-while getopts "d:s:v:b:" arg; do
+while getopts "r:u:e:p:h:d:s:v:b:" arg; do
   case $arg in
+    r)
+      # -r install enterprise/commercial Zenoss version
+      zenoss_package=$zenoss_package_enteprise
+      zenoss_installation=$zenoss_installation_enteprise
+      zenoss_template=$zenoss_template_enteprise
+      install_doc=$install_doc_enteprise
+      ;;
+    u)
+      # -u <docker registry username>
+      docker_registry_user=$OPTARG 
+      ;;
+    e)
+      # -e <docker registry email>
+      docker_registry_email=$OPTARG
+      ;;
+    p)
+      # -e <docker registry password>
+      docker_registry_password=$OPTARG
+      ;;
+    h)
+      # -h <IP of CC master>
+      MHOST=$OPTARG
+      ;;                            
     d)
       path="/var/lib/docker"
       rfs=$docker_fs_type
@@ -345,8 +379,13 @@ fi
 ss=$(df -T | grep ' \/$' | awk '{print $3}')
 mss=$(($root_fs_min_size * $g2k))
 if [ $ss -lt $mss ]; then
-    echo -e "${red}/ filesystem size is less than required ${root_fs_min_size}GB${endColor}"
-    exit 1    
+    echo -e "${red}/ filesystem size is less than required ${root_fs_min_size}GB. Do you want to continue (y/N)?${endColor}"
+    read answer    
+    if echo "$answer" | grep -iq "^y" ;then
+        echo " ... continuing"
+    else
+        exit 1
+    fi    
 else
   echo -e "${green}Done${endColor}"
 fi
@@ -364,8 +403,13 @@ fi
 ss=$(df -T | grep ' \/var\/lib\/docker$' | awk '{print $3}')
 mss=$(($docker_fs_min_size * $g2k))
 if [ $ss -lt $mss ]; then
-    echo -e "${red}/var/lib/docker filesystem size is less than required ${docker_fs_min_size}GB${endColor}"
-    exit 1    
+    echo -e "${red}/var/lib/docker filesystem size is less than required ${docker_fs_min_size}GB. Do you want to continue (y/N)?${endColor}"
+    read answer    
+    if echo "$answer" | grep -iq "^y" ;then
+        echo " ... continuing"
+    else
+        exit 1
+    fi        
 else
   echo -e "${green}Done${endColor}"
 fi
@@ -383,8 +427,13 @@ fi
 ss=$(df -T | grep ' \/opt\/serviced\/var$' | awk '{print $3}')
 mss=$(($serviced_fs_min_size * $g2k))
 if [ $ss -lt $mss ]; then
-    echo -e "${red}/opt/serviced/var filesystem size is less than required ${serviced_fs_min_size}GB${endColor}"
-    exit 1    
+    echo -e "${red}/opt/serviced/var filesystem size is less than required ${serviced_fs_min_size}GB. Do you want to continue (y/N)?${endColor}"
+    read answer    
+    if echo "$answer" | grep -iq "^y" ;then
+        echo " ... continuing"
+    else
+        exit 1
+    fi    
 else
   echo -e "${green}Done${endColor}"
 fi
@@ -393,41 +442,68 @@ echo -e "${yellow}1.9 /opt/serviced/var/volumes filesystem check${endColor}"
 fs=$(df -T | grep ' \/opt\/serviced\/var\/volumes$' | awk '{print $2}')
 if [ -z "$fs" ]; then
     echo -e "${red}/opt/serviced/var/volumes filesystem was not detected${endColor}"
-    exit 1
-fi
-if [ "$fs" != "$servicedvolumes_fs_type" ]; then
-    echo -e "${red}${fs} /opt/serviced/var/volumes filesystem detected, but ${servicedvolumes_fs_type} is required${endColor}"
-    exit 1    
-fi
-ss=$(df -T | grep ' \/opt\/serviced\/var\/volumes$' | awk '{print $3}')
-mss=$(($servicedvolumes_fs_min_size * $g2k))
-if [ $ss -lt $mss ]; then
-    echo -e "${red}/opt/serviced/var/volumes filesystem size is less than required ${servicedvolumes_fs_min_size}GB${endColor}"
-    exit 1    
+    echo -e "${yellow}Do you want to continue (y/n)?${endColor}"
+    read answer    
+    if echo "$answer" | grep -iq "^y" ;then
+        echo " ... continuing"  
+        # mkdir -p /opt/serviced/var/volumes
+    else
+        exit 1
+    fi
 else
-  echo -e "${green}Done${endColor}"
+    if [ "$fs" != "$servicedvolumes_fs_type" ]; then
+        echo -e "${red}${fs} /opt/serviced/var/volumes filesystem detected, but ${servicedvolumes_fs_type} is required${endColor}"
+        exit 1    
+    fi
+    ss=$(df -T | grep ' \/opt\/serviced\/var\/volumes$' | awk '{print $3}')
+    mss=$(($servicedvolumes_fs_min_size * $g2k))
+    if [ $ss -lt $mss ]; then
+        echo -e "${red}/opt/serviced/var/volumes filesystem size is less than required ${servicedvolumes_fs_min_size}GB. Do you want to continue (y/N)?${endColor}"
+        read answer    
+        if echo "$answer" | grep -iq "^y" ;then
+            echo " ... continuing"
+        else
+            exit 1
+        fi    
+    else
+      echo -e "${green}Done${endColor}"
+    fi    
 fi
+
 
 echo -e "${yellow}1.10 /opt/serviced/var/backups filesystem check${endColor}"
 fs=$(df -T | grep ' \/opt\/serviced\/var\/backups$' | awk '{print $2}')
 if [ -z "$fs" ]; then
     echo -e "${red}/opt/serviced/var/backups filesystem was not detected${endColor}"
-    exit 1
-fi
-if [ "$fs" != "$servicedbackups_fs_type" ]; then
-    echo -e "${red}${fs} /opt/serviced/var/backups filesystem detected, but ${servicedbackups_fs_type} is required${endColor}"
-    exit 1    
-fi
-ss=$(df -T | grep ' \/opt\/serviced\/var\/backups$' | awk '{print $3}')
-mss=$(($servicedbackups_fs_min_size * $g2k))
-if [ $ss -lt $mss ]; then
-    echo -e "${red}/opt/serviced/var/backups filesystem size is less than required ${servicedbackups_fs_min_size}GB${endColor}"
-    exit 1    
+    echo -e "${yellow}Do you want to continue (y/n)?${endColor}"
+    read answer    
+    if echo "$answer" | grep -iq "^y" ;then
+        echo " ... continuing"  
+        # mkdir -p /opt/serviced/var/backups
+    else
+        exit 1
+    fi
 else
-  echo -e "${green}Done${endColor}"
+    if [ "$fs" != "$servicedbackups_fs_type" ]; then
+        echo -e "${red}${fs} /opt/serviced/var/backups filesystem detected, but ${servicedbackups_fs_type} is required${endColor}"
+        exit 1    
+    fi
+    ss=$(df -T | grep ' \/opt\/serviced\/var\/backups$' | awk '{print $3}')
+    mss=$(($servicedbackups_fs_min_size * $g2k))
+    if [ $ss -lt $mss ]; then
+        echo -e "${red}/opt/serviced/var/backups filesystem size is less than required ${servicedbackups_fs_min_size}GB. Do you want to continue (y/N)?${endColor}"
+        read answer    
+        if echo "$answer" | grep -iq "^y" ;then
+            echo " ... continuing"
+        else
+            exit 1
+        fi    
+    else
+      echo -e "${green}Done${endColor}"
+    fi
 fi
 
-echo -e "${blue}2 Preparing the master host - (`date -R`)${endColor}"
+echo -e "${blue}2 Preparing the host - (`date -R`)${endColor}"
 
 echo -e "${yellow}2.1 IP configurations${endColor}"
 # ifconfig is not available in min installation - ip addr show used
@@ -438,6 +514,7 @@ if [ "$no" -gt "1" ]; then
     echo $is
     echo "Please write interface, which you want to use for deployement (see listing above), e.g. eth1 or ens160:"
     read interface
+    echo " ... continuing"
     privateipv4=$(ip addr show | grep -A 1 $interface | grep inet | awk '{print $2}' | awk -F'/' '{print $1}')
     if [ -z "$privateipv4" ]; then
         echo -e "${red}IPv4 address for selected interface ${interface} was not detected.${endColor}"
@@ -449,7 +526,7 @@ else
 fi    
 
 # AWS/HP Cloud public IPv4 address
-publicipv4=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4 | tr '\n' ' ')
+publicipv4=$(curl --max-time 10 -s http://169.254.169.254/latest/meta-data/public-ipv4 | tr '\n' ' ')
 if [[ ! $publicipv4 =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
     publicipv4=$privateipv4
 fi
@@ -505,6 +582,7 @@ if [ $com_ret -ne 0 ] && [ "$output" == "${output%$substring*}" ]; then
   echo -e "${red}Problem with installing Zenoss repository${endColor}"
   exit 1
 else
+  yum clean all &>/dev/null
   echo -e "${green}Done${endColor}"
 fi
 
@@ -530,6 +608,7 @@ fi
 
 echo -e "${yellow}2.8 ntpd autostart workaround${endColor}"
 echo 'echo "systemctl start ntpd" >> /etc/rc.d/rc.local && chmod +x /etc/rc.d/rc.local'
+sed -i -e "\|^systemctl start ntpd|d" /etc/rc.d/rc.local
 echo "systemctl start ntpd" >> /etc/rc.d/rc.local && chmod +x /etc/rc.d/rc.local
 if [ $? -ne 0 ]; then
   echo -e "${red}Problem with installing ntpd autostart workaround${endColor}"
@@ -551,8 +630,8 @@ fi
 echo -e "${blue}3 Installing on the master host - (`date -R`)${endColor}"
 
 echo -e "${yellow}3.1 Install Control Center, Zenoss Core, and Docker${endColor}"
-echo 'yum --enablerepo=zenoss-stable install -y zenoss-core-service'
-yum --enablerepo=zenoss-stable install -y zenoss-core-service
+echo 'yum --enablerepo=zenoss-stable install -y ${zenoss_package}'
+yum --enablerepo=zenoss-stable install -y ${zenoss_package}
 if [ $? -ne 0 ]; then
   echo -e "${red}Problem with installing Control Center, Zenoss Core and Docker${endColor}"
   exit 1
@@ -567,6 +646,27 @@ if [ $? -ne 0 ]; then
   echo -e "${red}Problem with starting of Docker${endColor}"
   exit 1
 else
+  echo -e "${green}Done${endColor}"
+fi
+
+if [ $zenoss_package == $zenoss_package_enteprise ] && [ -z "$MHOST" ]; then
+  # docker login
+  echo -e "${yellow}Authenticate to the Docker Hub repository${endColor}"  
+  mySetting=$HISTCONTROL; export HISTCONTROL=ignorespace
+    myUser=$docker_registry_user
+    myEmail=$docker_registry_email
+    myPass=$docker_registry_password
+    # turn off history substitution using - problem with specific passwords
+    set +H
+    systemctl start docker
+    # sleep
+    sleep 10
+    sudo sh -c "docker login -u $myUser -e $myEmail -p '$myPass'"
+    if [ $? -ne 0 ]; then
+        echo -e "${red}Problem with authentication to the Docker Hub${endColor}"
+        exit 1  
+    fi
+  export HISTCONTROL=$mySetting
   echo -e "${green}Done${endColor}"
 fi
 
@@ -618,6 +718,29 @@ else
   echo -e "${green}Done${endColor}"
 fi
 
+if [ ! -z "$MHOST" ]; then
+  echo -e "${yellow}Editing /etc/default/serviced on CC host${endColor}"
+  EXT=$(date +"%j-%H%M%S")
+  test ! -z "${MHOST}" && \
+  sed -i.${EXT} -e 's|^#[^H]*\(HOME=/root\)|\1|' \
+   -e 's|^#[^S]*\(SERVICED_REGISTRY=\).|\11|' \
+   -e 's|^#[^S]*\(SERVICED_AGENT=\).|\11|' \
+   -e 's|^#[^S]*\(SERVICED_MASTER=\).|\10|' \
+   -e 's|^#[^S]*\(SERVICED_MASTER_IP=\).*|\1'${MHOST}'|' \
+   -e '/=$SERVICED_MASTER_IP/ s|^#[^S]*||' \
+   -e 's|\($SERVICED_MASTER_IP\)|'${MHOST}'|' \
+   /etc/default/serviced
+else
+  # enable a multi-host deployment on the master
+  echo -e "${yellow}Editing /etc/default/serviced on CC master${endColor}"
+  EXT=$(date +"%j-%H%M%S")
+  sudo sed -i.${EXT} -e 's|^#[^H]*\(HOME=/root\)|\1|' \
+   -e 's|^#[^S]*\(SERVICED_REGISTRY=\).|\11|' \
+   -e 's|^#[^S]*\(SERVICED_AGENT=\).|\11|' \
+   -e 's|^#[^S]*\(SERVICED_MASTER=\).|\11|' \
+    /etc/default/serviced  
+fi
+
 echo -e "${yellow}3.7 Change the volume type for application data${endColor}"
 echo "sed -i.$(date +\"%j-%H%M%S\") -e 's|^#[^S]*\(SERVICED_FS_TYPE=\).*$|\1btrfs|' /etc/default/serviced"
 sed -i.$(date +"%j-%H%M%S") -e 's|^#[^S]*\(SERVICED_FS_TYPE=\).*$|\1btrfs|' /etc/default/serviced
@@ -628,7 +751,7 @@ else
   echo -e "${green}Done${endColor}"
 fi
 
-# rpcbind bug http://www.zenoss.org/forum/4726 http://pastebin.com/9hn92W33
+# rpcbind bug http://www.zenoss.org/forum/4726
 echo -e "${yellow}3.8 rpcbind workaround${endColor}"
 echo 'systemctl status rpcbind &>/dev/null'
 systemctl status rpcbind &>/dev/null
@@ -640,6 +763,7 @@ if [ $? -ne 0 ]; then
     echo -e "${red}Problem with rpcbind start${endColor}"
     exit 1
   fi
+  sed -i -e "\|^systemctl start rpcbind|d" /etc/rc.d/rc.local
   echo 'echo "systemctl start rpcbind" >> /etc/rc.d/rc.local && chmod +x /etc/rc.d/rc.local'
   echo "systemctl start rpcbind" >> /etc/rc.d/rc.local && chmod +x /etc/rc.d/rc.local
   if [ $? -ne 0 ]; then
@@ -659,10 +783,19 @@ else
   echo -e "${green}Done${endColor}"
 fi
 
-echo -e "${blue}4 Zenoss Core 5 deployement - (`date -R`)${endColor}"
+# exit host installation
+if [ ! -z "$MHOST" ]; then
+  echo -e "${green}Control Center installation on the host completed${endColor}"
+  echo -e "${green}Please visit Control Center${endColor}"
+  echo -e "${green}You can check status of serviced: systemctl status serviced${endColor}"  
+  exit 0
+fi 
+
+echo -e "${blue}4 ${zenoss_installation} deployement - (`date -R`)${endColor}"
 
 echo -e "${yellow}4.1 Adding current host to the default resource pool${endColor}"
 echo -e "${yellow}Please be patient, because docker image zenoss/serviced-isvcs must be downloaded before first start.${endColor}"
+echo -e "${yellow}You can check progress in new console: journalctl -u serviced -f -a${endColor}"
 echo -e "${yellow}Script is trying to check status every 10s. Timeout for this step is 15 minutes.${endColor}"
 echo "serviced host list 2>&1"
 test=$(serviced host list 2>&1)
@@ -671,7 +804,7 @@ retry=1
 while [ "$test" = "rpc: can't find service Master.GetHosts" ] || [[ "$test" =~ "could not create a client to the master: dial tcp" ]] && [ $retry -lt $retries_max ]
 do
    echo $test
-   echo "#${retry}: Control Service is not fully started, I'm trying in next ${sleep_duration} seconds"
+   echo "#${retry}: This is not a problem, because Control Centre service is not fully started, I'm trying in next ${sleep_duration} seconds"
    retry=$(( $retry + 1 ))
    sleep $sleep_duration    
    test=$(serviced host list 2>&1)   
@@ -698,11 +831,11 @@ else
   fi  
 fi
 
-echo -e "${yellow}4.2 Deploy Zenoss.core application (the deployment step can take 15-30 minutes)${endColor}"
+echo -e "${yellow}4.2 Deploy ${zenoss_template} application (the deployment step can take 15-30 minutes)${endColor}"
 echo -e "${yellow}Please be patient, because all Zenoss docker images must be downloaded before first start.${endColor}"
 echo -e "${yellow}Progress from serviced log file is presented. No timeout for this step.${endColor}"
-echo "serviced template list 2>&1 | grep 'Zenoss.core' | awk '{print \$1}'"
-TEMPLATEID=$(serviced template list 2>&1 | grep 'Zenoss.core' | awk '{print $1}')
+echo "serviced template list 2>&1 | grep \"${zenoss_template}\" | awk '{print \$1}'"
+TEMPLATEID=$(serviced template list 2>&1 | grep "${zenoss_template}" | awk '{print $1}')
 echo 'serviced service list 2>/dev/null | wc -l'
 services=$(serviced service list 2>/dev/null | wc -l)                      
 #if [ "$TEMPLATEID" == "05d70f0fb778ff5d1b9461dca75fa4bb" ] && [ "$services" == "0" ]; then
@@ -732,7 +865,7 @@ else
 fi
 
 echo -e "${blue}5 Final overview - (`date -R`)${endColor}"
-echo -e "${green}Control Center & Zenoss Core 5 installation completed${endColor}"
+echo -e "${green}Control Center & ${zenoss_installation} installation completed${endColor}"
 echo -e "${green}Set password for Control Center ${user} user: passwd ${user}${endColor}"
 echo -e "${green}Please visit Control Center https://$publicipv4/ in your favorite web browser to complete setup, log in with ${user} user${endColor}"
 echo -e "${green}Add following line to your hosts file:${endColor}"
