@@ -49,6 +49,9 @@ For advandced users only (you are familiar with documentation, so you will be ab
 
 # # install Resource Manager 5 host, it will fail if your Docker hub account doesn't have access to private Zenoss repositories
 # ./core-autodeploy.sh -r resmgr -h '<MASTER IP>' -u <DOCKER HUB USERNAME> -e <DOCKER HUB EMAIL> -p '<DOCKER HUB PASSWORD>'
+
+# # install Resource Manager 5 master + pull Service Impact Docker image, it will fail if your Docker hub account doesn't have access to private Zenoss repositories
+# ./core-autodeploy.sh -r resmgr -i impact -u <DOCKER HUB USERNAME> -e <DOCKER HUB EMAIL> -p '<DOCKER HUB PASSWORD>'
 ```
 
 Example

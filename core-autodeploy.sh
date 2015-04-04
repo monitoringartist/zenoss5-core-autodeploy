@@ -18,17 +18,19 @@ servicedbackups_fs_min_size=1 #GB
 servicedbackups_fs_type="btrfs"
 g2k=1048576
 user="ccuser"
-version="2015-04-03"
+version="2015-04-04"
 retries_max=90
 sleep_duration=10
 install_doc="http://wiki.zenoss.org/download/core/docs/Zenoss_Core_Installation_Guide_r5.0.0_latest.pdf"
-install_doc_enteprise="Please contact your Zenoss support for Zenoss Resource Manager 5 documentation"
+install_doc_enterprise="Please contact your Zenoss representative for Zenoss Resource Manager 5 documentation"
 zenoss_package="zenoss-core-service"
-zenoss_package_enteprise="zenoss-resmgr-service"
+zenoss_package_enterprise="zenoss-resmgr-service"
 zenoss_installation="Zenoss Core 5"
-zenoss_installation_enteprise="Zenoss Resource Manager 5"
+zenoss_installation_enterprise="Zenoss Resource Manager 5"
 zenoss_template="Zenoss.core"
-zenoss_template_enteprise="Zenoss.resmgr"
+zenoss_template_enterprise="Zenoss.resmgr"
+zenoss_impact=""
+zenoss_impact_enterprise="zenoss/impact_5.0:5.0.0.0.0"
 docker_registry_user=""
 docker_registry_email=""
 docker_registry_password=""
@@ -66,14 +68,17 @@ if [ "$languages" != "en_GB.UTF-8" ] && [ "$languages" != "en_US.UTF-8" ]; then
     fi
 fi
           
-while getopts "r:u:e:p:h:d:s:v:b:" arg; do
+while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
   case $arg in
+    i)
+      # -i impact: pull impact image
+      zenoss_impact=$zenoss_impact_enterprise       
     r)
-      # -r install enterprise/commercial Zenoss version
-      zenoss_package=$zenoss_package_enteprise
-      zenoss_installation=$zenoss_installation_enteprise
-      zenoss_template=$zenoss_template_enteprise
-      install_doc=$install_doc_enteprise
+      # -r resmgr: install enterprise/commercial Zenoss version
+      zenoss_package=$zenoss_package_enterprise
+      zenoss_installation=$zenoss_installation_enterprise
+      zenoss_template=$zenoss_template_enterprise
+      install_doc=$install_doc_enterprise
       ;;
     u)
       # -u <docker registry username>
@@ -649,7 +654,7 @@ else
   echo -e "${green}Done${endColor}"
 fi
 
-if [ $zenoss_package == $zenoss_package_enteprise ] && [ -z "$MHOST" ]; then
+if [ $zenoss_package == $zenoss_package_enterprise ] && [ -z "$MHOST" ]; then
   # docker login
   echo -e "${yellow}Authenticate to the Docker Hub repository${endColor}"  
   mySetting=$HISTCONTROL; export HISTCONTROL=ignorespace
@@ -862,6 +867,17 @@ else
     echo -e "${red}Skipping deploying an application - check output from template test: $TEMPLATEID${endColor}"
     exit 1
   fi
+fi
+
+if [ $zenoss_impact == $zenoss_impact_enterprise ]; then
+  echo -e "${yellow}4.3 Pull Service Impact Docker image (the deployment step can take 3-5 minutes)${endColor}"
+  echo "docker pull $zenoss_impact"
+  docker pull $zenoss_impact
+  if [ $rc -ne 0 ]; then
+    echo -e "${red}Problem with pulling Service Impact Docker image${endColor}"
+  else
+    echo -e "${green}Done${endColor}"
+  fi  
 fi
 
 echo -e "${blue}5 Final overview - (`date -R`)${endColor}"
