@@ -18,7 +18,7 @@ servicedbackups_fs_min_size=1 #GB
 servicedbackups_fs_type="btrfs"
 g2k=1048576
 user="ccuser"
-version="2015-04-04"
+version="2015-04-07"
 retries_max=90
 sleep_duration=10
 install_doc="http://wiki.zenoss.org/download/core/docs/Zenoss_Core_Installation_Guide_r5.0.0_latest.pdf"
@@ -842,9 +842,7 @@ echo -e "${yellow}Progress from serviced log file is presented. No timeout for t
 echo "serviced template list 2>&1 | grep \"${zenoss_template}\" | awk '{print \$1}'"
 TEMPLATEID=$(serviced template list 2>&1 | grep "${zenoss_template}" | awk '{print $1}')
 echo 'serviced service list 2>/dev/null | wc -l'
-services=$(serviced service list 2>/dev/null | wc -l)                      
-#if [ "$TEMPLATEID" == "05d70f0fb778ff5d1b9461dca75fa4bb" ] && [ "$services" == "0" ]; then
-# no TEMPLATEID, because it depends on release - last f7e337606c87626b37cf1f4fb2fbb07e
+services=$(serviced service list 2>/dev/null | wc -l)
 if [ "$services" == "0" ]; then
   # log progress watching from journalctl in background
   bgjobs=$(jobs -p | wc -l)
@@ -869,7 +867,50 @@ else
   fi
 fi
 
-echo -e "${yellow}4.3 Configuring periodic maintenance${endColor}"
+echo -e "${yellow}5 Tuning ${zenoss_template}${endColor}"
+
+echo -e "${yellow}5.1 Installing the Quilt package${endColor}"
+echo "Creating /tmp/quilt.txt"
+cat > /tmp/quilt.txt << EOF
+DESCRIPTION quilt.txt -- add Quilt to a Zenoss image
+VERSION zenoss-quilt-1.0
+REQUIRE_SVC
+SNAPSHOT
+
+# Download the EPEL RPM
+SVC_EXEC COMMIT ${zenoss_template} yum install -y epel-release
+# Download repository metadata
+SVC_EXEC COMMIT ${zenoss_template} yum makecache -y
+# Install quilt
+SVC_EXEC COMMIT ${zenoss_template} yum install -y quilt
+# Remove EPEL
+SVC_EXEC COMMIT ${zenoss_template} yum erase -y epel-release
+# Clean up yum caches
+SVC_EXEC COMMIT ${zenoss_template} yum clean all
+EOF
+echo "Syntax verification of /tmp/quilt.txt"
+serviced script parse quilt.txt
+if [ $? -ne 0 ]; then
+    echo -e "${red}Problem with syntax verification of /tmp/quilt.txt${endColor}"
+    exit 1
+fi
+echo "Installing the Quilt package"
+serviced script run quilt.txt --service ${zenoss_template}
+if [ $? -ne 0 ]; then
+    echo -e "${red}Problem with installing the Quilt package${endColor}"
+    exit 1
+fi
+echo -e "${green}Done${endColor}"
+
+echo -e "${yellow}5.2 Installing the Percona Toolkit${endColor}"
+echo "serviced service run zope install-percona"
+serviced service run zope install-percona
+if [ $? -ne 0 ]; then
+    echo -e "${red}Problem with installing the Percona Toolkit${endColor}"
+    exit 1
+fi
+
+echo -e "${yellow}5.3 Configuring periodic maintenance${endColor}"
 if [ ! -z "$MHOST" ]; then
     # cron on the CC master
     echo "Creating /etc/cron.weekly/zenoss-master-btrfs"
@@ -893,9 +934,10 @@ else
     EOF
     chmod +x /etc/cron.weekly/zenoss-pool-btrfs                           
 fi
+echo -e "${green}Done${endColor}"
 
 if [ $zenoss_impact == $zenoss_impact_enterprise ]; then
-  echo -e "${yellow}4.4 Pull Service Impact Docker image (the deployment step can take 3-5 minutes)${endColor}"
+  echo -e "${yellow}6 Pull Service Impact Docker image (the deployment step can take 3-5 minutes)${endColor}"
   echo "docker pull $zenoss_impact"
   docker pull $zenoss_impact
   if [ $rc -ne 0 ]; then
