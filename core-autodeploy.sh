@@ -575,7 +575,7 @@ if [ ! -z "$test" ] && [ "$test" != "SELINUX=disabled" ]; then
     sed -i.$(date +"%j-%H%M%S") -e 's/^SELINUX=.*/SELINUX=disabled/g' /etc/selinux/config && grep '^SELINUX=' /etc/selinux/config
     echo -e "${green}Done${endColor}"
 else
-    echo -e "${green}Done${endColor}"
+    echo -e "${green}Done${endColor} - disabled already"
 fi
 
 echo -e "${yellow}2.5 Download and install the Zenoss repository package${endColor}"
@@ -636,7 +636,7 @@ fi
 echo -e "${blue}3 Installing on the master host - (`date -R`)${endColor}"
 
 echo -e "${yellow}3.1 Install Control Center, Zenoss Core, and Docker${endColor}"
-echo 'yum --enablerepo=zenoss-stable install -y ${zenoss_package}'
+echo "yum --enablerepo=zenoss-stable install -y ${zenoss_package}"
 yum --enablerepo=zenoss-stable install -y ${zenoss_package}
 if [ $? -ne 0 ]; then
   echo -e "${red}Problem with installing Control Center, Zenoss Core and Docker${endColor}"
@@ -655,7 +655,7 @@ else
   echo -e "${green}Done${endColor}"
 fi
 
-if [ $zenoss_package == $zenoss_package_enterprise ] && [ -z "$MHOST" ]; then
+if [ "$zenoss_package" == "$zenoss_package_enterprise" ] && [ -z "$MHOST" ]; then
   # docker login
   echo -e "${yellow}Authenticate to the Docker Hub repository${endColor}"  
   mySetting=$HISTCONTROL; export HISTCONTROL=ignorespace
@@ -901,43 +901,52 @@ if [ $? -ne 0 ]; then
     echo -e "${red}Problem with installing the Quilt package${endColor}"
     exit 1
 fi
+rm -rf /tmp/quilt.txt
 echo -e "${green}Done${endColor}"
 
 echo -e "${yellow}5.2 Installing the Percona Toolkit${endColor}"
-echo "serviced service run zope install-percona"
+echo " serviced service list | grep -i mariadb | awk '{print $1}' | sort -r | grep -i 'mariadb' | head -n 1"
+mservice=$( serviced service list | grep -i mariadb | awk '{print $1}' | sort -r | grep -i 'mariadb' | head -n 1)
+echo "serviced service start $mservice"
+serviced service start $mservice
+echo "serviced service run zope install-percona" 
 serviced service run zope install-percona
-if [ $? -ne 0 ]; then
+# exit code 1 always
+if [ $? -ne 1 ]; then
     echo -e "${red}Problem with installing the Percona Toolkit${endColor}"
+    echo "serviced service stop $mservice"
+    serviced service stop $mservice
     exit 1
 fi
+echo "serviced service stop $mservice"
+serviced service stop $mservice
 
 echo -e "${yellow}5.3 Configuring periodic maintenance${endColor}"
-if [ ! -z "$MHOST" ]; then
+if [ -z "$MHOST" ]; then
     # cron on the CC master
     echo "Creating /etc/cron.weekly/zenoss-master-btrfs"
     cat > /etc/cron.weekly/zenoss-master-btrfs << EOF
-    DOCKER_PARTITION=/var/lib/docker
-    btrfs balance start ${DOCKER_PARTITION} \
-     && btrfs scrub start ${DOCKER_PARTITION}
-     
-    DATA_PARTITION=/opt/serviced/var/volumes
-    btrfs balance start ${DATA_PARTITION} \
-     && btrfs scrub start ${DATA_PARTITION}
-    EOF        
+DOCKER_PARTITION=/var/lib/docker
+btrfs balance start ${DOCKER_PARTITION} && btrfs scrub start ${DOCKER_PARTITION}
+ 
+DATA_PARTITION=/opt/serviced/var/volumes
+btrfs balance start ${DATA_PARTITION} && btrfs scrub start ${DATA_PARTITION}
+EOF
+
     chmod +x /etc/cron.weekly/zenoss-master-btrfs
 else
     # cron on the CC host    
     echo "Creating /etc/cron.weekly/zenoss-pool-btrfs"
     cat > /etc/cron.weekly/zenoss-pool-btrfs << EOF
-    DOCKER_PARTITION=/var/lib/docker
-    btrfs balance start ${DOCKER_PARTITION} \
-     && btrfs scrub start ${DOCKER_PARTITION}
-    EOF
-    chmod +x /etc/cron.weekly/zenoss-pool-btrfs                           
+DOCKER_PARTITION=/var/lib/docker
+btrfs balance start ${DOCKER_PARTITION} && btrfs scrub start ${DOCKER_PARTITION}
+EOF
+
+    chmod +x /etc/cron.weekly/zenoss-pool-btrfs
 fi
 echo -e "${green}Done${endColor}"
 
-if [ $zenoss_impact == $zenoss_impact_enterprise ]; then
+if [ "$zenoss_impact" == "$zenoss_impact_enterprise" ]; then
   echo -e "${yellow}6 Pull Service Impact Docker image (the deployment step can take 3-5 minutes)${endColor}"
   echo "docker pull $zenoss_impact"
   docker pull $zenoss_impact
