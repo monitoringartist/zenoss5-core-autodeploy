@@ -869,8 +869,33 @@ else
   fi
 fi
 
+echo -e "${yellow}4.3 Configuring periodic maintenance${endColor}"
+if [ ! -z "$MHOST" ]; then
+    # cron on the CC master
+    echo "Creating /etc/cron.weekly/zenoss-master-btrfs"
+    cat > /etc/cron.weekly/zenoss-master-btrfs << EOF
+    DOCKER_PARTITION=/var/lib/docker
+    btrfs balance start ${DOCKER_PARTITION} \
+     && btrfs scrub start ${DOCKER_PARTITION}
+     
+    DATA_PARTITION=/opt/serviced/var/volumes
+    btrfs balance start ${DATA_PARTITION} \
+     && btrfs scrub start ${DATA_PARTITION}
+    EOF        
+    chmod +x /etc/cron.weekly/zenoss-master-btrfs
+else
+    # cron on the CC host    
+    echo "Creating /etc/cron.weekly/zenoss-pool-btrfs"
+    cat > /etc/cron.weekly/zenoss-pool-btrfs << EOF
+    DOCKER_PARTITION=/var/lib/docker
+    btrfs balance start ${DOCKER_PARTITION} \
+     && btrfs scrub start ${DOCKER_PARTITION}
+    EOF
+    chmod +x /etc/cron.weekly/zenoss-pool-btrfs                           
+fi
+
 if [ $zenoss_impact == $zenoss_impact_enterprise ]; then
-  echo -e "${yellow}4.3 Pull Service Impact Docker image (the deployment step can take 3-5 minutes)${endColor}"
+  echo -e "${yellow}4.4 Pull Service Impact Docker image (the deployment step can take 3-5 minutes)${endColor}"
   echo "docker pull $zenoss_impact"
   docker pull $zenoss_impact
   if [ $rc -ne 0 ]; then
