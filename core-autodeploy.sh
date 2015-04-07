@@ -72,7 +72,8 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
   case $arg in
     i)
       # -i impact: pull impact image
-      zenoss_impact=$zenoss_impact_enterprise       
+      zenoss_impact=$zenoss_impact_enterprise
+      ;;       
     r)
       # -r resmgr: install enterprise/commercial Zenoss version
       zenoss_package=$zenoss_package_enterprise
