@@ -16,12 +16,6 @@ and Zenoss Core 5 for you. Usage of auto-deployment script:
 # ./core-autodeploy.sh
 ```
 
-If you don't need to pass any parameters to the script, then you can use luxury one-line version:
-
-```
-curl -s https://raw.githubusercontent.com/jangaraj/zenoss5-core-autodeploy/master/one-line-core-autodeploy.sh | sudo bash
-```
-
 The script will take several minutes (around 15-30) to complete. When done, 
 you should be able to visit Control Center in a web browser to start 
 Zenoss Core 5 application.
