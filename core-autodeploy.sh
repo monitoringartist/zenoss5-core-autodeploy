@@ -810,7 +810,7 @@ retry=1
 while [ "$test" = "rpc: can't find service Master.GetHosts" ] || [[ "$test" =~ "could not create a client to the master: dial tcp" ]] && [ $retry -lt $retries_max ]
 do
    echo $test
-   echo "#${retry}: This is not a problem, because Control Centre service is not fully started, I'm trying in next ${sleep_duration} seconds"
+   echo "#${retry}: This is not a problem, because Control Centre service is not fully started, I'm trying in ${sleep_duration} seconds"
    retry=$(( $retry + 1 ))
    sleep $sleep_duration    
    test=$(serviced host list 2>&1)   
@@ -878,17 +878,10 @@ VERSION zenoss-quilt-1.0
 REQUIRE_SVC
 SNAPSHOT
 
-# Download the EPEL RPM
-SVC_EXEC COMMIT ${zenoss_template} yum install -y epel-release
-# Download repository metadata
-SVC_EXEC COMMIT ${zenoss_template} yum makecache -y
-# Install quilt
-SVC_EXEC COMMIT ${zenoss_template} yum install -y quilt
-# Remove EPEL
-SVC_EXEC COMMIT ${zenoss_template} yum erase -y epel-release
-# Clean up yum caches
-SVC_EXEC COMMIT ${zenoss_template} yum clean all
+# quilt install steps in one go - save time and space
+SVC_EXEC COMMIT ${zenoss_template} yum install -y epel-release && yum makecache -y && yum install -y quilt && yum erase -y epel-release && yum clean all
 EOF
+
 echo "Syntax verification of /tmp/quilt.txt"
 serviced script parse quilt.txt
 if [ $? -ne 0 ]; then
@@ -899,6 +892,7 @@ echo "Installing the Quilt package"
 serviced script run quilt.txt --service ${zenoss_template}
 if [ $? -ne 0 ]; then
     echo -e "${red}Problem with installing the Quilt package${endColor}"
+    rm -rf /tmp/quilt.txt
     exit 1
 fi
 rm -rf /tmp/quilt.txt
@@ -944,6 +938,13 @@ EOF
 
     chmod +x /etc/cron.weekly/zenoss-pool-btrfs
 fi
+echo -e "${green}Done${endColor}"
+
+echo -e "${yellow}5.4 Deleting the RabbitMQ guest user account${endColor}"
+serviced service start $(serviced service list | grep -i rabbitmq | awk '{print $2}')
+sleep 10
+serviced service attach $(serviced service list | grep -i rabbitmq | awk '{print $2}') rabbitmqctl delete_user guest
+serviced service stop $(serviced service list | grep -i rabbitmq | awk '{print $2}')
 echo -e "${green}Done${endColor}"
 
 if [ "$zenoss_impact" == "$zenoss_impact_enterprise" ]; then
