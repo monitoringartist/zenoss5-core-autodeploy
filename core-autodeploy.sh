@@ -16,6 +16,8 @@ servicedvolumes_fs_min_size=1 #GB
 servicedvolumes_fs_type="btrfs"
 servicedbackups_fs_min_size=1 #GB
 servicedbackups_fs_type="xfs"
+mount_parameters_btrfs="rw,noatime,nodatacow 0 0"
+mount_parameters_xfs="defaults,noatime 0 0"
 g2k=1048576
 user="ccuser"
 version="2015-04-13"
@@ -122,9 +124,11 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
               if [ "${rfs}" == "btrfs" ]; then
                   echo "mkfs -t ${rfs} -f --nodiscard ${dev}"
                   mkfs -t ${rfs} -f --nodiscard ${dev}
+                  mount_parameters=$mount_parameters_btrfs
               else
                   echo "mkfs -t ${rfs} -f ${dev}"
                   mkfs -t ${rfs} -f ${dev}              
+                  mount_parameters=$mount_parameters_xfs
               fi
               if [ $? -ne 0 ]; then
                 echo -e "${red}Problem with formating ${dev}${endColor}"
@@ -133,8 +137,8 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
               # fstab
               echo "sed -i -e \"\|^$dev|d\" /etc/fstab"
               sed -i -e "\|^$dev|d" /etc/fstab                  
-              echo "echo \"${dev} ${path} ${rfs} rw,noatime,nodatacow 0 0\" >> /etc/fstab"
-              echo "${dev} ${path} ${rfs} rw,noatime,nodatacow 0 0" >> /etc/fstab
+              echo "echo \"${dev} ${path} ${rfs} ${mount_parameters}\" >> /etc/fstab"
+              echo "${dev} ${path} ${rfs} ${mount_parameters}" >> /etc/fstab
               if [ $? -ne 0 ]; then
                 echo -e "${red}Problem with updating /etc/fstab for ${dev}${endColor}"
                 exit 1
@@ -176,9 +180,11 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
               if [ "${rfs}" == "btrfs" ]; then
                   echo "mkfs -t ${rfs} -f --nodiscard ${dev}"
                   mkfs -t ${rfs} -f --nodiscard ${dev}
+                  mount_parameters=$mount_parameters_btrfs
               else
                   echo "mkfs -t ${rfs} -f ${dev}"
-                  mkfs -t ${rfs} -f ${dev}              
+                  mkfs -t ${rfs} -f ${dev}
+                  mount_parameters=$mount_parameters_xfs              
               fi
               if [ $? -ne 0 ]; then
                 echo -e "${red}Problem with formating ${dev}${endColor}"
@@ -187,8 +193,8 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
               # fstab
               echo "sed -i -e \"\|^$dev|d\" /etc/fstab"
               sed -i -e "\|^$dev|d" /etc/fstab                  
-              echo "echo \"${dev} ${path} ${rfs} rw,noatime 0 0\" >> /etc/fstab"
-              echo "${dev} ${path} ${rfs} rw,noatime 0 0" >> /etc/fstab
+              echo "echo \"${dev} ${path} ${rfs} ${mount_parameters}\" >> /etc/fstab"
+              echo "${dev} ${path} ${rfs} ${mount_parameters}" >> /etc/fstab
               if [ $? -ne 0 ]; then
                 echo -e "${red}Problem with updating /etc/fstab for ${dev}${endColor}"
                 exit 1
@@ -230,9 +236,11 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
               if [ "${rfs}" == "btrfs" ]; then
                   echo "mkfs -t ${rfs} -f --nodiscard ${dev}"
                   mkfs -t ${rfs} -f --nodiscard ${dev}
+                  mount_parameters=$mount_parameters_btrfs
               else
                   echo "mkfs -t ${rfs} -f ${dev}"
                   mkfs -t ${rfs} -f ${dev}              
+                  mount_parameters=$mount_parameters_xfs
               fi
               if [ $? -ne 0 ]; then
                 echo -e "${red}Problem with formating ${dev}${endColor}"
@@ -241,8 +249,8 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
               # fstab
               echo "sed -i -e \"\|^$dev|d\" /etc/fstab"
               sed -i -e "\|^$dev|d" /etc/fstab                  
-              echo "echo \"${dev} ${path} ${rfs} rw,noatime,nodatacow 0 0\" >> /etc/fstab"
-              echo "${dev} ${path} ${rfs} rw,noatime,nodatacow 0 0" >> /etc/fstab
+              echo "echo \"${dev} ${path} ${rfs} ${mount_parameters}\" >> /etc/fstab"
+              echo "${dev} ${path} ${rfs} ${mount_parameters}" >> /etc/fstab
               if [ $? -ne 0 ]; then
                 echo -e "${red}Problem with updating /etc/fstab for ${dev}${endColor}"
                 exit 1
@@ -284,9 +292,11 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
               if [ "${rfs}" == "btrfs" ]; then
                   echo "mkfs -t ${rfs} -f --nodiscard ${dev}"
                   mkfs -t ${rfs} -f --nodiscard ${dev}
+                  mount_parameters=$mount_parameters_btrfs
               else
                   echo "mkfs -t ${rfs} -f ${dev}"
                   mkfs -t ${rfs} -f ${dev}              
+                  mount_parameters=$mount_parameters_xfs
               fi
               if [ $? -ne 0 ]; then
                 echo -e "${red}Problem with formating ${dev}${endColor}"
@@ -295,8 +305,8 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
               # fstab
               echo "sed -i -e \"\|^$dev|d\" /etc/fstab"
               sed -i -e "\|^$dev|d" /etc/fstab                  
-              echo "echo \"${dev} ${path} ${rfs} rw,noatime,nodatacow 0 0\" >> /etc/fstab"
-              echo "${dev} ${path} ${rfs} rw,noatime,nodatacow 0 0" >> /etc/fstab
+              echo "echo \"${dev} ${path} ${rfs} ${mount_parameters}\" >> /etc/fstab"
+              echo "${dev} ${path} ${rfs} ${mount_parameters}" >> /etc/fstab
               if [ $? -ne 0 ]; then
                 echo -e "${red}Problem with updating /etc/fstab for ${dev}${endColor}"
                 exit 1
@@ -942,7 +952,7 @@ echo -e "${green}Done${endColor}"
 
 echo -e "${yellow}5.4 Deleting the RabbitMQ guest user account${endColor}"
 serviced service start $(serviced service list | grep -i rabbitmq | awk '{print $2}')
-sleep 10
+sleep 30
 serviced service attach $(serviced service list | grep -i rabbitmq | awk '{print $2}') rabbitmqctl delete_user guest
 serviced service stop $(serviced service list | grep -i rabbitmq | awk '{print $2}')
 echo -e "${green}Done${endColor}"
