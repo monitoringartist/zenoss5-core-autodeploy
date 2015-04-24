@@ -888,22 +888,29 @@ VERSION zenoss-quilt-1.0
 REQUIRE_SVC
 SNAPSHOT
 
-# quilt install steps in one go - save time and space
-SVC_EXEC COMMIT ${zenoss_template} yum install -y epel-release && yum makecache -y && yum install -y quilt && yum erase -y epel-release && yum clean all
+# Download the EPEL RPM
+SVC_EXEC COMMIT ${zenoss_template} yum install -y epel-release
+# Download repository metadata
+SVC_EXEC COMMIT ${zenoss_template} yum makecache -y
+# Install quilt
+SVC_EXEC COMMIT ${zenoss_template} yum install -y quilt
+# Remove EPEL
+SVC_EXEC COMMIT ${zenoss_template} yum erase -y epel-release
+# Clean up yum caches
+SVC_EXEC COMMIT ${zenoss_template} yum clean all
 EOF
 
 echo "Syntax verification of /tmp/quilt.txt"
 serviced script parse quilt.txt
 if [ $? -ne 0 ]; then
     echo -e "${red}Problem with syntax verification of /tmp/quilt.txt${endColor}"
-    exit 1
+    rm -rf /tmp/quilt.txt
 fi
 echo "Installing the Quilt package"
 serviced script run quilt.txt --service ${zenoss_template}
 if [ $? -ne 0 ]; then
     echo -e "${red}Problem with installing the Quilt package${endColor}"
     rm -rf /tmp/quilt.txt
-    exit 1
 fi
 rm -rf /tmp/quilt.txt
 echo -e "${green}Done${endColor}"
@@ -920,7 +927,6 @@ if [ $? -ne 1 ]; then
     echo -e "${red}Problem with installing the Percona Toolkit${endColor}"
     echo "serviced service stop $mservice"
     serviced service stop $mservice
-    exit 1
 fi
 echo "serviced service stop $mservice"
 serviced service stop $mservice
