@@ -821,6 +821,7 @@ while [ "$test" = "rpc: can't find service Master.GetHosts" ] || [[ "$test" =~ "
 do
    echo $test
    echo "#${retry}: This is not a problem, because Control Centre service is not fully started, I'm trying in ${sleep_duration} seconds"
+   echo "Message from author of autodeploy script: Keep calm and be patient! - http://www.keepcalmandposters.com/posters/38112.png"
    retry=$(( $retry + 1 ))
    sleep $sleep_duration    
    test=$(serviced host list 2>&1)   
@@ -859,7 +860,7 @@ if [ "$services" == "0" ]; then
     bgjobs=$(jobs -p | wc -l)
     ((bgjobs++))
     echo "serviced template deploy $TEMPLATEID default zenoss"
-    journalctl -u serviced -f -n 0 &
+    journalctl -u serviced -f -a -n 0 &
     serviced template deploy $TEMPLATEID default zenoss
     rc=$?
     # kill log watching
@@ -901,13 +902,13 @@ SVC_EXEC COMMIT ${zenoss_template} yum clean all
 EOF
 
 echo "Syntax verification of /tmp/quilt.txt"
-serviced script parse quilt.txt
+serviced script parse /tmp/quilt.txt
 if [ $? -ne 0 ]; then
     echo -e "${red}Problem with syntax verification of /tmp/quilt.txt${endColor}"
     rm -rf /tmp/quilt.txt
 fi
 echo "Installing the Quilt package"
-serviced script run quilt.txt --service ${zenoss_template}
+serviced script run /tmp/quilt.txt --service ${zenoss_template}
 if [ $? -ne 0 ]; then
     echo -e "${red}Problem with installing the Quilt package${endColor}"
     rm -rf /tmp/quilt.txt
