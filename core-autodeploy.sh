@@ -20,7 +20,7 @@ mount_parameters_btrfs="rw,noatime,nodatacow 0 0"
 mount_parameters_xfs="defaults,noatime 0 0"
 g2k=1048576
 user="ccuser"
-version="2015-04-13"
+version="2015-04-24"
 retries_max=90
 sleep_duration=10
 install_doc="http://wiki.zenoss.org/download/core/docs/Zenoss_Core_Installation_Guide_r5.0.0_latest.pdf"
@@ -571,10 +571,10 @@ echo -e "${yellow}2.3 Enable persistent storage for log files${endColor}"
 echo 'mkdir -p /var/log/journal && systemctl restart systemd-journald'
 mkdir -p /var/log/journal && systemctl restart systemd-journald
 if [ $? -ne 0 ]; then
-  echo -e "${red}Problem with enabling persistent log storage${endColor}"
-  exit 1
+    echo -e "${red}Problem with enabling persistent log storage${endColor}"
+    exit 1
 else
-  echo -e "${green}Done${endColor}"
+    echo -e "${green}Done${endColor}"
 fi
 
 echo -e "${yellow}2.4 Disable selinux${endColor}"
@@ -595,31 +595,31 @@ com_ret=$?
 echo "$output"
 substring="is already installed"
 if [ $com_ret -ne 0 ] && [ "$output" == "${output%$substring*}" ]; then
-  echo -e "${red}Problem with installing Zenoss repository${endColor}"
-  exit 1
+    echo -e "${red}Problem with installing Zenoss repository${endColor}"
+    exit 1
 else
-  yum clean all &>/dev/null
-  echo -e "${green}Done${endColor}"
+    yum clean all &>/dev/null
+    echo -e "${green}Done${endColor}"
 fi
 
 echo -e "${yellow}2.6 Install and start the dnsmasq package${endColor}"
 echo 'yum install -y dnsmasq && systemctl enable dnsmasq && systemctl start dnsmasq'
 yum install -y dnsmasq && systemctl enable dnsmasq && systemctl start dnsmasq
 if [ $? -ne 0 ]; then
-  echo -e "${red}Problem with installing dnsmasq package${endColor}"
-  exit 1
+    echo -e "${red}Problem with installing dnsmasq package${endColor}"
+    exit 1
 else
-  echo -e "${green}Done${endColor}"
+    echo -e "${green}Done${endColor}"
 fi
 
 echo -e "${yellow}2.7 Install and start the ntp package${endColor}"
 echo 'yum install -y ntp && systemctl enable ntpd'
 yum install -y ntp && systemctl enable ntpd
 if [ $? -ne 0 ]; then
-  echo -e "${red}Problem with installing ntp package${endColor}"
-  exit 1
+    echo -e "${red}Problem with installing ntp package${endColor}"
+    exit 1
 else
-  echo -e "${green}Done${endColor}"
+    echo -e "${green}Done${endColor}"
 fi
 
 echo -e "${yellow}2.8 ntpd autostart workaround${endColor}"
@@ -627,20 +627,20 @@ echo 'echo "systemctl start ntpd" >> /etc/rc.d/rc.local && chmod +x /etc/rc.d/rc
 sed -i -e "\|^systemctl start ntpd|d" /etc/rc.d/rc.local
 echo "systemctl start ntpd" >> /etc/rc.d/rc.local && chmod +x /etc/rc.d/rc.local
 if [ $? -ne 0 ]; then
-  echo -e "${red}Problem with installing ntpd autostart workaround${endColor}"
-  exit 1
+    echo -e "${red}Problem with installing ntpd autostart workaround${endColor}"
+    exit 1
 else
-  echo -e "${green}Done${endColor}"
+    echo -e "${green}Done${endColor}"
 fi
 
 echo -e "${yellow}2.9 ntpd start${endColor}"
 echo 'systemctl start ntpd'
 systemctl start ntpd
 if [ $? -ne 0 ]; then
-  echo -e "${red}Problem with ntpd start${endColor}"
-  exit 1
+    echo -e "${red}Problem with ntpd start${endColor}"
+    exit 1
 else
-  echo -e "${green}Done${endColor}"
+    echo -e "${green}Done${endColor}"
 fi
 
 echo -e "${blue}3 Installing on the master host - (`date -R`)${endColor}"
@@ -649,26 +649,26 @@ echo -e "${yellow}3.1 Install Control Center, Zenoss Core, and Docker${endColor}
 echo "yum --enablerepo=zenoss-stable install -y ${zenoss_package}"
 yum --enablerepo=zenoss-stable install -y ${zenoss_package}
 if [ $? -ne 0 ]; then
-  echo -e "${red}Problem with installing Control Center, Zenoss Core and Docker${endColor}"
-  exit 1
+    echo -e "${red}Problem with installing Control Center, Zenoss Core and Docker${endColor}"
+    exit 1
 else
-  echo -e "${green}Done${endColor}"
+    echo -e "${green}Done${endColor}"
 fi
 
 echo -e "${yellow}3.2 Start Docker${endColor}"
 echo 'systemctl enable docker && systemctl start docker'
 systemctl enable docker && systemctl start docker
 if [ $? -ne 0 ]; then
-  echo -e "${red}Problem with starting of Docker${endColor}"
-  exit 1
+    echo -e "${red}Problem with starting of Docker${endColor}"
+    exit 1
 else
-  echo -e "${green}Done${endColor}"
+    echo -e "${green}Done${endColor}"
 fi
 
 if [ "$zenoss_package" == "$zenoss_package_enterprise" ] && [ -z "$MHOST" ]; then
-  # docker login
-  echo -e "${yellow}Authenticate to the Docker Hub repository${endColor}"  
-  mySetting=$HISTCONTROL; export HISTCONTROL=ignorespace
+    # docker login
+    echo -e "${yellow}Authenticate to the Docker Hub repository${endColor}"  
+    mySetting=$HISTCONTROL; export HISTCONTROL=ignorespace
     myUser=$docker_registry_user
     myEmail=$docker_registry_email
     myPass=$docker_registry_password
@@ -682,18 +682,18 @@ if [ "$zenoss_package" == "$zenoss_package_enterprise" ] && [ -z "$MHOST" ]; the
         echo -e "${red}Problem with authentication to the Docker Hub${endColor}"
         exit 1  
     fi
-  export HISTCONTROL=$mySetting
-  echo -e "${green}Done${endColor}"
+    export HISTCONTROL=$mySetting
+    echo -e "${green}Done${endColor}"
 fi
 
 echo -e "${yellow}3.3 Identify the IPv4 address and subnet of Docker${endColor}"
 echo "ip addr | grep -A 2 'docker0:' | grep inet | awk '{print \$2}' | awk -F'/' '{print \$1}'"
 docker_ip=$(ip addr | grep -A 2 'docker0:' | grep inet | awk '{print $2}' | awk -F'/' '{print $1}')
 if [ -z "$docker_ip" ]; then
-  echo -e "${red}Problem with identifying IPv4 of Docker${endColor}"
-  exit 1
+    echo -e "${red}Problem with identifying IPv4 of Docker${endColor}"
+    exit 1
 else
-  echo -e "${green}Done${endColor}"
+    echo -e "${green}Done${endColor}"
 fi
 
 echo -e "${yellow}3.4 Add the Btrfs and DNS flags to the Docker startup options${endColor}"
@@ -702,10 +702,10 @@ sed -i -e "\|^DOCKER_OPTS=\"-s btrfs --dns=|d" /etc/sysconfig/docker
 echo 'echo "DOCKER_OPTS=\"-s btrfs --dns=$docker_ip\"" >> /etc/sysconfig/docker'
 echo "DOCKER_OPTS=\"-s btrfs --dns=$docker_ip\"" >> /etc/sysconfig/docker
 if [ $? -ne 0 ]; then
-  echo -e "${red}Problem with adding Btrfs and DNS flags to the Docker${endColor}"
-  exit 1
+    echo -e "${red}Problem with adding Btrfs and DNS flags to the Docker${endColor}"
+    exit 1
 else
-  echo -e "${green}Done${endColor}"
+    echo -e "${green}Done${endColor}"
 fi
 
 echo -e "${yellow}3.5 Creating user ${user} for Control Center (serviced) management${endColor}"
@@ -728,43 +728,43 @@ echo -e "${yellow}3.6 Stop and restart Docker${endColor}"
 echo "systemctl stop docker && systemctl start docker"
 systemctl stop docker && systemctl start docker
 if [ $? -ne 0 ]; then
-  echo -e "${red}Problem with restarting of Docker${endColor}"
-  exit 1
+    echo -e "${red}Problem with restarting of Docker${endColor}"
+    exit 1
 else
-  echo -e "${green}Done${endColor}"
+    echo -e "${green}Done${endColor}"
 fi
 
 if [ ! -z "$MHOST" ]; then
-  echo -e "${yellow}Editing /etc/default/serviced on CC host${endColor}"
-  EXT=$(date +"%j-%H%M%S")
-  test ! -z "${MHOST}" && \
-  sed -i.${EXT} -e 's|^#[^H]*\(HOME=/root\)|\1|' \
-   -e 's|^#[^S]*\(SERVICED_REGISTRY=\).|\11|' \
-   -e 's|^#[^S]*\(SERVICED_AGENT=\).|\11|' \
-   -e 's|^#[^S]*\(SERVICED_MASTER=\).|\10|' \
-   -e 's|^#[^S]*\(SERVICED_MASTER_IP=\).*|\1'${MHOST}'|' \
-   -e '/=$SERVICED_MASTER_IP/ s|^#[^S]*||' \
-   -e 's|\($SERVICED_MASTER_IP\)|'${MHOST}'|' \
-   /etc/default/serviced
+    echo -e "${yellow}Editing /etc/default/serviced on CC host${endColor}"
+    EXT=$(date +"%j-%H%M%S")
+    test ! -z "${MHOST}" && \
+    sed -i.${EXT} -e 's|^#[^H]*\(HOME=/root\)|\1|' \
+     -e 's|^#[^S]*\(SERVICED_REGISTRY=\).|\11|' \
+     -e 's|^#[^S]*\(SERVICED_AGENT=\).|\11|' \
+     -e 's|^#[^S]*\(SERVICED_MASTER=\).|\10|' \
+     -e 's|^#[^S]*\(SERVICED_MASTER_IP=\).*|\1'${MHOST}'|' \
+     -e '/=$SERVICED_MASTER_IP/ s|^#[^S]*||' \
+     -e 's|\($SERVICED_MASTER_IP\)|'${MHOST}'|' \
+     /etc/default/serviced
 else
-  # enable a multi-host deployment on the master
-  echo -e "${yellow}Editing /etc/default/serviced on CC master${endColor}"
-  EXT=$(date +"%j-%H%M%S")
-  sudo sed -i.${EXT} -e 's|^#[^H]*\(HOME=/root\)|\1|' \
-   -e 's|^#[^S]*\(SERVICED_REGISTRY=\).|\11|' \
-   -e 's|^#[^S]*\(SERVICED_AGENT=\).|\11|' \
-   -e 's|^#[^S]*\(SERVICED_MASTER=\).|\11|' \
-    /etc/default/serviced  
+    # enable a multi-host deployment on the master
+    echo -e "${yellow}Editing /etc/default/serviced on CC master${endColor}"
+    EXT=$(date +"%j-%H%M%S")
+    sudo sed -i.${EXT} -e 's|^#[^H]*\(HOME=/root\)|\1|' \
+     -e 's|^#[^S]*\(SERVICED_REGISTRY=\).|\11|' \
+     -e 's|^#[^S]*\(SERVICED_AGENT=\).|\11|' \
+     -e 's|^#[^S]*\(SERVICED_MASTER=\).|\11|' \
+      /etc/default/serviced  
 fi
 
 echo -e "${yellow}3.7 Change the volume type for application data${endColor}"
 echo "sed -i.$(date +\"%j-%H%M%S\") -e 's|^#[^S]*\(SERVICED_FS_TYPE=\).*$|\1btrfs|' /etc/default/serviced"
 sed -i.$(date +"%j-%H%M%S") -e 's|^#[^S]*\(SERVICED_FS_TYPE=\).*$|\1btrfs|' /etc/default/serviced
 if [ $? -ne 0 ]; then
-  echo -e "${red}Problem with changing of volume type${endColor}"
-  exit 1
+    echo -e "${red}Problem with changing of volume type${endColor}"
+    exit 1
 else
-  echo -e "${green}Done${endColor}"
+    echo -e "${green}Done${endColor}"
 fi
 
 # rpcbind bug http://www.zenoss.org/forum/4726
@@ -772,39 +772,39 @@ echo -e "${yellow}3.8 rpcbind workaround${endColor}"
 echo 'systemctl status rpcbind &>/dev/null'
 systemctl status rpcbind &>/dev/null
 if [ $? -ne 0 ]; then
-  echo -e "${yellow}Applying rpcbind workaround${endColor}"
-  echo 'systemctl start rpcbind'
-  systemctl start rpcbind
-  if [ $? -ne 0 ]; then
-    echo -e "${red}Problem with rpcbind start${endColor}"
-    exit 1
-  fi
-  sed -i -e "\|^systemctl start rpcbind|d" /etc/rc.d/rc.local
-  echo 'echo "systemctl start rpcbind" >> /etc/rc.d/rc.local && chmod +x /etc/rc.d/rc.local'
-  echo "systemctl start rpcbind" >> /etc/rc.d/rc.local && chmod +x /etc/rc.d/rc.local
-  if [ $? -ne 0 ]; then
-    echo -e "${red}Problem with installing rpcbind autostart workaround${endColor}"
-    exit 1  
-  fi    
-  echo -e "${green}Done${endColor}"
+    echo -e "${yellow}Applying rpcbind workaround${endColor}"
+    echo 'systemctl start rpcbind'
+    systemctl start rpcbind
+    if [ $? -ne 0 ]; then
+        echo -e "${red}Problem with rpcbind start${endColor}"
+        exit 1
+    fi
+    sed -i -e "\|^systemctl start rpcbind|d" /etc/rc.d/rc.local
+    echo 'echo "systemctl start rpcbind" >> /etc/rc.d/rc.local && chmod +x /etc/rc.d/rc.local'
+    echo "systemctl start rpcbind" >> /etc/rc.d/rc.local && chmod +x /etc/rc.d/rc.local
+    if [ $? -ne 0 ]; then
+        echo -e "${red}Problem with installing rpcbind autostart workaround${endColor}"
+        exit 1  
+    fi    
+    echo -e "${green}Done${endColor}"
 fi
 
 echo -e "${yellow}3.9 Start the Control Center service${endColor}"
 echo "systemctl enable serviced && systemctl start serviced"
 systemctl enable serviced && systemctl start serviced
 if [ $? -ne 0 ]; then
-  echo -e "${red}Problem with starting of serviced${endColor}"
-  exit 1
+    echo -e "${red}Problem with starting of serviced${endColor}"
+    exit 1
 else
-  echo -e "${green}Done${endColor}"
+    echo -e "${green}Done${endColor}"
 fi
 
 # exit host installation
 if [ ! -z "$MHOST" ]; then
-  echo -e "${green}Control Center installation on the host completed${endColor}"
-  echo -e "${green}Please visit Control Center${endColor}"
-  echo -e "${green}You can check status of serviced: systemctl status serviced${endColor}"  
-  exit 0
+    echo -e "${green}Control Center installation on the host completed${endColor}"
+    echo -e "${green}Please visit Control Center${endColor}"
+    echo -e "${green}You can check status of serviced: systemctl status serviced${endColor}"  
+    exit 0
 fi 
 
 echo -e "${blue}4 ${zenoss_installation} deployement - (`date -R`)${endColor}"
@@ -826,25 +826,25 @@ do
    test=$(serviced host list 2>&1)   
 done
 if [ "$test" = "no hosts found" ]; then
-  echo "serviced host add $hostname:4979 default"
-  serviced host add $hostname:4979 default
-  if [ $? -ne 0 ]; then
-    echo -e "${red}Problem with command: serviced host add $privateipv4:4979 default${endColor}"
-    exit 1
-  else
-    echo -e "${green}Done${endColor}"
-  fi
+    echo "serviced host add $hostname:4979 default"
+    serviced host add $hostname:4979 default
+    if [ $? -ne 0 ]; then
+        echo -e "${red}Problem with command: serviced host add $privateipv4:4979 default${endColor}"
+        exit 1
+    else
+        echo -e "${green}Done${endColor}"
+    fi
 else
-  echo "echo \"$test\" | wc -l"
-  #test2=$(echo "$test" | grep $(uname -n) | wc -l)
-  test2=$(echo "$test" | wc -l)
-  if [ "$test2" -gt "1" ]; then
-    echo -e "${yellow}Skipping - some host is deployed already${endColor}"
-    echo -e "${green}Done${endColor}"
-  else 
-    echo -e "${red}Problem with adding a host - check output from test: $test${endColor}"
-    exit 1
-  fi  
+    echo "echo \"$test\" | wc -l"
+    #test2=$(echo "$test" | grep $(uname -n) | wc -l)
+    test2=$(echo "$test" | wc -l)
+    if [ "$test2" -gt "1" ]; then
+        echo -e "${yellow}Skipping - some host is deployed already${endColor}"
+        echo -e "${green}Done${endColor}"
+    else 
+        echo -e "${red}Problem with adding a host - check output from test: $test${endColor}"
+        exit 1
+    fi  
 fi
 
 echo -e "${yellow}4.2 Deploy ${zenoss_template} application (the deployment step can take 15-30 minutes)${endColor}"
@@ -855,27 +855,27 @@ TEMPLATEID=$(serviced template list 2>&1 | grep "${zenoss_template}" | awk '{pri
 echo 'serviced service list 2>/dev/null | wc -l'
 services=$(serviced service list 2>/dev/null | wc -l)
 if [ "$services" == "0" ]; then
-  # log progress watching from journalctl in background
-  bgjobs=$(jobs -p | wc -l)
-  ((bgjobs++))
-  echo "serviced template deploy $TEMPLATEID default zenoss"
-  journalctl -u serviced -f -n 0 &
-  serviced template deploy $TEMPLATEID default zenoss
-  rc=$?
-  # kill log watching
-  kill %${bgjobs}
-  sleep 5
-  if [ $rc -ne 0 ]; then
-    echo -e "${red}Problem with command: serviced template deploy $TEMPLATEID default zenoss${endColor}"
-    exit 1
-  fi
+    # log progress watching from journalctl in background
+    bgjobs=$(jobs -p | wc -l)
+    ((bgjobs++))
+    echo "serviced template deploy $TEMPLATEID default zenoss"
+    journalctl -u serviced -f -n 0 &
+    serviced template deploy $TEMPLATEID default zenoss
+    rc=$?
+    # kill log watching
+    kill %${bgjobs}
+    sleep 5
+    if [ $rc -ne 0 ]; then
+        echo -e "${red}Problem with command: serviced template deploy $TEMPLATEID default zenoss${endColor}"
+        exit 1
+    fi
 else
-  if [ "$services" -gt "0" ]; then
-    echo -e "${yellow}Skipping - some services are already deployed, check: serviced service list${endColor}"
-  else
-    echo -e "${red}Skipping deploying an application - check output from template test: $TEMPLATEID${endColor}"
-    exit 1
-  fi
+    if [ "$services" -gt "0" ]; then
+        echo -e "${yellow}Skipping - some services are already deployed, check: serviced service list${endColor}"
+    else
+        echo -e "${red}Skipping deploying an application - check output from template test: $TEMPLATEID${endColor}"
+        exit 1
+    fi
 fi
 
 echo -e "${yellow}5 Tuning ${zenoss_template}${endColor}"
@@ -956,6 +956,17 @@ sleep 30
 serviced service attach $(serviced service list | grep -i rabbitmq | awk '{print $2}') rabbitmqctl delete_user guest
 serviced service stop $(serviced service list | grep -i rabbitmq | awk '{print $2}')
 echo -e "${green}Done${endColor}"
+
+echo -e "${yellow}5.5 Port forwarding${endColor}"
+ipv4forwarding=$(sysctl net.ipv4.conf.all.forwarding)
+if [ "$ipv4forwarding" != "net.ipv4.conf.all.forwarding = 1" ]; then
+    sysctl net.ipv4.conf.all.forwarding=1
+    sed -i -e "\|^net.ipv4.conf.all.forwarding |d" /etc/sysctl.conf
+    echo "net.ipv4.conf.all.forwarding = 1" >> /etc/sysctl.conf
+    echo -e "${green}Done${endColor}"
+else
+    echo -e "${green}Done${endColor} - already enabled"
+fi
 
 if [ "$zenoss_impact" == "$zenoss_impact_enterprise" ]; then
   echo -e "${yellow}6 Pull Service Impact Docker image (the deployment step can take 3-5 minutes)${endColor}"
