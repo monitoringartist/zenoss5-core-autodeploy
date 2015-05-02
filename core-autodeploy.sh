@@ -20,7 +20,7 @@ mount_parameters_btrfs="rw,noatime,nodatacow 0 0"
 mount_parameters_xfs="defaults,noatime 0 0"
 g2k=1048576
 user="ccuser"
-version="2015-04-24"
+version="2015-05-02"
 retries_max=90
 sleep_duration=10
 install_doc="http://wiki.zenoss.org/download/core/docs/Zenoss_Core_Installation_Guide_r5.0.0_latest.pdf"
@@ -433,12 +433,22 @@ fi
 echo -e "${yellow}1.8 /opt/serviced/var filesystem check${endColor}"
 fs=$(df -T | grep ' \/opt\/serviced\/var$' | awk '{print $2}')
 if [ -z "$fs" ]; then
-    echo -e "${red}/opt/serviced/var filesystem was not detected${endColor}"
-    exit 1
+    echo -e "${red}/opt/serviced/var filesystem was not detected. Do you want to continue (y/N)${endColor}"
+    read answer
+    if echo "$answer" | grep -iq "^y" ;then
+        echo " ... continuing"
+    else
+        exit 1
+    fi
 fi
 if [ "$fs" != "$serviced_fs_type" ]; then
-    echo -e "${red}${fs} /opt/serviced/var filesystem detected, but ${serviced_fs_type} is required${endColor}"
-    exit 1    
+    echo -e "${red}${fs} /opt/serviced/var filesystem detected, but ${serviced_fs_type} is required. Do you want to continue (y/N)${endColor}"
+    read answer
+    if echo "$answer" | grep -iq "^y" ;then
+        echo " ... continuing"
+    else
+        exit 1
+    fi
 fi
 ss=$(df -T | grep ' \/opt\/serviced\/var$' | awk '{print $3}')
 mss=$(($serviced_fs_min_size * $g2k))
@@ -580,7 +590,8 @@ fi
 echo -e "${yellow}2.4 Disable selinux${endColor}"
 test=$(test -f /etc/selinux/config && grep '^SELINUX=' /etc/selinux/config)
 if [ ! -z "$test" ] && [ "$test" != "SELINUX=disabled" ]; then
-    # TODO restart required when disabling selinux (???)
+    echo "echo 0 > /selinux/enforce"
+    echo 0 > /selinux/enforce    
     echo "sed -i.$(date +\"%j-%H%M%S\") -e 's/^SELINUX=.*/SELINUX=disabled/g' /etc/selinux/config && grep '^SELINUX=' /etc/selinux/config"
     sed -i.$(date +"%j-%H%M%S") -e 's/^SELINUX=.*/SELINUX=disabled/g' /etc/selinux/config && grep '^SELINUX=' /etc/selinux/config
     echo -e "${green}Done${endColor}"
