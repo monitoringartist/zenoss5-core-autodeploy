@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Script for Control Center and Zenoss Core 5/Zenoss Resource Manager 5 deployement
-# Copyright (C) 2015 Jan Garaj - www.jangaraj.com
+# Script for Control Center and Zenoss Core 5 / Zenoss Resource Manager 5 deployement
+# Copyright (C) 2015 Jan Garaj - www.jangaraj.com / www.monitoringartist.com
 
 # Variables
 cpus_min=4
@@ -20,7 +20,7 @@ mount_parameters_btrfs="rw,noatime,nodatacow 0 0"
 mount_parameters_xfs="defaults,noatime 0 0"
 g2k=1048576
 user="ccuser"
-version="2015-05-02"
+version="2015-05-05"
 retries_max=90
 sleep_duration=10
 install_doc="http://wiki.zenoss.org/download/core/docs/Zenoss_Core_Installation_Guide_r5.0.0_latest.pdf"
@@ -45,6 +45,7 @@ blue='\e[0;34m'
 endColor='\e[0m'
 
 echo -e "${yellow}Autodeploy script ${version} for Control Center master host and Zenoss Core 5/Zenoss Resource Manager 5${endColor}"
+echo -e "${yellow}Get your own Zenoss 5 Core taster instance in 10 minutes: www.zenoss5taster.com${endColor}"
 echo -e "Install guide: ${install_doc}"
 
 echo -e "${yellow}Requirements:${endColor}
@@ -110,7 +111,7 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
       else
           # mount point
           if [ ! -d $path ]; then
-              echo "mkdir -p ${path}" 
+              echo "mkdir -p ${path}"                              f
               mkdir -p ${path}
               if [ $? -ne 0 ]; then
                   echo -e "${red}Problem with creating mountpoint ${path}${endColor}"
@@ -357,7 +358,6 @@ else
 fi
 echo -e "${green}Done${endColor}"
 
-
 echo -e "${yellow}1.4 CPU check${endColor}"
 cpus=$(nproc)
 if [ $cpus -lt $cpus_min ]; then
@@ -395,7 +395,7 @@ fi
 ss=$(df -T | grep ' \/$' | awk '{print $3}')
 mss=$(($root_fs_min_size * $g2k))
 if [ $ss -lt $mss ]; then
-    echo -e "${red}/ filesystem size is less than required ${root_fs_min_size}GB. Do you want to continue (y/N)?${endColor}"
+    echo -e "${red}/ filesystem size is less (${ss}kB) than required ${root_fs_min_size}GB. Do you want to continue (y/N)?${endColor}"
     read answer    
     if echo "$answer" | grep -iq "^y" ;then
         echo " ... continuing"
@@ -419,7 +419,7 @@ fi
 ss=$(df -T | grep ' \/var\/lib\/docker$' | awk '{print $3}')
 mss=$(($docker_fs_min_size * $g2k))
 if [ $ss -lt $mss ]; then
-    echo -e "${red}/var/lib/docker filesystem size is less than required ${docker_fs_min_size}GB. Do you want to continue (y/N)?${endColor}"
+    echo -e "${red}/var/lib/docker filesystem size is less (${ss}kB) than required ${docker_fs_min_size}GB. Do you want to continue (y/N)?${endColor}"
     read answer    
     if echo "$answer" | grep -iq "^y" ;then
         echo " ... continuing"
@@ -453,7 +453,7 @@ fi
 ss=$(df -T | grep ' \/opt\/serviced\/var$' | awk '{print $3}')
 mss=$(($serviced_fs_min_size * $g2k))
 if [ $ss -lt $mss ]; then
-    echo -e "${red}/opt/serviced/var filesystem size is less than required ${serviced_fs_min_size}GB. Do you want to continue (y/N)?${endColor}"
+    echo -e "${red}/opt/serviced/var filesystem size is less (${ss}kB) than required ${serviced_fs_min_size}GB. Do you want to continue (y/N)?${endColor}"
     read answer    
     if echo "$answer" | grep -iq "^y" ;then
         echo " ... continuing"
@@ -484,7 +484,7 @@ else
     ss=$(df -T | grep ' \/opt\/serviced\/var\/volumes$' | awk '{print $3}')
     mss=$(($servicedvolumes_fs_min_size * $g2k))
     if [ $ss -lt $mss ]; then
-        echo -e "${red}/opt/serviced/var/volumes filesystem size is less than required ${servicedvolumes_fs_min_size}GB. Do you want to continue (y/N)?${endColor}"
+        echo -e "${red}/opt/serviced/var/volumes filesystem size is less (${ss}kB) than required ${servicedvolumes_fs_min_size}GB. Do you want to continue (y/N)?${endColor}"
         read answer    
         if echo "$answer" | grep -iq "^y" ;then
             echo " ... continuing"
@@ -517,7 +517,7 @@ else
     ss=$(df -T | grep ' \/opt\/serviced\/var\/backups$' | awk '{print $3}')
     mss=$(($servicedbackups_fs_min_size * $g2k))
     if [ $ss -lt $mss ]; then
-        echo -e "${red}/opt/serviced/var/backups filesystem size is less than required ${servicedbackups_fs_min_size}GB. Do you want to continue (y/N)?${endColor}"
+        echo -e "${red}/opt/serviced/var/backups filesystem size is less (${ss}kB) than required ${servicedbackups_fs_min_size}GB. Do you want to continue (y/N)?${endColor}"
         read answer    
         if echo "$answer" | grep -iq "^y" ;then
             echo " ... continuing"
@@ -811,10 +811,23 @@ else
 fi
 
 # exit host installation
-if [ ! -z "$MHOST" ]; then
+if [ ! -z "$MHOST" ]; then    
+    echo -e "${yellow}5.3 Configuring periodic maintenance${endColor}"
+    # cron on the CC host    
+    echo "Creating /etc/cron.weekly/zenoss-pool-btrfs"
+    DOCKER_PARTITION="/var/lib/docker"
+    cat > /etc/cron.weekly/zenoss-pool-btrfs << EOF
+btrfs balance start ${DOCKER_PARTITION} && btrfs scrub start ${DOCKER_PARTITION}
+EOF
+    chmod +x /etc/cron.weekly/zenoss-pool-btrfs
+    echo -e "${green}Done${endColor}"
+    
     echo -e "${green}Control Center installation on the host completed${endColor}"
     echo -e "${green}Please visit Control Center${endColor}"
-    echo -e "${green}You can check status of serviced: systemctl status serviced${endColor}"  
+    echo -e "${green}You can check status of serviced: systemctl status serviced${endColor}"
+    echo -e "Install guide: ${install_doc}"
+    echo -e "${blue}Credit: www.jangaraj.com${endColor}"
+    echo -e "${blue}Get your own Zenoss 5 Core taster instance in 10 minutes: www.zenoss5taster.com${endColor}"      
     exit 0
 fi 
 
@@ -944,28 +957,15 @@ echo "serviced service stop $mservice"
 serviced service stop $mservice
 
 echo -e "${yellow}5.3 Configuring periodic maintenance${endColor}"
-if [ -z "$MHOST" ]; then
-    # cron on the CC master
-    echo "Creating /etc/cron.weekly/zenoss-master-btrfs"
-    cat > /etc/cron.weekly/zenoss-master-btrfs << EOF
-DOCKER_PARTITION=/var/lib/docker
+# cron on the CC master
+echo "Creating /etc/cron.weekly/zenoss-master-btrfs"
+DOCKER_PARTITION="/var/lib/docker"
+DATA_PARTITION="/opt/serviced/var/volumes"
+cat > /etc/cron.weekly/zenoss-master-btrfs << EOF
 btrfs balance start ${DOCKER_PARTITION} && btrfs scrub start ${DOCKER_PARTITION}
- 
-DATA_PARTITION=/opt/serviced/var/volumes
 btrfs balance start ${DATA_PARTITION} && btrfs scrub start ${DATA_PARTITION}
 EOF
-
-    chmod +x /etc/cron.weekly/zenoss-master-btrfs
-else
-    # cron on the CC host    
-    echo "Creating /etc/cron.weekly/zenoss-pool-btrfs"
-    cat > /etc/cron.weekly/zenoss-pool-btrfs << EOF
-DOCKER_PARTITION=/var/lib/docker
-btrfs balance start ${DOCKER_PARTITION} && btrfs scrub start ${DOCKER_PARTITION}
-EOF
-
-    chmod +x /etc/cron.weekly/zenoss-pool-btrfs
-fi
+chmod +x /etc/cron.weekly/zenoss-master-btrfs
 echo -e "${green}Done${endColor}"
 
 echo -e "${yellow}5.4 Deleting the RabbitMQ guest user account${endColor}"
@@ -1012,3 +1012,4 @@ if [ "$output" != "${output%$substring*}" ]; then
 fi
 echo -e "Install guide: ${install_doc}"
 echo -e "${blue}Credit: www.jangaraj.com${endColor}"
+echo -e "${blue}Get your own Zenoss 5 Core taster instance in 10 minutes: www.zenoss5taster.com${endColor}"
