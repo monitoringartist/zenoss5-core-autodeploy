@@ -1,7 +1,13 @@
 Zenoss Core 5 autodeploy script
 ===============================
 
-If you like or use this project, please provide feedback to author - Star it ★. 
+If you like or use this project, please provide feedback to author - Star it ★.
+
+If you want to discover all new features of Zenoss 5, than please use [www.zenoss5taster.com](http://www.zenoss5taster.com). 
+It will provision brand new Zenoss 5 Core instance for testing/developement in 10 minutes. 
+Provisioned instance has 8CPU, 30GB RAM and lot of SSD filespace. 
+You will have full access to Control Center/OpenTSDB/HBase/RabbitMQ. 
+No deployment, no config, no DNS configuration. It's just click and play service. 
 
 Auto-deployment script for Zenoss Core 5 on CentOS 7.x or Red Hat Enterprise 
 Linux 7.x. Ubuntu is not supported at the moment. A 64-bit build is required.
@@ -19,6 +25,8 @@ and Zenoss Core 5 for you. Usage of auto-deployment script:
 The script will take several minutes (around 15-30) to complete. When done, 
 you should be able to visit Control Center in a web browser to start 
 Zenoss Core 5 application.
+
+Click and play instance 
 
 Script requires mounted filesystems:
 
