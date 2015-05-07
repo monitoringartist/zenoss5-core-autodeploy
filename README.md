@@ -3,7 +3,7 @@ Zenoss Core 5 autodeploy script
 
 If you like or use this project, please provide feedback to author - Star it ★.
 
-If you want to discover all new features of Zenoss 5, than please use [www.zenoss5taster.com](http://www.zenoss5taster.com). 
+If you want to easily discover all new features of Zenoss 5, than please use [www.zenoss5taster.com](http://www.zenoss5taster.com). 
 It will provision brand new Zenoss 5 Core instance for testing/developement in 10 minutes. 
 Provisioned instance has 8CPU, 30GB RAM and lot of SSD filespace. 
 You will have full access to Control Center/OpenTSDB/HBase/RabbitMQ. 
