@@ -1,5 +1,5 @@
-Zenoss Core 5 autodeploy script
-===============================
+Zenoss 5 Core (Resource Manager 5) - autodeploy script
+======================================================
 
 If you like or use this project, please provide feedback to author - Star it ★.
 
@@ -13,7 +13,7 @@ Auto-deployment script for Zenoss Core 5 on CentOS 7.x or Red Hat Enterprise
 Linux 7.x. Ubuntu is not supported at the moment. A 64-bit build is required.
 
 The script included in this directory will automatically deploy Control Center 
-and Zenoss Core 5 for you. Usage of auto-deployment script: 
+and Zenoss 5 Core (Resource Manager 5) for you. Usage of auto-deployment script: 
 
 ```
 # cd /tmp
@@ -24,7 +24,7 @@ and Zenoss Core 5 for you. Usage of auto-deployment script:
 
 The script will take several minutes (around 15-30) to complete. When done, 
 you should be able to visit Control Center in a web browser to start 
-Zenoss Core 5 application.
+Zenoss 5 Core application.
 
 Click and play instance 
 
@@ -49,7 +49,7 @@ Confirmation is needed before formatting. Available options:
 
 For advandced users only (you are familiar with documentation, so you will be able identify some script warnings/errors, which can be ignored):
 ```
-# # install Zenoss Core 5 host
+# # install Zenoss 5 Core host
 # ./core-autodeploy.sh -h '<MASTER IP>'
 
 # # install Resource Manager 5 master, it will fail if your Docker hub account doesn't have access to private Zenoss repositories
@@ -120,17 +120,17 @@ Images
 ======
 
 Start of autodeployement:
-![Zenoss Core 5 - start of autodeployement](https://raw.githubusercontent.com/jangaraj/zenoss5-core-autodeploy/master/doc/zenoss5-core-autodeploy-1.png)
+![Zenoss 5 Core - start of autodeployement](https://raw.githubusercontent.com/jangaraj/zenoss5-core-autodeploy/master/doc/zenoss5-core-autodeploy-1.png)
 Part of autodeployement:
-![Zenoss Core 5 - part of autodeployement](https://raw.githubusercontent.com/jangaraj/zenoss5-core-autodeploy/master/doc/zenoss5-core-autodeploy-2.png)
+![Zenoss 5 Core - part of autodeployement](https://raw.githubusercontent.com/jangaraj/zenoss5-core-autodeploy/master/doc/zenoss5-core-autodeploy-2.png)
 Host stat in Control Center:
-![Zenoss Core 5 - host stat in Control Center](https://raw.githubusercontent.com/jangaraj/zenoss5-core-autodeploy/master/doc/cc-host-stat.png)
+![Zenoss 5 Cor - host stat in Control Center](https://raw.githubusercontent.com/jangaraj/zenoss5-core-autodeploy/master/doc/cc-host-stat.png)
 Zenoss Core 5 application overview in Control Center:
-![Zenoss Core 5 - app overview in Control Center](https://raw.githubusercontent.com/jangaraj/zenoss5-core-autodeploy/master/doc/cc-app-overview.png)
+![Zenoss 5 Core - app overview in Control Center](https://raw.githubusercontent.com/jangaraj/zenoss5-core-autodeploy/master/doc/cc-app-overview.png)
 4 instances of MariaDB in Control Center:
-![Zenoss Core 5 - 4 instances of MariaDB in Control Center](https://raw.githubusercontent.com/jangaraj/zenoss5-core-autodeploy/master/doc/cc-app-mariadb-4-instances.png)
+![Zenoss 5 Core - 4 instances of MariaDB in Control Center](https://raw.githubusercontent.com/jangaraj/zenoss5-core-autodeploy/master/doc/cc-app-mariadb-4-instances.png)
 htop of running Zenoss Core 5 with 0 monitored devices:
-![Zenoss Core 5 - htop of running Zenoss Core 5](https://raw.githubusercontent.com/jangaraj/zenoss5-core-autodeploy/master/doc/htop-cc-master-zenoss-core-5.png)
+![Zenoss 5 Core - htop of running Zenoss 5 Core](https://raw.githubusercontent.com/jangaraj/zenoss5-core-autodeploy/master/doc/htop-cc-master-zenoss-core-5.png)
 
 Troubleshooting
 ===============
