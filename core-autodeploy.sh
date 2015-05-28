@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Script for Control Center and Zenoss Core 5 / Zenoss Resource Manager 5 deployement
-# Copyright (C) 2015 Jan Garaj - www.jangaraj.com / www.monitoringartist.com
+# Copyright (C) 2015 Jan Garaj - www.jangaraj.com / www.monitoringartist.com / www.zenoss5taster.com
 
 # Variables
 cpus_min=4
@@ -24,7 +24,7 @@ version="2015-05-05"
 retries_max=90
 sleep_duration=10
 install_doc="http://wiki.zenoss.org/download/core/docs/Zenoss_Core_Installation_Guide_r5.0.0_latest.pdf"
-install_doc_enterprise="Please contact your Zenoss representative for Zenoss Resource Manager 5 documentation"
+install_doc_enterprise="https://www.zenoss.com/resources/documentation"
 zenoss_package="zenoss-core-service"
 zenoss_package_enterprise="zenoss-resmgr-service"
 zenoss_installation="Zenoss Core 5"
@@ -37,6 +37,19 @@ docker_registry_user=""
 docker_registry_email=""
 docker_registry_password=""
 MHOST=""
+installer="yum"
+isubuntu="0"
+
+# Ubuntu settings
+lsb_release -a &>/dev/null 
+if [ $? -eq 0 ]; then
+    isubuntu="1"
+    root_fs_type="ext4"
+    docker_fs_type="ext4"    
+    serviced_fs_type="ext4"
+    servicedbackups_fs_type="ext4"
+    installer="apt-get"
+fi
     
 green='\e[0;32m'
 yellow='\e[0;33m'
@@ -346,15 +359,29 @@ else
 fi
 
 echo -e "${yellow}1.3 OS version check${endColor}"
-if [ -f /etc/redhat-release ]; then
-    elv=`cat /etc/redhat-release | gawk 'BEGIN {FS="release "} {print $2}' | gawk 'BEGIN {FS="."} {print $1}'`
-    if [ $elv -ne 7 ]; then
-	    echo -e "${red}Not supported OS version. Only RedHat 7 and CentOS 7 are supported by autodeploy script at the moment.${endColor}"
-        exit 1
+if [ "$isubuntu" = "0" ]; then
+    # RedHat version check
+    if [ -f /etc/redhat-release ]; then
+        elv=`cat /etc/redhat-release | gawk 'BEGIN {FS="release "} {print $2}' | gawk 'BEGIN {FS="."} {print $1}'`
+        if [ $elv -ne 7 ]; then
+    	    echo -e "${red}Not supported OS version. Only RedHat 7 and CentOS 7 are supported by autodeploy script at the moment.${endColor}"
+            exit 1
+        else
+            echo "RedHat/CentOS 7.x detected" 
+        fi
+    else
+    	echo -e "${red}Not supported OS version. Only RedHat 7/CentOS 7/Ubuntu 14 are supported by Zenoss 5.${endColor}"
+        exit 1   
     fi
 else
-	echo -e "${red}Not supported OS version. Only RedHat 7 and CentOS 7 are supported by autodeploy script at the moment.${endColor}"
-    exit 1   
+    # Ubuntu version check
+    version=`lsb_release -a 2>/dev/null | grep ^Description | awk -F: '{print $2}' | awk -F'Ubuntu ' '{print $2}' | awk -F. '{print $1}'`
+    if [ $elv -ne 7 ]; then
+	    echo -e "${red}Not supported OS version. Only Ubuntu 14.x is supported by Zenoss 5.${endColor}"
+        exit 1
+    else
+        echo "Ubuntu 14.x detected"
+    fi
 fi
 echo -e "${green}Done${endColor}"
 
