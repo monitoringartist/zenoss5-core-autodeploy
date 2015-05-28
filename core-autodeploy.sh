@@ -45,7 +45,7 @@ lsb_release -a &>/dev/null
 if [ $? -eq 0 ]; then
     isubuntu="1"
     root_fs_type="ext4"
-    docker_fs_type="ext4"    
+    docker_fs_type="ext4"
     serviced_fs_type="ext4"
     servicedbackups_fs_type="ext4"
     installer="apt-get"
@@ -65,12 +65,12 @@ echo -e "${yellow}Requirements:${endColor}
 Min number of available CPUs: ${cpus_min}
 Min size of available RAM:    ${rams_min}GB
 These filesystems must be mounted with correct type and size:
-Filesystem                  Type	Min size
-/                           ${root_fs_type}		${root_fs_min_size}GB
-/var/lib/docker             ${docker_fs_type}	${docker_fs_min_size}GB
-/opt/serviced/var           ${serviced_fs_type}		${serviced_fs_min_size}GB
-/opt/serviced/var/volumes   ${servicedvolumes_fs_type}	${servicedvolumes_fs_min_size}GB
-/opt/serviced/var/backups   ${servicedbackups_fs_type}	${servicedbackups_fs_min_size}GB"
+Filesystem                  Type        Min size
+/                           ${root_fs_type}        ${root_fs_min_size}GB
+/var/lib/docker             ${docker_fs_type}        ${docker_fs_min_size}GB
+/opt/serviced/var           ${serviced_fs_type}        ${serviced_fs_min_size}GB
+/opt/serviced/var/volumes   ${servicedvolumes_fs_type}       ${servicedvolumes_fs_min_size}GB
+/opt/serviced/var/backups   ${servicedbackups_fs_type}        ${servicedbackups_fs_min_size}GB"
 
 # lang check, only en_GB.UTF-8/en_US.UTF-8 are supported
 languages=$(locale | awk -F'=' '{print $2}' | tr -d '"' | grep -v '^$' | sort | uniq | tr -d '\r' | tr -d '\n')
@@ -376,7 +376,7 @@ if [ "$isubuntu" = "0" ]; then
 else
     # Ubuntu version check
     version=`lsb_release -a 2>/dev/null | grep ^Description | awk -F: '{print $2}' | awk -F'Ubuntu ' '{print $2}' | awk -F. '{print $1}'`
-    if [ $elv -ne 7 ]; then
+    if [ $version -ne 14 ]; then
 	    echo -e "${red}Not supported OS version. Only Ubuntu 14.x is supported by Zenoss 5.${endColor}"
         exit 1
     else
