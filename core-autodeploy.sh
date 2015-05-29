@@ -106,14 +106,16 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
       docker_registry_email=$OPTARG
       ;;
     p)
-      # -e <docker registry password>
+      # -p <docker registry password>
       docker_registry_password=$OPTARG
       ;;
     h)
       # -h <IP of CC master>
       MHOST=$OPTARG
-      ;;                            
+      ;;
     d)
+      # TODO install Ubuntu btrfs tools:
+      # dpkg -s btrfs-tools >/dev/null 2>&1 || sudo apt-get install -y btrfs-tools
       path="/var/lib/docker"
       rfs=$docker_fs_type
       dev=$OPTARG
@@ -124,7 +126,7 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
       else
           # mount point
           if [ ! -d $path ]; then
-              echo "mkdir -p ${path}"                              f
+              echo "mkdir -p ${path}"
               mkdir -p ${path}
               if [ $? -ne 0 ]; then
                   echo -e "${red}Problem with creating mountpoint ${path}${endColor}"
@@ -141,7 +143,7 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
                   mount_parameters=$mount_parameters_btrfs
               else
                   echo "mkfs -t ${rfs} -f ${dev}"
-                  mkfs -t ${rfs} -f ${dev}              
+                  mkfs -t ${rfs} -f ${dev}
                   mount_parameters=$mount_parameters_xfs
               fi
               if [ $? -ne 0 ]; then
@@ -150,7 +152,7 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
               fi
               # fstab
               echo "sed -i -e \"\|^$dev|d\" /etc/fstab"
-              sed -i -e "\|^$dev|d" /etc/fstab                  
+              sed -i -e "\|^$dev|d" /etc/fstab
               echo "echo \"${dev} ${path} ${rfs} ${mount_parameters}\" >> /etc/fstab"
               echo "${dev} ${path} ${rfs} ${mount_parameters}" >> /etc/fstab
               if [ $? -ne 0 ]; then
@@ -167,7 +169,7 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
           else
               exit 1
           fi
-        fi             
+        fi
       ;;
     s)
       path="/opt/serviced/var"
@@ -198,7 +200,7 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
               else
                   echo "mkfs -t ${rfs} -f ${dev}"
                   mkfs -t ${rfs} -f ${dev}
-                  mount_parameters=$mount_parameters_xfs              
+                  mount_parameters=$mount_parameters_xfs
               fi
               if [ $? -ne 0 ]; then
                 echo -e "${red}Problem with formating ${dev}${endColor}"
@@ -206,7 +208,7 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
               fi
               # fstab
               echo "sed -i -e \"\|^$dev|d\" /etc/fstab"
-              sed -i -e "\|^$dev|d" /etc/fstab                  
+              sed -i -e "\|^$dev|d" /etc/fstab
               echo "echo \"${dev} ${path} ${rfs} ${mount_parameters}\" >> /etc/fstab"
               echo "${dev} ${path} ${rfs} ${mount_parameters}" >> /etc/fstab
               if [ $? -ne 0 ]; then
@@ -279,7 +281,7 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
           else
               exit 1
           fi
-        fi                         
+        fi
       ;;
     b)
       path="/opt/serviced/var/backups"
@@ -336,7 +338,7 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
               exit 1
           fi
         fi      
-      ;;            
+      ;;
   esac
 done
 
@@ -371,10 +373,10 @@ if [ "$isubuntu" = "0" ]; then
         fi
     else
     	echo -e "${red}Not supported OS version. Only RedHat 7/CentOS 7/Ubuntu 14 are supported by Zenoss 5.${endColor}"
-        exit 1   
+        exit 1
     fi
 else
-    # Ubuntu version check
+    # Ubuntu
     version=`lsb_release -a 2>/dev/null | grep ^Description | awk -F: '{print $2}' | awk -F'Ubuntu ' '{print $2}' | awk -F. '{print $1}'`
     if [ $version -ne 14 ]; then
 	    echo -e "${red}Not supported OS version. Only Ubuntu 14.x is supported by Zenoss 5.${endColor}"
@@ -394,7 +396,7 @@ if [ $cpus -lt $cpus_min ]; then
         echo " ... continuing"
     else
         exit 1
-    fi    
+    fi
 else
   echo -e "${green}Done${endColor}"
 fi
@@ -403,7 +405,7 @@ echo -e "${yellow}1.5 RAM check${endColor}"
 rams=$(free -g | grep 'Mem' | awk '{print $2}') 
 if [ $rams -lt $rams_min ]; then
     echo -e "${red}Only ${rams} GB of RAM has been detected, but at least 20GB is recommended. Do you want to continue (y/N)?${endColor}"
-    read answer    
+    read answer
     if echo "$answer" | grep -iq "^y" ;then
         echo " ... continuing"
     else
@@ -423,12 +425,12 @@ ss=$(df -T | grep ' \/$' | awk '{print $3}')
 mss=$(($root_fs_min_size * $g2k))
 if [ $ss -lt $mss ]; then
     echo -e "${red}/ filesystem size is less (${ss}kB) than required ${root_fs_min_size}GB. Do you want to continue (y/N)?${endColor}"
-    read answer    
+    read answer
     if echo "$answer" | grep -iq "^y" ;then
         echo " ... continuing"
     else
         exit 1
-    fi    
+    fi
 else
   echo -e "${green}Done${endColor}"
 fi
@@ -441,7 +443,7 @@ if [ -z "$fs" ]; then
 fi
 if [ "$fs" != "$docker_fs_type" ]; then
     echo -e "${red}${fs} /var/lib/docker filesystem detected, but ${docker_fs_type} is required${endColor}"
-    exit 1    
+    exit 1
 fi
 ss=$(df -T | grep ' \/var\/lib\/docker$' | awk '{print $3}')
 mss=$(($docker_fs_min_size * $g2k))
@@ -452,7 +454,7 @@ if [ $ss -lt $mss ]; then
         echo " ... continuing"
     else
         exit 1
-    fi        
+    fi
 else
   echo -e "${green}Done${endColor}"
 fi
@@ -486,7 +488,7 @@ if [ $ss -lt $mss ]; then
         echo " ... continuing"
     else
         exit 1
-    fi    
+    fi
 else
   echo -e "${green}Done${endColor}"
 fi
@@ -506,7 +508,7 @@ if [ -z "$fs" ]; then
 else
     if [ "$fs" != "$servicedvolumes_fs_type" ]; then
         echo -e "${red}${fs} /opt/serviced/var/volumes filesystem detected, but ${servicedvolumes_fs_type} is required${endColor}"
-        exit 1    
+        exit 1
     fi
     ss=$(df -T | grep ' \/opt\/serviced\/var\/volumes$' | awk '{print $3}')
     mss=$(($servicedvolumes_fs_min_size * $g2k))
@@ -517,10 +519,10 @@ else
             echo " ... continuing"
         else
             exit 1
-        fi    
+        fi
     else
       echo -e "${green}Done${endColor}"
-    fi    
+    fi
 fi
 
 
@@ -539,7 +541,7 @@ if [ -z "$fs" ]; then
 else
     if [ "$fs" != "$servicedbackups_fs_type" ]; then
         echo -e "${red}${fs} /opt/serviced/var/backups filesystem detected, but ${servicedbackups_fs_type} is required${endColor}"
-        exit 1    
+        exit 1
     fi
     ss=$(df -T | grep ' \/opt\/serviced\/var\/backups$' | awk '{print $3}')
     mss=$(($servicedbackups_fs_min_size * $g2k))
@@ -550,7 +552,7 @@ else
             echo " ... continuing"
         else
             exit 1
-        fi    
+        fi
     else
       echo -e "${green}Done${endColor}"
     fi
@@ -565,7 +567,7 @@ no=$(echo ${is} | tr ' ' "\n" | wc -l)
 if [ "$no" -gt "1" ]; then
     echo "Network interface auto detection failed. Available interfaces in your system:"
     echo $is
-    echo "Please write interface, which you want to use for deployement (see listing above), e.g. eth1 or ens160:"
+    echo "Please write interface, which you want to use for deployement (see listing above) or use some not listed available virtual interface, e.g. eth1 or ens160:"
     read interface
     echo " ... continuing"
     privateipv4=$(ip addr show | grep -A 1 $interface | grep inet | awk '{print $2}' | awk -F'/' '{print $1}')
@@ -600,8 +602,14 @@ echo "Private IPv4: $privateipv4"
 echo -e "${green}Done${endColor}"
 
 echo -e "${yellow}2.2 Disable the firewall${endColor}"
-echo 'systemctl stop firewalld && systemctl disable firewalld'
-systemctl stop firewalld && systemctl disable firewalld
+if [ "$isubuntu" = "0" ]; then
+    echo 'systemctl stop firewalld && systemctl disable firewalld'
+    systemctl stop firewalld && systemctl disable firewalld
+else
+    # ubuntu
+    echo 'ufw disable'
+    ufw disable
+fi
 echo -e "${green}Done${endColor}"
 
 echo -e "${yellow}2.3 Enable persistent storage for log files${endColor}"
@@ -618,7 +626,7 @@ echo -e "${yellow}2.4 Disable selinux${endColor}"
 test=$(test -f /etc/selinux/config && grep '^SELINUX=' /etc/selinux/config)
 if [ ! -z "$test" ] && [ "$test" != "SELINUX=disabled" ]; then
     echo "echo 0 > /selinux/enforce"
-    echo 0 > /selinux/enforce    
+    echo 0 > /selinux/enforce
     echo "sed -i.$(date +\"%j-%H%M%S\") -e 's/^SELINUX=.*/SELINUX=disabled/g' /etc/selinux/config && grep '^SELINUX=' /etc/selinux/config"
     sed -i.$(date +"%j-%H%M%S") -e 's/^SELINUX=.*/SELINUX=disabled/g' /etc/selinux/config && grep '^SELINUX=' /etc/selinux/config
     echo -e "${green}Done${endColor}"
@@ -627,22 +635,37 @@ else
 fi
 
 echo -e "${yellow}2.5 Download and install the Zenoss repository package${endColor}"
-echo 'rpm -ivh http://get.zenoss.io/yum/zenoss-repo-1-1.x86_64.rpm'
-output=$(rpm -ivh http://get.zenoss.io/yum/zenoss-repo-1-1.x86_64.rpm 2>&1)
-com_ret=$?
-echo "$output"
-substring="is already installed"
-if [ $com_ret -ne 0 ] && [ "$output" == "${output%$substring*}" ]; then
-    echo -e "${red}Problem with installing Zenoss repository${endColor}"
-    exit 1
+if [ "$isubuntu" = "0" ]; then
+    echo 'rpm -ivh http://get.zenoss.io/yum/zenoss-repo-1-1.x86_64.rpm'
+    output=$(rpm -ivh http://get.zenoss.io/yum/zenoss-repo-1-1.x86_64.rpm 2>&1)
+    com_ret=$?
+    echo "$output"
+    substring="is already installed"
+    if [ $com_ret -ne 0 ] && [ "$output" == "${output%$substring*}" ]; then
+        echo -e "${red}Problem with installing Zenoss repository${endColor}"
+        exit 1
+    else
+        ${installer} clean all &>/dev/null
+        echo -e "${green}Done${endColor}"
+    fi
 else
-    yum clean all &>/dev/null
-    echo -e "${green}Done${endColor}"
-fi
-
+    # ubuntu TODO    
+    echo 'apt-key adv --keyserver keys.gnupg.net --recv-keys AA5A1AD7'
+    apt-key adv --keyserver keys.gnupg.net --recv-keys AA5A1AD7
+    if [ $? -ne 0 ]; then
+        echo -e "${red}Problem with installing Zenoss repository${endColor}"
+        exit 1
+    fi
+    echo 'echo "deb [ arch=amd64 ] \'http://get.zenoss.io/apt/ubuntu\' trusty universe" > /etc/apt/sources.list.d/zenoss.list'
+    echo "deb [ arch=amd64 ] 'http://get.zenoss.io/apt/ubuntu' trusty universe" > /etc/apt/sources.list.d/zenoss.list
+    if [ $? -ne 0 ]; then
+        echo -e "${red}Problem with installing Zenoss repository${endColor}"
+        exit 1
+    fi    
+fi    
 echo -e "${yellow}2.6 Install and start the dnsmasq package${endColor}"
-echo 'yum install -y dnsmasq && systemctl enable dnsmasq && systemctl start dnsmasq'
-yum install -y dnsmasq && systemctl enable dnsmasq && systemctl start dnsmasq
+echo "${installer} install -y dnsmasq && systemctl enable dnsmasq && systemctl start dnsmasq"
+${installer} install -y dnsmasq && systemctl enable dnsmasq && systemctl start dnsmasq
 if [ $? -ne 0 ]; then
     echo -e "${red}Problem with installing dnsmasq package${endColor}"
     exit 1
@@ -651,8 +674,8 @@ else
 fi
 
 echo -e "${yellow}2.7 Install and start the ntp package${endColor}"
-echo 'yum install -y ntp && systemctl enable ntpd'
-yum install -y ntp && systemctl enable ntpd
+echo "${installer} install -y ntp && systemctl enable ntpd"
+${installer} install -y ntp && systemctl enable ntpd
 if [ $? -ne 0 ]; then
     echo -e "${red}Problem with installing ntp package${endColor}"
     exit 1
@@ -684,8 +707,8 @@ fi
 echo -e "${blue}3 Installing on the master host - (`date -R`)${endColor}"
 
 echo -e "${yellow}3.1 Install Control Center, Zenoss Core, and Docker${endColor}"
-echo "yum --enablerepo=zenoss-stable install -y ${zenoss_package}"
-yum --enablerepo=zenoss-stable install -y ${zenoss_package}
+echo "${installer} --enablerepo=zenoss-stable install -y ${zenoss_package}"
+${installer} --enablerepo=zenoss-stable install -y ${zenoss_package}
 if [ $? -ne 0 ]; then
     echo -e "${red}Problem with installing Control Center, Zenoss Core and Docker${endColor}"
     exit 1
@@ -753,7 +776,7 @@ if [ $? -ne 0 ]; then
     echo "adduser -M -c 'Management user for Control Center (serviced)' ${user}"
     adduser -M -c 'Management user for Control Center (serviced)' ${user}
     echo "usermod -aG wheel ${user}"
-    usermod -aG wheel ${user}        
+    usermod -aG wheel ${user}
     # ubuntu
     #echo "usermod -aG sudo ${user}"
     #usermod -aG sudo ${user}
@@ -823,7 +846,7 @@ if [ $? -ne 0 ]; then
     if [ $? -ne 0 ]; then
         echo -e "${red}Problem with installing rpcbind autostart workaround${endColor}"
         exit 1  
-    fi    
+    fi
     echo -e "${green}Done${endColor}"
 fi
 
@@ -838,9 +861,9 @@ else
 fi
 
 # exit host installation
-if [ ! -z "$MHOST" ]; then    
+if [ ! -z "$MHOST" ]; then
     echo -e "${yellow}5.3 Configuring periodic maintenance${endColor}"
-    # cron on the CC host    
+    # cron on the CC host
     echo "Creating /etc/cron.weekly/zenoss-pool-btrfs"
     DOCKER_PARTITION="/var/lib/docker"
     cat > /etc/cron.weekly/zenoss-pool-btrfs << EOF
@@ -874,8 +897,8 @@ do
    echo "#${retry}: This is not a problem, because Control Centre service is not fully started, I'm trying in ${sleep_duration} seconds"
    echo "Message from author of autodeploy script: Keep calm and be patient! - http://www.keepcalmandposters.com/posters/38112.png"
    retry=$(( $retry + 1 ))
-   sleep $sleep_duration    
-   test=$(serviced host list 2>&1)   
+   sleep $sleep_duration
+   test=$(serviced host list 2>&1)
 done
 if [ "$test" = "no hosts found" ]; then
     echo "serviced host add $hostname:4979 default"
