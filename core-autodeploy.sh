@@ -874,6 +874,8 @@ if [ $? -ne 0 ]; then
         usermod -aG wheel ${user}
     else
         # ubuntu
+        echo "useradd -m -c 'Management user for Control Center (serviced)' ${user}"
+        useradd -m -c 'Management user for Control Center (serviced)' ${user}
         echo "usermod -aG sudo ${user}"
         usermod -aG sudo ${user}
     fi
@@ -958,16 +960,26 @@ echo -e "${yellow}3.9 Start the Control Center service${endColor}"
 if [ "$isubuntu" == "0" ]; then
     echo "systemctl enable serviced && systemctl start serviced"
     systemctl enable serviced && systemctl start serviced
+    if [ $? -ne 0 ]; then
+        echo -e "${red}Problem with starting of serviced${endColor}"
+        exit 1
+    else
+        echo -e "${green}Done${endColor}"
+    fi    
 else
     echo "start serviced"
-    start serviced
+    output=$(start serviced 2>&1)
+    com_ret=$?
+    echo "$output"
+    substring="is already running"
+    if [ $com_ret -ne 0 ] && [ "$output" == "${output%$substring*}" ]; then
+        echo -e "${red}Problem with starting of serviced${endColor}"
+        exit 1
+    else
+        echo -e "${green}Done${endColor}"
+    fi     
 fi    
-if [ $? -ne 0 ]; then
-    echo -e "${red}Problem with starting of serviced${endColor}"
-    exit 1
-else
-    echo -e "${green}Done${endColor}"
-fi
+
 
 # exit host installation
 if [ ! -z "$MHOST" ]; then
@@ -1039,15 +1051,19 @@ TEMPLATEID=$(serviced template list 2>&1 | grep "${zenoss_template}" | awk '{pri
 echo 'serviced service list 2>/dev/null | wc -l'
 services=$(serviced service list 2>/dev/null | wc -l)
 if [ "$services" == "0" ]; then
-    # log progress watching from journalctl in background
-    bgjobs=$(jobs -p | wc -l)
-    ((bgjobs++))
+    if [ "$isubuntu" == "0" ]; then
+        # log progress watching from journalctl in background
+        bgjobs=$(jobs -p | wc -l)
+        ((bgjobs++))
+    fi
     echo "serviced template deploy $TEMPLATEID default zenoss"
     journalctl -u serviced -f -a -n 0 &
     serviced template deploy $TEMPLATEID default zenoss
     rc=$?
-    # kill log watching
-    kill %${bgjobs}
+    if [ "$isubuntu" == "0" ]; then
+        # kill log watching
+        kill %${bgjobs}
+    fi
     sleep 5
     if [ $rc -ne 0 ]; then
         echo -e "${red}Problem with command: serviced template deploy $TEMPLATEID default zenoss${endColor}"
@@ -1118,6 +1134,7 @@ serviced service stop $mservice
 echo -e "${yellow}5.3 Configuring periodic maintenance${endColor}"
 # cron on the CC master
 echo "Creating /etc/cron.weekly/zenoss-master-btrfs"
+if [ "$isubuntu" == "0" ]; then
 DOCKER_PARTITION="/var/lib/docker"
 DATA_PARTITION="/opt/serviced/var/volumes"
 cat > /etc/cron.weekly/zenoss-master-btrfs << EOF
@@ -1125,6 +1142,14 @@ btrfs balance start ${DOCKER_PARTITION} && btrfs scrub start ${DOCKER_PARTITION}
 btrfs balance start ${DATA_PARTITION} && btrfs scrub start ${DATA_PARTITION}
 EOF
 chmod +x /etc/cron.weekly/zenoss-master-btrfs
+else
+# ubuntu
+DATA_PARTITION="/opt/serviced/var/volumes"
+cat > /etc/cron.weekly/zenoss-master-btrfs << EOF
+btrfs balance start ${DATA_PARTITION} && btrfs scrub start ${DATA_PARTITION}
+EOF
+chmod +x /etc/cron.weekly/zenoss-master-btrfs    
+fi    
 echo -e "${green}Done${endColor}"
 
 echo -e "${yellow}5.4 Deleting the RabbitMQ guest user account${endColor}"
