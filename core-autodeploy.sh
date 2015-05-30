@@ -18,6 +18,7 @@ servicedbackups_fs_min_size=1 #GB
 servicedbackups_fs_type="xfs"
 mount_parameters_btrfs="rw,noatime,nodatacow 0 0"
 mount_parameters_xfs="defaults,noatime 0 0"
+mount_parameters_ext4="defaults,noatime 0 0"
 g2k=1048576
 user="ccuser"
 version="2015-05-05"
@@ -83,7 +84,14 @@ if [ "$languages" != "en_GB.UTF-8" ] && [ "$languages" != "en_US.UTF-8" ]; then
         exit 1
     fi
 fi
-          
+
+# ubuntu
+if [ "$isubuntu" == "1" ]; then
+    echo -e "${yellow}Preinstallation of btrfs tools${endColor}"
+    echo 'dpkg -s btrfs-tools >/dev/null 2>&1 || apt-get install -y btrfs-tools'
+    dpkg -s btrfs-tools >/dev/null 2>&1 || apt-get install -y btrfs-tools
+fi
+
 while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
   case $arg in
     i)
@@ -114,8 +122,6 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
       MHOST=$OPTARG
       ;;
     d)
-      # TODO install Ubuntu btrfs tools:
-      # dpkg -s btrfs-tools >/dev/null 2>&1 || sudo apt-get install -y btrfs-tools
       path="/var/lib/docker"
       rfs=$docker_fs_type
       dev=$OPTARG
@@ -142,9 +148,15 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
                   mkfs -t ${rfs} -f --nodiscard ${dev}
                   mount_parameters=$mount_parameters_btrfs
               else
-                  echo "mkfs -t ${rfs} -f ${dev}"
-                  mkfs -t ${rfs} -f ${dev}
-                  mount_parameters=$mount_parameters_xfs
+                  if [ "${rfs}" == "ext4" ]; then
+                      echo "mkfs -t ${rfs} ${dev}"
+                      mkfs -t ${rfs} ${dev}
+                      mount_parameters=$mount_parameters_ext4
+                  else
+                      echo "mkfs -t ${rfs} -f ${dev}"
+                      mkfs -t ${rfs} -f ${dev}
+                      mount_parameters=$mount_parameters_xfs
+                  fi                  
               fi
               if [ $? -ne 0 ]; then
                 echo -e "${red}Problem with formating ${dev}${endColor}"
@@ -198,9 +210,15 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
                   mkfs -t ${rfs} -f --nodiscard ${dev}
                   mount_parameters=$mount_parameters_btrfs
               else
-                  echo "mkfs -t ${rfs} -f ${dev}"
-                  mkfs -t ${rfs} -f ${dev}
-                  mount_parameters=$mount_parameters_xfs
+                  if [ "${rfs}" == "ext4" ]; then
+                      echo "mkfs -t ${rfs} ${dev}"
+                      mkfs -t ${rfs} ${dev}
+                      mount_parameters=$mount_parameters_ext4
+                  else
+                      echo "mkfs -t ${rfs} -f ${dev}"
+                      mkfs -t ${rfs} -f ${dev}
+                      mount_parameters=$mount_parameters_xfs
+                  fi                  
               fi
               if [ $? -ne 0 ]; then
                 echo -e "${red}Problem with formating ${dev}${endColor}"
@@ -254,9 +272,15 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
                   mkfs -t ${rfs} -f --nodiscard ${dev}
                   mount_parameters=$mount_parameters_btrfs
               else
-                  echo "mkfs -t ${rfs} -f ${dev}"
-                  mkfs -t ${rfs} -f ${dev}              
-                  mount_parameters=$mount_parameters_xfs
+                  if [ "${rfs}" == "ext4" ]; then
+                      echo "mkfs -t ${rfs} ${dev}"
+                      mkfs -t ${rfs} ${dev}
+                      mount_parameters=$mount_parameters_ext4
+                  else
+                      echo "mkfs -t ${rfs} -f ${dev}"
+                      mkfs -t ${rfs} -f ${dev}
+                      mount_parameters=$mount_parameters_xfs
+                  fi                  
               fi
               if [ $? -ne 0 ]; then
                 echo -e "${red}Problem with formating ${dev}${endColor}"
@@ -310,9 +334,15 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
                   mkfs -t ${rfs} -f --nodiscard ${dev}
                   mount_parameters=$mount_parameters_btrfs
               else
-                  echo "mkfs -t ${rfs} -f ${dev}"
-                  mkfs -t ${rfs} -f ${dev}              
-                  mount_parameters=$mount_parameters_xfs
+                  if [ "${rfs}" == "ext4" ]; then
+                      echo "mkfs -t ${rfs} ${dev}"
+                      mkfs -t ${rfs} ${dev}
+                      mount_parameters=$mount_parameters_ext4
+                  else
+                      echo "mkfs -t ${rfs} -f ${dev}"
+                      mkfs -t ${rfs} -f ${dev}
+                      mount_parameters=$mount_parameters_xfs
+                  fi                  
               fi
               if [ $? -ne 0 ]; then
                 echo -e "${red}Problem with formating ${dev}${endColor}"
@@ -342,7 +372,7 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
   esac
 done
 
-echo -e "${blue}1 Checks - (`date -R`)${endColor}"
+echo -e "${blue}1 Checks [`date -R`]${endColor}"
 echo -e "${yellow}1.1 Root permission check${endColor}"
 if [ "$EUID" -ne 0 ]; then
   echo -e "${red}Please run as root or use sudo${endColor}"
@@ -361,7 +391,7 @@ else
 fi
 
 echo -e "${yellow}1.3 OS version check${endColor}"
-if [ "$isubuntu" = "0" ]; then
+if [ "$isubuntu" == "0" ]; then
     # RedHat version check
     if [ -f /etc/redhat-release ]; then
         elv=`cat /etc/redhat-release | gawk 'BEGIN {FS="release "} {print $2}' | gawk 'BEGIN {FS="."} {print $1}'`
@@ -525,7 +555,6 @@ else
     fi
 fi
 
-
 echo -e "${yellow}1.10 /opt/serviced/var/backups filesystem check${endColor}"
 fs=$(df -T | grep ' \/opt\/serviced\/var\/backups$' | awk '{print $2}')
 if [ -z "$fs" ]; then
@@ -558,7 +587,7 @@ else
     fi
 fi
 
-echo -e "${blue}2 Preparing the host - (`date -R`)${endColor}"
+echo -e "${blue}2 Preparing the host [`date -R`]${endColor}"
 
 echo -e "${yellow}2.1 IP configurations${endColor}"
 # ifconfig is not available in min installation - ip addr show used
@@ -602,7 +631,7 @@ echo "Private IPv4: $privateipv4"
 echo -e "${green}Done${endColor}"
 
 echo -e "${yellow}2.2 Disable the firewall${endColor}"
-if [ "$isubuntu" = "0" ]; then
+if [ "$isubuntu" == "0" ]; then
     echo 'systemctl stop firewalld && systemctl disable firewalld'
     systemctl stop firewalld && systemctl disable firewalld
 else
@@ -612,14 +641,16 @@ else
 fi
 echo -e "${green}Done${endColor}"
 
-echo -e "${yellow}2.3 Enable persistent storage for log files${endColor}"
-echo 'mkdir -p /var/log/journal && systemctl restart systemd-journald'
-mkdir -p /var/log/journal && systemctl restart systemd-journald
-if [ $? -ne 0 ]; then
-    echo -e "${red}Problem with enabling persistent log storage${endColor}"
-    exit 1
-else
-    echo -e "${green}Done${endColor}"
+if [ "$isubuntu" == "0" ]; then
+    echo -e "${yellow}2.3 Enable persistent storage for log files${endColor}"
+    echo 'mkdir -p /var/log/journal && systemctl restart systemd-journald'
+    mkdir -p /var/log/journal && systemctl restart systemd-journald
+    if [ $? -ne 0 ]; then
+        echo -e "${red}Problem with enabling persistent log storage${endColor}"
+        exit 1
+    else
+        echo -e "${green}Done${endColor}"
+    fi
 fi
 
 echo -e "${yellow}2.4 Disable selinux${endColor}"
@@ -634,8 +665,37 @@ else
     echo -e "${green}Done${endColor} - disabled already"
 fi
 
+# ubuntu
+if [ "$isubuntu" == "1" ]; then
+    echo -e "${yellow}2.x Install Docker${endColor}"
+    echo 'echo "deb http://get.docker.com/ubuntu docker main" > /etc/apt/sources.list.d/docker.list'
+    if [ $? -ne 0 ]; then
+        echo -e "${red}Problem with Docker instalation${endColor}"
+        exit 1
+    fi    
+    echo "deb http://get.docker.com/ubuntu docker main" > /etc/apt/sources.list.d/docker.list    
+    echo 'apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8950F966E92D8576A8BA88D21E9'
+    apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8950F966E92D8576A8BA88D21E9
+    if [ $? -ne 0 ]; then
+        echo -e "${red}Problem with Docker instalation${endColor}"
+        exit 1
+    fi    
+    echo 'apt-get update'
+    apt-get update
+    if [ $? -ne 0 ]; then
+        echo -e "${red}Problem with Docker instalation${endColor}"
+        exit 1
+    fi    
+    echo 'apt-get install -y lxc-docker-1.5.0'
+    apt-get install -y lxc-docker-1.5.0
+    if [ $? -ne 0 ]; then
+        echo -e "${red}Problem with Docker instalation${endColor}"
+        exit 1
+    fi        
+fi
+
 echo -e "${yellow}2.5 Download and install the Zenoss repository package${endColor}"
-if [ "$isubuntu" = "0" ]; then
+if [ "$isubuntu" == "0" ]; then
     echo 'rpm -ivh http://get.zenoss.io/yum/zenoss-repo-1-1.x86_64.rpm'
     output=$(rpm -ivh http://get.zenoss.io/yum/zenoss-repo-1-1.x86_64.rpm 2>&1)
     com_ret=$?
@@ -649,23 +709,28 @@ if [ "$isubuntu" = "0" ]; then
         echo -e "${green}Done${endColor}"
     fi
 else
-    # ubuntu TODO    
+    # ubuntu    
     echo 'apt-key adv --keyserver keys.gnupg.net --recv-keys AA5A1AD7'
     apt-key adv --keyserver keys.gnupg.net --recv-keys AA5A1AD7
     if [ $? -ne 0 ]; then
         echo -e "${red}Problem with installing Zenoss repository${endColor}"
         exit 1
     fi
-    echo 'echo "deb [ arch=amd64 ] \'http://get.zenoss.io/apt/ubuntu\' trusty universe" > /etc/apt/sources.list.d/zenoss.list'
-    echo "deb [ arch=amd64 ] 'http://get.zenoss.io/apt/ubuntu' trusty universe" > /etc/apt/sources.list.d/zenoss.list
+    echo 'echo "deb [ arch=amd64 ] http://get.zenoss.io/apt/ubuntu trusty universe" > /etc/apt/sources.list.d/zenoss.list'
+    echo "deb [ arch=amd64 ] http://get.zenoss.io/apt/ubuntu trusty universe" > /etc/apt/sources.list.d/zenoss.list
     if [ $? -ne 0 ]; then
         echo -e "${red}Problem with installing Zenoss repository${endColor}"
         exit 1
     fi    
 fi    
 echo -e "${yellow}2.6 Install and start the dnsmasq package${endColor}"
-echo "${installer} install -y dnsmasq && systemctl enable dnsmasq && systemctl start dnsmasq"
-${installer} install -y dnsmasq && systemctl enable dnsmasq && systemctl start dnsmasq
+if [ "$isubuntu" == "0" ]; then
+    echo "${installer} install -y dnsmasq && systemctl enable dnsmasq && systemctl start dnsmasq"
+    ${installer} install -y dnsmasq && systemctl enable dnsmasq && systemctl start dnsmasq
+else
+    echo "${installer} install -y dnsmasq"
+    ${installer} install -y dnsmasq
+fi        
 if [ $? -ne 0 ]; then
     echo -e "${red}Problem with installing dnsmasq package${endColor}"
     exit 1
@@ -674,8 +739,13 @@ else
 fi
 
 echo -e "${yellow}2.7 Install and start the ntp package${endColor}"
-echo "${installer} install -y ntp && systemctl enable ntpd"
-${installer} install -y ntp && systemctl enable ntpd
+if [ "$isubuntu" == "0" ]; then
+    echo "${installer} install -y ntp && systemctl enable ntpd"
+    ${installer} install -y ntp && systemctl enable ntpd
+else
+    echo "${installer} install -y ntp"
+    ${installer} install -y ntp
+fi    
 if [ $? -ne 0 ]; then
     echo -e "${red}Problem with installing ntp package${endColor}"
     exit 1
@@ -683,32 +753,40 @@ else
     echo -e "${green}Done${endColor}"
 fi
 
-echo -e "${yellow}2.8 ntpd autostart workaround${endColor}"
-echo 'echo "systemctl start ntpd" >> /etc/rc.d/rc.local && chmod +x /etc/rc.d/rc.local'
-sed -i -e "\|^systemctl start ntpd|d" /etc/rc.d/rc.local
-echo "systemctl start ntpd" >> /etc/rc.d/rc.local && chmod +x /etc/rc.d/rc.local
-if [ $? -ne 0 ]; then
-    echo -e "${red}Problem with installing ntpd autostart workaround${endColor}"
-    exit 1
-else
-    echo -e "${green}Done${endColor}"
+if [ "$isubuntu" == "0" ]; then
+    echo -e "${yellow}2.8 ntpd autostart workaround${endColor}"
+    echo 'echo "systemctl start ntpd" >> /etc/rc.d/rc.local && chmod +x /etc/rc.d/rc.local'
+    sed -i -e "\|^systemctl start ntpd|d" /etc/rc.d/rc.local
+    echo "systemctl start ntpd" >> /etc/rc.d/rc.local && chmod +x /etc/rc.d/rc.local
+    if [ $? -ne 0 ]; then
+        echo -e "${red}Problem with installing ntpd autostart workaround${endColor}"
+        exit 1
+    else
+        echo -e "${green}Done${endColor}"
+    fi
+    
+    echo -e "${yellow}2.9 ntpd start${endColor}"
+    echo 'systemctl start ntpd'
+    systemctl start ntpd
+    if [ $? -ne 0 ]; then
+        echo -e "${red}Problem with ntpd start${endColor}"
+        exit 1
+    else
+        echo -e "${green}Done${endColor}"
+    fi
 fi
 
-echo -e "${yellow}2.9 ntpd start${endColor}"
-echo 'systemctl start ntpd'
-systemctl start ntpd
-if [ $? -ne 0 ]; then
-    echo -e "${red}Problem with ntpd start${endColor}"
-    exit 1
-else
-    echo -e "${green}Done${endColor}"
-fi
-
-echo -e "${blue}3 Installing on the master host - (`date -R`)${endColor}"
+echo -e "${blue}3 Installing on the master host [`date -R`]${endColor}"
 
 echo -e "${yellow}3.1 Install Control Center, Zenoss Core, and Docker${endColor}"
-echo "${installer} --enablerepo=zenoss-stable install -y ${zenoss_package}"
-${installer} --enablerepo=zenoss-stable install -y ${zenoss_package}
+if [ "$isubuntu" == "0" ]; then
+    echo "${installer} --enablerepo=zenoss-stable install -y ${zenoss_package}"
+    ${installer} --enablerepo=zenoss-stable install -y ${zenoss_package}
+else
+    # ubuntu
+    echo "${installer} install -y ${zenoss_package}"
+    ${installer} install -y ${zenoss_package}
+fi            
 if [ $? -ne 0 ]; then
     echo -e "${red}Problem with installing Control Center, Zenoss Core and Docker${endColor}"
     exit 1
@@ -717,8 +795,13 @@ else
 fi
 
 echo -e "${yellow}3.2 Start Docker${endColor}"
-echo 'systemctl enable docker && systemctl start docker'
-systemctl enable docker && systemctl start docker
+if [ "$isubuntu" == "0" ]; then
+    echo 'systemctl enable docker && systemctl start docker'
+    systemctl enable docker && systemctl start docker
+else
+    echo 'stop docker && start docker'
+    stop docker && start docker
+fi
 if [ $? -ne 0 ]; then
     echo -e "${red}Problem with starting of Docker${endColor}"
     exit 1
@@ -735,7 +818,11 @@ if [ "$zenoss_package" == "$zenoss_package_enterprise" ] && [ -z "$MHOST" ]; the
     myPass=$docker_registry_password
     # turn off history substitution using - problem with specific passwords
     set +H
-    systemctl start docker
+    if [ "$isubuntu" == "0" ]; then
+        systemctl start docker
+    else
+        start docker
+    fi
     # sleep
     sleep 10
     sudo sh -c "docker login -u $myUser -e $myEmail -p '$myPass'"
@@ -758,10 +845,17 @@ else
 fi
 
 echo -e "${yellow}3.4 Add the Btrfs and DNS flags to the Docker startup options${endColor}"
-echo 'sed -i -e "\|^DOCKER_OPTS=\"-s btrfs --dns=|d" /etc/sysconfig/docker'
-sed -i -e "\|^DOCKER_OPTS=\"-s btrfs --dns=|d" /etc/sysconfig/docker         
-echo 'echo "DOCKER_OPTS=\"-s btrfs --dns=$docker_ip\"" >> /etc/sysconfig/docker'
-echo "DOCKER_OPTS=\"-s btrfs --dns=$docker_ip\"" >> /etc/sysconfig/docker
+if [ "$isubuntu" == "0" ]; then
+    echo 'sed -i -e "\|^DOCKER_OPTS=\"-s btrfs --dns=|d" /etc/sysconfig/docker'
+    sed -i -e "\|^DOCKER_OPTS=\"-s btrfs --dns=|d" /etc/sysconfig/docker         
+    echo 'echo "DOCKER_OPTS=\"-s btrfs --dns=$docker_ip\"" >> /etc/sysconfig/docker'
+    echo "DOCKER_OPTS=\"-s btrfs --dns=$docker_ip\"" >> /etc/sysconfig/docker
+else
+    echo 'sed -i -e "\|^DOCKER_OPTS=\"--dns=|d" /etc/default/docker'
+    sed -i -e "\|^DOCKER_OPTS=\"--dns=|d" /etc/default/docker         
+    echo 'echo "DOCKER_OPTS=\"--dns=$docker_ip\"" >> /etc/default/docker'
+    echo "DOCKER_OPTS=\"--dns=$docker_ip\"" >> /etc/default/docker
+fi    
 if [ $? -ne 0 ]; then
     echo -e "${red}Problem with adding Btrfs and DNS flags to the Docker${endColor}"
     exit 1
@@ -769,25 +863,33 @@ else
     echo -e "${green}Done${endColor}"
 fi
 
-echo -e "${yellow}3.5 Creating user ${user} for Control Center (serviced) management${endColor}"
+echo -e "${yellow}3.5 Creating user ${user} for Control Center/serviced management${endColor}"
 echo "id -u ${user}"
 id -u ${user}
 if [ $? -ne 0 ]; then
-    echo "adduser -M -c 'Management user for Control Center (serviced)' ${user}"
-    adduser -M -c 'Management user for Control Center (serviced)' ${user}
-    echo "usermod -aG wheel ${user}"
-    usermod -aG wheel ${user}
-    # ubuntu
-    #echo "usermod -aG sudo ${user}"
-    #usermod -aG sudo ${user}
+    if [ "$isubuntu" == "0" ]; then
+        echo "adduser -M -c 'Management user for Control Center (serviced)' ${user}"
+        adduser -M -c 'Management user for Control Center (serviced)' ${user}
+        echo "usermod -aG wheel ${user}"
+        usermod -aG wheel ${user}
+    else
+        # ubuntu
+        echo "usermod -aG sudo ${user}"
+        usermod -aG sudo ${user}
+    fi
 else
     echo 'User already exists'
 fi 
 echo -e "${green}Done${endColor}"
 
 echo -e "${yellow}3.6 Stop and restart Docker${endColor}"
-echo "systemctl stop docker && systemctl start docker"
-systemctl stop docker && systemctl start docker
+if [ "$isubuntu" == "0" ]; then
+    echo "systemctl stop docker && systemctl start docker"
+    systemctl stop docker && systemctl start docker
+else
+    echo "stop docker && start docker"
+    stop docker && start docker
+fi
 if [ $? -ne 0 ]; then
     echo -e "${red}Problem with restarting of Docker${endColor}"
     exit 1
@@ -828,31 +930,38 @@ else
     echo -e "${green}Done${endColor}"
 fi
 
-# rpcbind bug http://www.zenoss.org/forum/4726
-echo -e "${yellow}3.8 rpcbind workaround${endColor}"
-echo 'systemctl status rpcbind &>/dev/null'
-systemctl status rpcbind &>/dev/null
-if [ $? -ne 0 ]; then
-    echo -e "${yellow}Applying rpcbind workaround${endColor}"
-    echo 'systemctl start rpcbind'
-    systemctl start rpcbind
+if [ "$isubuntu" == "0" ]; then
+    # rpcbind bug http://www.zenoss.org/forum/4726
+    echo -e "${yellow}3.8 rpcbind workaround${endColor}"
+    echo 'systemctl status rpcbind &>/dev/null'
+    systemctl status rpcbind &>/dev/null
     if [ $? -ne 0 ]; then
-        echo -e "${red}Problem with rpcbind start${endColor}"
-        exit 1
+        echo -e "${yellow}Applying rpcbind workaround${endColor}"
+        echo 'systemctl start rpcbind'
+        systemctl start rpcbind
+        if [ $? -ne 0 ]; then
+            echo -e "${red}Problem with rpcbind start${endColor}"
+            exit 1
+        fi
+        sed -i -e "\|^systemctl start rpcbind|d" /etc/rc.d/rc.local
+        echo 'echo "systemctl start rpcbind" >> /etc/rc.d/rc.local && chmod +x /etc/rc.d/rc.local'
+        echo "systemctl start rpcbind" >> /etc/rc.d/rc.local && chmod +x /etc/rc.d/rc.local
+        if [ $? -ne 0 ]; then
+            echo -e "${red}Problem with installing rpcbind autostart workaround${endColor}"
+            exit 1  
+        fi
+        echo -e "${green}Done${endColor}"
     fi
-    sed -i -e "\|^systemctl start rpcbind|d" /etc/rc.d/rc.local
-    echo 'echo "systemctl start rpcbind" >> /etc/rc.d/rc.local && chmod +x /etc/rc.d/rc.local'
-    echo "systemctl start rpcbind" >> /etc/rc.d/rc.local && chmod +x /etc/rc.d/rc.local
-    if [ $? -ne 0 ]; then
-        echo -e "${red}Problem with installing rpcbind autostart workaround${endColor}"
-        exit 1  
-    fi
-    echo -e "${green}Done${endColor}"
 fi
 
 echo -e "${yellow}3.9 Start the Control Center service${endColor}"
-echo "systemctl enable serviced && systemctl start serviced"
-systemctl enable serviced && systemctl start serviced
+if [ "$isubuntu" == "0" ]; then
+    echo "systemctl enable serviced && systemctl start serviced"
+    systemctl enable serviced && systemctl start serviced
+else
+    echo "start serviced"
+    start serviced
+fi    
 if [ $? -ne 0 ]; then
     echo -e "${red}Problem with starting of serviced${endColor}"
     exit 1
@@ -881,7 +990,7 @@ EOF
     exit 0
 fi 
 
-echo -e "${blue}4 ${zenoss_installation} deployement - (`date -R`)${endColor}"
+echo -e "${blue}4 ${zenoss_installation} deployement [`date -R`]${endColor}"
 
 echo -e "${yellow}4.1 Adding current host to the default resource pool${endColor}"
 echo -e "${yellow}Please be patient, because docker image zenoss/serviced-isvcs must be downloaded before first start.${endColor}"
@@ -922,7 +1031,7 @@ else
     fi  
 fi
 
-echo -e "${yellow}4.2 Deploy ${zenoss_template} application (the deployment step can take 15-30 minutes)${endColor}"
+echo -e "${yellow}4.2 Deploy ${zenoss_template} application - the deployment step can take 15-30 minutes${endColor}"
 echo -e "${yellow}Please be patient, because all Zenoss docker images must be downloaded before first start.${endColor}"
 echo -e "${yellow}Progress from serviced log file is presented. No timeout for this step.${endColor}"
 echo "serviced template list 2>&1 | grep \"${zenoss_template}\" | awk '{print \$1}'"
@@ -1037,7 +1146,7 @@ else
 fi
 
 if [ "$zenoss_impact" == "$zenoss_impact_enterprise" ]; then
-  echo -e "${yellow}6 Pull Service Impact Docker image (the deployment step can take 3-5 minutes)${endColor}"
+  echo -e "${yellow}6 Pull Service Impact Docker image - the deployment step can take 3-5 minutes${endColor}"
   echo "docker pull $zenoss_impact"
   docker pull $zenoss_impact
   if [ $rc -ne 0 ]; then
@@ -1047,7 +1156,7 @@ if [ "$zenoss_impact" == "$zenoss_impact_enterprise" ]; then
   fi  
 fi
 
-echo -e "${blue}5 Final overview - (`date -R`)${endColor}"
+echo -e "${blue}5 Final overview [`date -R`]${endColor}"
 echo -e "${green}Control Center & ${zenoss_installation} installation completed${endColor}"
 echo -e "${green}Set password for Control Center ${user} user: passwd ${user}${endColor}"
 echo -e "${green}Please visit Control Center https://$publicipv4/ in your favorite web browser to complete setup, log in with ${user} user${endColor}"
