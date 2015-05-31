@@ -44,6 +44,15 @@ red='\e[0;31m'
 blue='\e[0;34m'
 endColor='\e[0m'
 
+prompt_continue () {
+    read answer    
+    if echo "$answer" | grep -iq "^y" ;then
+        echo " ... continuing"  
+    else
+        exit 1
+    fi
+}
+
 echo -e "${yellow}Autodeploy script ${version} for Control Center master host and Zenoss Core 5/Zenoss Resource Manager 5${endColor}"
 echo -e "${yellow}Get your own Zenoss 5 Core taster instance in 10 minutes: www.zenoss5taster.com${endColor}"
 echo -e "Install guide: ${install_doc}"
@@ -63,12 +72,7 @@ Filesystem                  Type	Min size
 languages=$(locale | awk -F'=' '{print $2}' | tr -d '"' | grep -v '^$' | sort | uniq | tr -d '\r' | tr -d '\n')
 if [ "$languages" != "en_GB.UTF-8" ] && [ "$languages" != "en_US.UTF-8" ]; then
     echo -e "${yellow}Warning: some non US/GB English or non UTF-8 locales are detected (see output from the command locale).\nOnly en_GB.UTF-8/en_US.UTF-8 are supported in core-autodeploy.sh script.\nYou can try to continue. Do you want to continue (y/n)?${endColor}"
-    read answer    
-    if echo "$answer" | grep -iq "^y" ;then
-        echo " ... continuing"  
-    else
-        exit 1
-    fi
+    prompt_continue
 fi
           
 while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
@@ -120,41 +124,37 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
           fi
           # mkfs
           echo -e "${dev} will be formated to ${rfs}. All current data on ${dev} will be lost and /etc/fstab will be updated. Do you want to continue (y/n)?"
-          read answer    
-          if echo "$answer" | grep -iq "^y" ;then
-              if [ "${rfs}" == "btrfs" ]; then
-                  echo "mkfs -t ${rfs} -f --nodiscard ${dev}"
-                  mkfs -t ${rfs} -f --nodiscard ${dev}
-                  mount_parameters=$mount_parameters_btrfs
-              else
-                  echo "mkfs -t ${rfs} -f ${dev}"
-                  mkfs -t ${rfs} -f ${dev}              
-                  mount_parameters=$mount_parameters_xfs
-              fi
-              if [ $? -ne 0 ]; then
-                echo -e "${red}Problem with formating ${dev}${endColor}"
-                exit 1
-              fi
-              # fstab
-              echo "sed -i -e \"\|^$dev|d\" /etc/fstab"
-              sed -i -e "\|^$dev|d" /etc/fstab                  
-              echo "echo \"${dev} ${path} ${rfs} ${mount_parameters}\" >> /etc/fstab"
-              echo "${dev} ${path} ${rfs} ${mount_parameters}" >> /etc/fstab
-              if [ $? -ne 0 ]; then
-                echo -e "${red}Problem with updating /etc/fstab for ${dev}${endColor}"
-                exit 1
-              fi
-              # mount
-              echo "mount ${path}"
-              mount ${path}
-              if [ $? -ne 0 ]; then
-                echo -e "${red}Problem with mounting ${path}${endColor}"
-                exit 1
-              fi
+          prompt_continue
+          if [ "${rfs}" == "btrfs" ]; then
+              echo "mkfs -t ${rfs} -f --nodiscard ${dev}"
+              mkfs -t ${rfs} -f --nodiscard ${dev}
+              mount_parameters=$mount_parameters_btrfs
           else
-              exit 1
+              echo "mkfs -t ${rfs} -f ${dev}"
+              mkfs -t ${rfs} -f ${dev}              
+              mount_parameters=$mount_parameters_xfs
           fi
-        fi             
+          if [ $? -ne 0 ]; then
+            echo -e "${red}Problem with formating ${dev}${endColor}"
+            exit 1
+          fi
+          # fstab
+          echo "sed -i -e \"\|^$dev|d\" /etc/fstab"
+          sed -i -e "\|^$dev|d" /etc/fstab                  
+          echo "echo \"${dev} ${path} ${rfs} ${mount_parameters}\" >> /etc/fstab"
+          echo "${dev} ${path} ${rfs} ${mount_parameters}" >> /etc/fstab
+          if [ $? -ne 0 ]; then
+            echo -e "${red}Problem with updating /etc/fstab for ${dev}${endColor}"
+            exit 1
+          fi
+          # mount
+          echo "mount ${path}"
+          mount ${path}
+          if [ $? -ne 0 ]; then
+            echo -e "${red}Problem with mounting ${path}${endColor}"
+            exit 1
+          fi
+      fi             
       ;;
     s)
       path="/opt/serviced/var"
@@ -176,41 +176,37 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
           fi
           # mkfs
           echo -e "${dev} will be formated to ${rfs}. All current data on ${dev} will be lost and /etc/fstab will be updated. Do you want to continue (y/n)?"
-          read answer    
-          if echo "$answer" | grep -iq "^y" ;then
-              if [ "${rfs}" == "btrfs" ]; then
-                  echo "mkfs -t ${rfs} -f --nodiscard ${dev}"
-                  mkfs -t ${rfs} -f --nodiscard ${dev}
-                  mount_parameters=$mount_parameters_btrfs
-              else
-                  echo "mkfs -t ${rfs} -f ${dev}"
-                  mkfs -t ${rfs} -f ${dev}
-                  mount_parameters=$mount_parameters_xfs              
-              fi
-              if [ $? -ne 0 ]; then
-                echo -e "${red}Problem with formating ${dev}${endColor}"
-                exit 1
-              fi
-              # fstab
-              echo "sed -i -e \"\|^$dev|d\" /etc/fstab"
-              sed -i -e "\|^$dev|d" /etc/fstab                  
-              echo "echo \"${dev} ${path} ${rfs} ${mount_parameters}\" >> /etc/fstab"
-              echo "${dev} ${path} ${rfs} ${mount_parameters}" >> /etc/fstab
-              if [ $? -ne 0 ]; then
-                echo -e "${red}Problem with updating /etc/fstab for ${dev}${endColor}"
-                exit 1
-              fi
-              # mount
-              echo "mount ${path}"
-              mount ${path}
-              if [ $? -ne 0 ]; then
-                echo -e "${red}Problem with mounting ${path}${endColor}"
-                exit 1
-              fi
+          prompt_continue
+          if [ "${rfs}" == "btrfs" ]; then
+              echo "mkfs -t ${rfs} -f --nodiscard ${dev}"
+              mkfs -t ${rfs} -f --nodiscard ${dev}
+              mount_parameters=$mount_parameters_btrfs
           else
-              exit 1
+              echo "mkfs -t ${rfs} -f ${dev}"
+              mkfs -t ${rfs} -f ${dev}
+              mount_parameters=$mount_parameters_xfs              
           fi
-        fi             
+          if [ $? -ne 0 ]; then
+            echo -e "${red}Problem with formating ${dev}${endColor}"
+            exit 1
+          fi
+          # fstab
+          echo "sed -i -e \"\|^$dev|d\" /etc/fstab"
+          sed -i -e "\|^$dev|d" /etc/fstab                  
+          echo "echo \"${dev} ${path} ${rfs} ${mount_parameters}\" >> /etc/fstab"
+          echo "${dev} ${path} ${rfs} ${mount_parameters}" >> /etc/fstab
+          if [ $? -ne 0 ]; then
+            echo -e "${red}Problem with updating /etc/fstab for ${dev}${endColor}"
+            exit 1
+          fi
+          # mount
+          echo "mount ${path}"
+          mount ${path}
+          if [ $? -ne 0 ]; then
+            echo -e "${red}Problem with mounting ${path}${endColor}"
+            exit 1
+          fi
+      fi             
       ;;
     v)
       path="/opt/serviced/var/volumes"
@@ -232,41 +228,37 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
           fi
           # mkfs
           echo -e "${dev} will be formated to ${rfs}. All current data on ${dev} will be lost and /etc/fstab will be updated. Do you want to continue (y/n)?"
-          read answer    
-          if echo "$answer" | grep -iq "^y" ;then
-              if [ "${rfs}" == "btrfs" ]; then
-                  echo "mkfs -t ${rfs} -f --nodiscard ${dev}"
-                  mkfs -t ${rfs} -f --nodiscard ${dev}
-                  mount_parameters=$mount_parameters_btrfs
-              else
-                  echo "mkfs -t ${rfs} -f ${dev}"
-                  mkfs -t ${rfs} -f ${dev}              
-                  mount_parameters=$mount_parameters_xfs
-              fi
-              if [ $? -ne 0 ]; then
-                echo -e "${red}Problem with formating ${dev}${endColor}"
-                exit 1
-              fi
-              # fstab
-              echo "sed -i -e \"\|^$dev|d\" /etc/fstab"
-              sed -i -e "\|^$dev|d" /etc/fstab                  
-              echo "echo \"${dev} ${path} ${rfs} ${mount_parameters}\" >> /etc/fstab"
-              echo "${dev} ${path} ${rfs} ${mount_parameters}" >> /etc/fstab
-              if [ $? -ne 0 ]; then
-                echo -e "${red}Problem with updating /etc/fstab for ${dev}${endColor}"
-                exit 1
-              fi
-              # mount
-              echo "mount ${path}"
-              mount ${path}
-              if [ $? -ne 0 ]; then
-                echo -e "${red}Problem with mounting ${path}${endColor}"
-                exit 1
-              fi
+          prompt_continue
+          if [ "${rfs}" == "btrfs" ]; then
+              echo "mkfs -t ${rfs} -f --nodiscard ${dev}"
+              mkfs -t ${rfs} -f --nodiscard ${dev}
+              mount_parameters=$mount_parameters_btrfs
           else
-              exit 1
+              echo "mkfs -t ${rfs} -f ${dev}"
+              mkfs -t ${rfs} -f ${dev}              
+              mount_parameters=$mount_parameters_xfs
           fi
-        fi                         
+          if [ $? -ne 0 ]; then
+            echo -e "${red}Problem with formating ${dev}${endColor}"
+            exit 1
+          fi
+          # fstab
+          echo "sed -i -e \"\|^$dev|d\" /etc/fstab"
+          sed -i -e "\|^$dev|d" /etc/fstab                  
+          echo "echo \"${dev} ${path} ${rfs} ${mount_parameters}\" >> /etc/fstab"
+          echo "${dev} ${path} ${rfs} ${mount_parameters}" >> /etc/fstab
+          if [ $? -ne 0 ]; then
+            echo -e "${red}Problem with updating /etc/fstab for ${dev}${endColor}"
+            exit 1
+          fi
+          # mount
+          echo "mount ${path}"
+          mount ${path}
+          if [ $? -ne 0 ]; then
+            echo -e "${red}Problem with mounting ${path}${endColor}"
+            exit 1
+          fi
+      fi                         
       ;;
     b)
       path="/opt/serviced/var/backups"
@@ -288,45 +280,42 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
           fi
           # mkfs
           echo -e "${dev} will be formated to ${rfs}. All current data on ${dev} will be lost and /etc/fstab will be updated. Do you want to continue (y/n)?"
-          read answer    
-          if echo "$answer" | grep -iq "^y" ;then
-              if [ "${rfs}" == "btrfs" ]; then
-                  echo "mkfs -t ${rfs} -f --nodiscard ${dev}"
-                  mkfs -t ${rfs} -f --nodiscard ${dev}
-                  mount_parameters=$mount_parameters_btrfs
-              else
-                  echo "mkfs -t ${rfs} -f ${dev}"
-                  mkfs -t ${rfs} -f ${dev}              
-                  mount_parameters=$mount_parameters_xfs
-              fi
-              if [ $? -ne 0 ]; then
-                echo -e "${red}Problem with formating ${dev}${endColor}"
-                exit 1
-              fi
-              # fstab
-              echo "sed -i -e \"\|^$dev|d\" /etc/fstab"
-              sed -i -e "\|^$dev|d" /etc/fstab                  
-              echo "echo \"${dev} ${path} ${rfs} ${mount_parameters}\" >> /etc/fstab"
-              echo "${dev} ${path} ${rfs} ${mount_parameters}" >> /etc/fstab
-              if [ $? -ne 0 ]; then
-                echo -e "${red}Problem with updating /etc/fstab for ${dev}${endColor}"
-                exit 1
-              fi
-              # mount
-              echo "mount ${path}"
-              mount ${path}
-              if [ $? -ne 0 ]; then
-                echo -e "${red}Problem with mounting ${path}${endColor}"
-                exit 1
-              fi
+          prompt_continue
+          if [ "${rfs}" == "btrfs" ]; then
+              echo "mkfs -t ${rfs} -f --nodiscard ${dev}"
+              mkfs -t ${rfs} -f --nodiscard ${dev}
+              mount_parameters=$mount_parameters_btrfs
           else
-              exit 1
+              echo "mkfs -t ${rfs} -f ${dev}"
+              mkfs -t ${rfs} -f ${dev}              
+              mount_parameters=$mount_parameters_xfs
           fi
-        fi      
+          if [ $? -ne 0 ]; then
+            echo -e "${red}Problem with formating ${dev}${endColor}"
+            exit 1
+          fi
+          # fstab
+          echo "sed -i -e \"\|^$dev|d\" /etc/fstab"
+          sed -i -e "\|^$dev|d" /etc/fstab                  
+          echo "echo \"${dev} ${path} ${rfs} ${mount_parameters}\" >> /etc/fstab"
+          echo "${dev} ${path} ${rfs} ${mount_parameters}" >> /etc/fstab
+          if [ $? -ne 0 ]; then
+            echo -e "${red}Problem with updating /etc/fstab for ${dev}${endColor}"
+            exit 1
+          fi
+          # mount
+          echo "mount ${path}"
+          mount ${path}
+          if [ $? -ne 0 ]; then
+            echo -e "${red}Problem with mounting ${path}${endColor}"
+            exit 1
+          fi
+      fi      
       ;;            
   esac
 done
 
+# Check for root access
 echo -e "${blue}1 Checks - (`date -R`)${endColor}"
 echo -e "${yellow}1.1 Root permission check${endColor}"
 if [ "$EUID" -ne 0 ]; then
@@ -336,6 +325,7 @@ else
   echo -e "${green}Done${endColor}"
 fi
 
+# Check for 64 bit arch
 echo -e "${yellow}1.2 Architecture check${endColor}"
 arch=$(uname -m)
 if [ ! "$arch" = "x86_64" ]; then
@@ -345,137 +335,117 @@ else
   echo -e "${green}Done${endColor}"
 fi
 
+# Check distro compatibility
 echo -e "${yellow}1.3 OS version check${endColor}"
+notsupported="${red}Not supported OS version. Only RedHat 7, CentOS 7 and Ubuntu 14.04 are supported by autodeploy script at the moment.${endColor}"
+hostos="unknown"
+# Check for Redhat/CentOS
 if [ -f /etc/redhat-release ]; then
     elv=`cat /etc/redhat-release | gawk 'BEGIN {FS="release "} {print $2}' | gawk 'BEGIN {FS="."} {print $1}'`
     if [ $elv -ne 7 ]; then
-	    echo -e "${red}Not supported OS version. Only RedHat 7 and CentOS 7 are supported by autodeploy script at the moment.${endColor}"
-        exit 1
+	    echo -e $notsupported
+      exit 1
     fi
+    hostos="redhat"
+# Check for Ubuntu
+elif grep -q "Ubuntu" /etc/issue; then
+  if ! grep -q "14.04" /etc/issue; then
+    echo -e $notsupported
+    exit 1
+  fi
+  hostos="ubuntu"
+# Not Supported
 else
-	echo -e "${red}Not supported OS version. Only RedHat 7 and CentOS 7 are supported by autodeploy script at the moment.${endColor}"
-    exit 1   
+	echo -e $notsupported
+  exit 1
 fi
 echo -e "${green}Done${endColor}"
 
+# Check CPU requirements
 echo -e "${yellow}1.4 CPU check${endColor}"
 cpus=$(nproc)
 if [ $cpus -lt $cpus_min ]; then
     echo -e "${red}Only ${cpus} CPUs have been detected, but at least $cpus_min are required. Do you want to continue (y/n)?${endColor}"
-    read answer    
-    if echo "$answer" | grep -iq "^y" ;then
-        echo " ... continuing"
-    else
-        exit 1
-    fi    
+    prompt_continue
 else
   echo -e "${green}Done${endColor}"
 fi
 
+# Check memory requirements
 echo -e "${yellow}1.5 RAM check${endColor}"
 rams=$(free -g | grep 'Mem' | awk '{print $2}') 
 if [ $rams -lt $rams_min ]; then
     echo -e "${red}Only ${rams} GB of RAM has been detected, but at least 20GB is recommended. Do you want to continue (y/N)?${endColor}"
-    read answer    
-    if echo "$answer" | grep -iq "^y" ;then
-        echo " ... continuing"
-    else
-        exit 1
-    fi    
+    prompt_continue
 else
   echo -e "${green}Done${endColor}"
 fi
 
+# Check FS requirements for /
 echo -e "${yellow}1.6 / filesystem check${endColor}"
 fs=$(df -T | grep ' \/$' | awk '{print $2}')
+rootfs=$fs
 if [ "$fs" != "$root_fs_type" ]; then
-    echo -e "${red}${fs} / filesystem detected, but ${root_fs_type} is required${endColor}"
-    exit 1    
+    echo -e "${red}${fs} / filesystem detected, but ${root_fs_type} is required. Do you want to continue (y/N)?${endColor}"
+    prompt_continue
 fi
 ss=$(df -T | grep ' \/$' | awk '{print $3}')
 mss=$(($root_fs_min_size * $g2k))
 if [ $ss -lt $mss ]; then
     echo -e "${red}/ filesystem size is less (${ss}kB) than required ${root_fs_min_size}GB. Do you want to continue (y/N)?${endColor}"
-    read answer    
-    if echo "$answer" | grep -iq "^y" ;then
-        echo " ... continuing"
-    else
-        exit 1
-    fi    
+    prompt_continue
 else
   echo -e "${green}Done${endColor}"
 fi
 
+# Check FS requirements for /var/lib/docker
 echo -e "${yellow}1.7 /var/lib/docker filesystem check${endColor}"
 fs=$(df -T | grep ' \/var\/lib\/docker$' | awk '{print $2}')
 if [ -z "$fs" ]; then
-    echo -e "${red}/var/lib/docker filesystem was not detected${endColor}"
-    exit 1
+    echo -e "${red}/var/lib/docker separate mount point from / not found. Do you want to continue (y/N)?${endColor}"
+    prompt_continue
+    fs=$rootfs
 fi
 if [ "$fs" != "$docker_fs_type" ]; then
-    echo -e "${red}${fs} /var/lib/docker filesystem detected, but ${docker_fs_type} is required${endColor}"
-    exit 1    
+    echo -e "${red}${fs} /var/lib/docker filesystem detected, but ${docker_fs_type} is required. Do you want to continue (y/N)?${endColor}"
+    prompt_continue
 fi
 ss=$(df -T | grep ' \/var\/lib\/docker$' | awk '{print $3}')
 mss=$(($docker_fs_min_size * $g2k))
 if [ $ss -lt $mss ]; then
     echo -e "${red}/var/lib/docker filesystem size is less (${ss}kB) than required ${docker_fs_min_size}GB. Do you want to continue (y/N)?${endColor}"
-    read answer    
-    if echo "$answer" | grep -iq "^y" ;then
-        echo " ... continuing"
-    else
-        exit 1
-    fi        
+    prompt_continue  
 else
   echo -e "${green}Done${endColor}"
 fi
 
+# Check FS requirements for /opt/serviced/var
 echo -e "${yellow}1.8 /opt/serviced/var filesystem check${endColor}"
 fs=$(df -T | grep ' \/opt\/serviced\/var$' | awk '{print $2}')
 if [ -z "$fs" ]; then
-    echo -e "${red}/opt/serviced/var filesystem was not detected. Do you want to continue (y/N)${endColor}"
-    read answer
-    if echo "$answer" | grep -iq "^y" ;then
-        echo " ... continuing"
-    else
-        exit 1
-    fi
+    echo -e "${red}/opt/serviced/var separate mount point from / not found. Do you want to continue (y/N)${endColor}"
+    prompt_continue
 fi
 if [ "$fs" != "$serviced_fs_type" ]; then
     echo -e "${red}${fs} /opt/serviced/var filesystem detected, but ${serviced_fs_type} is required. Do you want to continue (y/N)${endColor}"
-    read answer
-    if echo "$answer" | grep -iq "^y" ;then
-        echo " ... continuing"
-    else
-        exit 1
-    fi
+    prompt_continue
 fi
 ss=$(df -T | grep ' \/opt\/serviced\/var$' | awk '{print $3}')
 mss=$(($serviced_fs_min_size * $g2k))
-if [ $ss -lt $mss ]; then
+if [ "$ss" -lt $mss ]; then
     echo -e "${red}/opt/serviced/var filesystem size is less (${ss}kB) than required ${serviced_fs_min_size}GB. Do you want to continue (y/N)?${endColor}"
-    read answer    
-    if echo "$answer" | grep -iq "^y" ;then
-        echo " ... continuing"
-    else
-        exit 1
-    fi    
+    prompt_continue
 else
   echo -e "${green}Done${endColor}"
 fi
 
+# Check FS requirements for /opt/serviced/var/volumes
 echo -e "${yellow}1.9 /opt/serviced/var/volumes filesystem check${endColor}"
 fs=$(df -T | grep ' \/opt\/serviced\/var\/volumes$' | awk '{print $2}')
 if [ -z "$fs" ]; then
-    echo -e "${red}/opt/serviced/var/volumes filesystem was not detected${endColor}"
+    echo -e "${red}/opt/serviced/var/volumes separate mount point from / not found${endColor}"
     echo -e "${yellow}Do you want to continue (y/n)?${endColor}"
-    read answer    
-    if echo "$answer" | grep -iq "^y" ;then
-        echo " ... continuing"  
-        # mkdir -p /opt/serviced/var/volumes
-    else
-        exit 1
-    fi
+    prompt_continue
 else
     if [ "$fs" != "$servicedvolumes_fs_type" ]; then
         echo -e "${red}${fs} /opt/serviced/var/volumes filesystem detected, but ${servicedvolumes_fs_type} is required${endColor}"
@@ -485,30 +455,19 @@ else
     mss=$(($servicedvolumes_fs_min_size * $g2k))
     if [ $ss -lt $mss ]; then
         echo -e "${red}/opt/serviced/var/volumes filesystem size is less (${ss}kB) than required ${servicedvolumes_fs_min_size}GB. Do you want to continue (y/N)?${endColor}"
-        read answer    
-        if echo "$answer" | grep -iq "^y" ;then
-            echo " ... continuing"
-        else
-            exit 1
-        fi    
+        prompt_continue
     else
       echo -e "${green}Done${endColor}"
     fi    
 fi
 
-
+# Check FS requirements for /opt/serviced/var/backups
 echo -e "${yellow}1.10 /opt/serviced/var/backups filesystem check${endColor}"
 fs=$(df -T | grep ' \/opt\/serviced\/var\/backups$' | awk '{print $2}')
 if [ -z "$fs" ]; then
-    echo -e "${red}/opt/serviced/var/backups filesystem was not detected${endColor}"
+    echo -e "${red}/opt/serviced/var/backups separate mount point from / not found${endColor}"
     echo -e "${yellow}Do you want to continue (y/n)?${endColor}"
-    read answer    
-    if echo "$answer" | grep -iq "^y" ;then
-        echo " ... continuing"  
-        # mkdir -p /opt/serviced/var/backups
-    else
-        exit 1
-    fi
+    prompt_continue
 else
     if [ "$fs" != "$servicedbackups_fs_type" ]; then
         echo -e "${red}${fs} /opt/serviced/var/backups filesystem detected, but ${servicedbackups_fs_type} is required${endColor}"
@@ -518,12 +477,7 @@ else
     mss=$(($servicedbackups_fs_min_size * $g2k))
     if [ $ss -lt $mss ]; then
         echo -e "${red}/opt/serviced/var/backups filesystem size is less (${ss}kB) than required ${servicedbackups_fs_min_size}GB. Do you want to continue (y/N)?${endColor}"
-        read answer    
-        if echo "$answer" | grep -iq "^y" ;then
-            echo " ... continuing"
-        else
-            exit 1
-        fi    
+        prompt_continue
     else
       echo -e "${green}Done${endColor}"
     fi
@@ -531,6 +485,7 @@ fi
 
 echo -e "${blue}2 Preparing the host - (`date -R`)${endColor}"
 
+# Define primary IP address
 echo -e "${yellow}2.1 IP configurations${endColor}"
 # ifconfig is not available in min installation - ip addr show used
 is=$(ls /sys/class/net | grep -v ^lo | grep -v ^docker0 | grep -v ^veth)
@@ -556,7 +511,8 @@ publicipv4=$(curl --max-time 10 -s http://169.254.169.254/latest/meta-data/publi
 if [[ ! $publicipv4 =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
     publicipv4=$privateipv4
 fi
- 
+
+# Check and update host file
 hostname=$(uname -n)
 if [ "$hostname" == "localhost" ] || [ "$hostname" == "localhost.localdomain" ]; then
     hostname=$(echo $publicipv4 | tr '.' '-')
@@ -572,21 +528,31 @@ echo "Public IPv4: $publicipv4"
 echo "Private IPv4: $privateipv4"
 echo -e "${green}Done${endColor}"
 
+# Disable the firewall
 echo -e "${yellow}2.2 Disable the firewall${endColor}"
-echo 'systemctl stop firewalld && systemctl disable firewalld'
-systemctl stop firewalld && systemctl disable firewalld
+if [ "$hostos" == "redhat" ]; then
+  echo 'systemctl stop firewalld && systemctl disable firewalld'
+  systemctl stop firewalld && systemctl disable firewalld
+elif [ "$hostos" == "ubuntu" ]; then
+  echo "sudo ufw disable"
+  ufw disable
+fi
 echo -e "${green}Done${endColor}"
 
-echo -e "${yellow}2.3 Enable persistent storage for log files${endColor}"
-echo 'mkdir -p /var/log/journal && systemctl restart systemd-journald'
-mkdir -p /var/log/journal && systemctl restart systemd-journald
-if [ $? -ne 0 ]; then
-    echo -e "${red}Problem with enabling persistent log storage${endColor}"
-    exit 1
-else
-    echo -e "${green}Done${endColor}"
+# Enable persistent log storage
+if [ "$hostos" == "redhat" ]; then
+  echo -e "${yellow}2.3 Enable persistent storage for log files${endColor}"
+  echo 'mkdir -p /var/log/journal && systemctl restart systemd-journald'
+  mkdir -p /var/log/journal && systemctl restart systemd-journald
+  if [ $? -ne 0 ]; then
+      echo -e "${red}Problem with enabling persistent log storage${endColor}"
+      exit 1
+  else
+      echo -e "${green}Done${endColor}"
+  fi
 fi
 
+# Disable SELinux
 echo -e "${yellow}2.4 Disable selinux${endColor}"
 test=$(test -f /etc/selinux/config && grep '^SELINUX=' /etc/selinux/config)
 if [ ! -z "$test" ] && [ "$test" != "SELINUX=disabled" ]; then
@@ -599,33 +565,61 @@ else
     echo -e "${green}Done${endColor} - disabled already"
 fi
 
-echo -e "${yellow}2.5 Download and install the Zenoss repository package${endColor}"
-echo 'rpm -ivh http://get.zenoss.io/yum/zenoss-repo-1-1.x86_64.rpm'
-output=$(rpm -ivh http://get.zenoss.io/yum/zenoss-repo-1-1.x86_64.rpm 2>&1)
-com_ret=$?
-echo "$output"
-substring="is already installed"
-if [ $com_ret -ne 0 ] && [ "$output" == "${output%$substring*}" ]; then
-    echo -e "${red}Problem with installing Zenoss repository${endColor}"
-    exit 1
-else
-    yum clean all &>/dev/null
-    echo -e "${green}Done${endColor}"
+# Setup software repositories
+if [ "$hostos" == "redhat" ]; then
+  echo -e "${yellow}2.5 Download and install the Zenoss repository package${endColor}"
+  echo 'rpm -ivh http://get.zenoss.io/yum/zenoss-repo-1-1.x86_64.rpm'
+  output=$(rpm -ivh http://get.zenoss.io/yum/zenoss-repo-1-1.x86_64.rpm 2>&1)
+  com_ret=$?
+  echo "$output"
+  substring="is already installed"
+  if [ $com_ret -ne 0 ] && [ "$output" == "${output%$substring*}" ]; then
+      echo -e "${red}Problem with installing Zenoss repository${endColor}"
+      exit 1
+  else
+      yum clean all &>/dev/null
+      echo -e "${green}Done${endColor}"
+  fi
+elif [ "$hostos" == "ubuntu" ]; then
+  # Docker repository
+  echo "deb http://get.docker.com/ubuntu docker main" > /etc/apt/sources.list.d/docker.list
+  apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8950F966E92D8576A8BA88D21E9ca
+  # Zenoss repository
+  echo "deb [ arch=amd64 ] http://get.zenoss.io/apt/ubuntu trusty universe" > /etc/apt/sources.list.d/zenoss.list
+  sudo apt-key adv --keyserver keys.gnupg.net --recv-keys AA5A1AD7
+  # Make sure repos are updated or below packages fail.
+  apt-get update
+  sleep 5
+  apt-get update
 fi
 
+# Install dnsmasq for docker
 echo -e "${yellow}2.6 Install and start the dnsmasq package${endColor}"
-echo 'yum install -y dnsmasq && systemctl enable dnsmasq && systemctl start dnsmasq'
-yum install -y dnsmasq && systemctl enable dnsmasq && systemctl start dnsmasq
+if [ "$hostos" == "redhat" ]; then
+  echo 'yum install -y dnsmasq && systemctl enable dnsmasq && systemctl start dnsmasq'
+  yum install -y dnsmasq && systemctl enable dnsmasq && systemctl start dnsmasq
+elif [ "$hostos" == "ubuntu" ]; then
+  echo "sudo apt-get install -y dnsmasq"
+  apt-get install -y dnsmasq
+fi
 if [ $? -ne 0 ]; then
     echo -e "${red}Problem with installing dnsmasq package${endColor}"
     exit 1
 else
     echo -e "${green}Done${endColor}"
 fi
+# Give dnsmasq a chance to startup
+sleep 10
 
+# Install ntp for docker
 echo -e "${yellow}2.7 Install and start the ntp package${endColor}"
-echo 'yum install -y ntp && systemctl enable ntpd'
-yum install -y ntp && systemctl enable ntpd
+if [ "$hostos" == "redhat" ]; then
+  echo 'yum install -y ntp && systemctl enable ntpd'
+  yum install -y ntp && systemctl enable ntpd
+elif [ "$hostos" == "ubuntu" ]; then
+  echo "sudo apt-get install -y ntp"
+  apt-get install -y ntp
+fi
 if [ $? -ne 0 ]; then
     echo -e "${red}Problem with installing ntp package${endColor}"
     exit 1
@@ -633,32 +627,43 @@ else
     echo -e "${green}Done${endColor}"
 fi
 
-echo -e "${yellow}2.8 ntpd autostart workaround${endColor}"
-echo 'echo "systemctl start ntpd" >> /etc/rc.d/rc.local && chmod +x /etc/rc.d/rc.local'
-sed -i -e "\|^systemctl start ntpd|d" /etc/rc.d/rc.local
-echo "systemctl start ntpd" >> /etc/rc.d/rc.local && chmod +x /etc/rc.d/rc.local
-if [ $? -ne 0 ]; then
-    echo -e "${red}Problem with installing ntpd autostart workaround${endColor}"
-    exit 1
-else
-    echo -e "${green}Done${endColor}"
+# Startup workaround for ntpd on redhat distributions
+if [ "$hostos" == "redhat" ]; then
+  echo -e "${yellow}2.8 ntpd autostart workaround${endColor}"
+  echo 'echo "systemctl start ntpd" >> /etc/rc.d/rc.local && chmod +x /etc/rc.d/rc.local'
+  sed -i -e "\|^systemctl start ntpd|d" /etc/rc.d/rc.local
+  echo "systemctl start ntpd" >> /etc/rc.d/rc.local && chmod +x /etc/rc.d/rc.local
+  if [ $? -ne 0 ]; then
+      echo -e "${red}Problem with installing ntpd autostart workaround${endColor}"
+      exit 1
+  else
+      echo -e "${green}Done${endColor}"
+  fi
 fi
 
-echo -e "${yellow}2.9 ntpd start${endColor}"
-echo 'systemctl start ntpd'
-systemctl start ntpd
-if [ $? -ne 0 ]; then
-    echo -e "${red}Problem with ntpd start${endColor}"
-    exit 1
-else
-    echo -e "${green}Done${endColor}"
+# Start ntpd service
+if [ "$hostos" == "redhat" ]; then
+  echo -e "${yellow}2.9 ntpd start${endColor}"
+  echo 'systemctl start ntpd'
+  systemctl start ntpd
+  if [ $? -ne 0 ]; then
+      echo -e "${red}Problem with ntpd start${endColor}"
+      exit 1
+  else
+      echo -e "${green}Done${endColor}"
+  fi
 fi
 
 echo -e "${blue}3 Installing on the master host - (`date -R`)${endColor}"
 
+# Install core services
 echo -e "${yellow}3.1 Install Control Center, Zenoss Core, and Docker${endColor}"
-echo "yum --enablerepo=zenoss-stable install -y ${zenoss_package}"
-yum --enablerepo=zenoss-stable install -y ${zenoss_package}
+if [ "$hostos" == "redhat" ]; then
+  echo "yum --enablerepo=zenoss-stable install -y ${zenoss_package}"
+  yum --enablerepo=zenoss-stable install -y ${zenoss_package}
+elif [ "$hostos" == "ubuntu" ]; then
+  apt-get install -y lxc-docker-1.5.0 zenoss-core-service
+fi
 if [ $? -ne 0 ]; then
     echo -e "${red}Problem with installing Control Center, Zenoss Core and Docker${endColor}"
     exit 1
@@ -667,15 +672,20 @@ else
 fi
 
 echo -e "${yellow}3.2 Start Docker${endColor}"
-echo 'systemctl enable docker && systemctl start docker'
-systemctl enable docker && systemctl start docker
-if [ $? -ne 0 ]; then
-    echo -e "${red}Problem with starting of Docker${endColor}"
-    exit 1
-else
-    echo -e "${green}Done${endColor}"
+
+# Startup docker (not needed for Ubuntu)
+if [ "$hostos" == "redhat" ]; then
+  echo 'systemctl enable docker && systemctl start docker'
+  systemctl enable docker && systemctl start docker
+  if [ $? -ne 0 ]; then
+      echo -e "${red}Problem with starting of Docker${endColor}"
+      exit 1
+  else
+      echo -e "${green}Done${endColor}"
+  fi
 fi
 
+# Setup host for Zenoss Enterprise
 if [ "$zenoss_package" == "$zenoss_package_enterprise" ] && [ -z "$MHOST" ]; then
     # docker login
     echo -e "${yellow}Authenticate to the Docker Hub repository${endColor}"  
@@ -683,20 +693,23 @@ if [ "$zenoss_package" == "$zenoss_package_enterprise" ] && [ -z "$MHOST" ]; the
     myUser=$docker_registry_user
     myEmail=$docker_registry_email
     myPass=$docker_registry_password
-    # turn off history substitution using - problem with specific passwords
-    set +H
-    systemctl start docker
-    # sleep
-    sleep 10
-    sudo sh -c "docker login -u $myUser -e $myEmail -p '$myPass'"
-    if [ $? -ne 0 ]; then
-        echo -e "${red}Problem with authentication to the Docker Hub${endColor}"
-        exit 1  
+    if [ "$hostos" == "redhat" ]; then
+      # turn off history substitution using - problem with specific passwords
+      set +H
+      systemctl start docker
+      # sleep
+      sleep 10
+      sudo sh -c "docker login -u $myUser -e $myEmail -p '$myPass'"
+      if [ $? -ne 0 ]; then
+          echo -e "${red}Problem with authentication to the Docker Hub${endColor}"
+          exit 1  
+      fi
+      export HISTCONTROL=$mySetting
     fi
-    export HISTCONTROL=$mySetting
     echo -e "${green}Done${endColor}"
 fi
 
+# Collect docker information
 echo -e "${yellow}3.3 Identify the IPv4 address and subnet of Docker${endColor}"
 echo "ip addr | grep -A 2 'docker0:' | grep inet | awk '{print \$2}' | awk -F'/' '{print \$1}'"
 docker_ip=$(ip addr | grep -A 2 'docker0:' | grep inet | awk '{print $2}' | awk -F'/' '{print $1}')
@@ -707,11 +720,19 @@ else
     echo -e "${green}Done${endColor}"
 fi
 
+# Configure docker settings
 echo -e "${yellow}3.4 Add the Btrfs and DNS flags to the Docker startup options${endColor}"
-echo 'sed -i -e "\|^DOCKER_OPTS=\"-s btrfs --dns=|d" /etc/sysconfig/docker'
-sed -i -e "\|^DOCKER_OPTS=\"-s btrfs --dns=|d" /etc/sysconfig/docker         
-echo 'echo "DOCKER_OPTS=\"-s btrfs --dns=$docker_ip\"" >> /etc/sysconfig/docker'
-echo "DOCKER_OPTS=\"-s btrfs --dns=$docker_ip\"" >> /etc/sysconfig/docker
+if [ "$hostos" == "redhat" ]; then
+  echo 'sed -i -e "\|^DOCKER_OPTS=\"-s btrfs --dns=|d" /etc/sysconfig/docker'
+  sed -i -e "\|^DOCKER_OPTS=\"-s btrfs --dns=|d" /etc/sysconfig/docker         
+  echo 'echo "DOCKER_OPTS=\"-s btrfs --dns=$docker_ip\"" >> /etc/sysconfig/docker'
+  echo "DOCKER_OPTS=\"-s btrfs --dns=$docker_ip\"" >> /etc/sysconfig/docker
+elif [ "$hostos" == "ubuntu" ]; then
+  echo 'sed -i -e "\|^DOCKER_OPTS=\"-s btrfs --dns=|d" /etc/default/docker'
+  sed -i -e "\|^DOCKER_OPTS=\"-s btrfs --dns=|d" /etc/default/docker         
+  echo 'echo "DOCKER_OPTS=\"-s btrfs --dns=$docker_ip\"" >> /etc/default/docker'
+  echo "DOCKER_OPTS=\"-s btrfs --dns=$docker_ip\"" >> /etc/default/docker
+fi
 if [ $? -ne 0 ]; then
     echo -e "${red}Problem with adding Btrfs and DNS flags to the Docker${endColor}"
     exit 1
@@ -719,25 +740,36 @@ else
     echo -e "${green}Done${endColor}"
 fi
 
+
+# Setup administrator user for docker
 echo -e "${yellow}3.5 Creating user ${user} for Control Center (serviced) management${endColor}"
 echo "id -u ${user}"
 id -u ${user}
 if [ $? -ne 0 ]; then
-    echo "adduser -M -c 'Management user for Control Center (serviced)' ${user}"
-    adduser -M -c 'Management user for Control Center (serviced)' ${user}
+  echo "adduser -M -c 'Management user for Control Center (serviced)' ${user}"
+  useradd -M -c 'Management user for Control Center (serviced)' ${user}
+  if [ "$hostos" == "redhat" ]; then
     echo "usermod -aG wheel ${user}"
-    usermod -aG wheel ${user}        
+    usermod -aG wheel ${user}
+  elif [ "$hostos" == "ubuntu" ]; then
     # ubuntu
-    #echo "usermod -aG sudo ${user}"
-    #usermod -aG sudo ${user}
+    echo "usermod -aG sudo ${user}"
+    usermod -aG sudo ${user}
+  fi
 else
     echo 'User already exists'
 fi 
 echo -e "${green}Done${endColor}"
 
+# Restart docker services
 echo -e "${yellow}3.6 Stop and restart Docker${endColor}"
-echo "systemctl stop docker && systemctl start docker"
-systemctl stop docker && systemctl start docker
+if [ "$hostos" == "redhat" ]; then
+  echo "systemctl stop docker && systemctl start docker"
+  systemctl stop docker && systemctl start docker
+elif [ "$hostos" == "ubuntu" ]; then
+  echo "sudo stop docker && sudo start docker"
+  sudo stop docker && sudo start docker
+fi
 if [ $? -ne 0 ]; then
     echo -e "${red}Problem with restarting of Docker${endColor}"
     exit 1
@@ -745,6 +777,7 @@ else
     echo -e "${green}Done${endColor}"
 fi
 
+# Update serviced host configuration
 if [ ! -z "$MHOST" ]; then
     echo -e "${yellow}Editing /etc/default/serviced on CC host${endColor}"
     EXT=$(date +"%j-%H%M%S")
@@ -768,6 +801,7 @@ else
       /etc/default/serviced  
 fi
 
+# Update serviced filesystem configuration
 echo -e "${yellow}3.7 Change the volume type for application data${endColor}"
 echo "sed -i.$(date +\"%j-%H%M%S\") -e 's|^#[^S]*\(SERVICED_FS_TYPE=\).*$|\1btrfs|' /etc/default/serviced"
 sed -i.$(date +"%j-%H%M%S") -e 's|^#[^S]*\(SERVICED_FS_TYPE=\).*$|\1btrfs|' /etc/default/serviced
@@ -779,30 +813,38 @@ else
 fi
 
 # rpcbind bug http://www.zenoss.org/forum/4726
-echo -e "${yellow}3.8 rpcbind workaround${endColor}"
-echo 'systemctl status rpcbind &>/dev/null'
-systemctl status rpcbind &>/dev/null
-if [ $? -ne 0 ]; then
-    echo -e "${yellow}Applying rpcbind workaround${endColor}"
-    echo 'systemctl start rpcbind'
-    systemctl start rpcbind
-    if [ $? -ne 0 ]; then
-        echo -e "${red}Problem with rpcbind start${endColor}"
-        exit 1
-    fi
-    sed -i -e "\|^systemctl start rpcbind|d" /etc/rc.d/rc.local
-    echo 'echo "systemctl start rpcbind" >> /etc/rc.d/rc.local && chmod +x /etc/rc.d/rc.local'
-    echo "systemctl start rpcbind" >> /etc/rc.d/rc.local && chmod +x /etc/rc.d/rc.local
-    if [ $? -ne 0 ]; then
-        echo -e "${red}Problem with installing rpcbind autostart workaround${endColor}"
-        exit 1  
-    fi    
-    echo -e "${green}Done${endColor}"
+if [ "$hostos" == "redhat" ]; then
+  echo -e "${yellow}3.8 rpcbind workaround${endColor}"
+  echo 'systemctl status rpcbind &>/dev/null'
+  systemctl status rpcbind &>/dev/null
+  if [ $? -ne 0 ]; then
+      echo -e "${yellow}Applying rpcbind workaround${endColor}"
+      echo 'systemctl start rpcbind'
+      systemctl start rpcbind
+      if [ $? -ne 0 ]; then
+          echo -e "${red}Problem with rpcbind start${endColor}"
+          exit 1
+      fi
+      sed -i -e "\|^systemctl start rpcbind|d" /etc/rc.d/rc.local
+      echo 'echo "systemctl start rpcbind" >> /etc/rc.d/rc.local && chmod +x /etc/rc.d/rc.local'
+      echo "systemctl start rpcbind" >> /etc/rc.d/rc.local && chmod +x /etc/rc.d/rc.local
+      if [ $? -ne 0 ]; then
+          echo -e "${red}Problem with installing rpcbind autostart workaround${endColor}"
+          exit 1  
+      fi    
+      echo -e "${green}Done${endColor}"
+  fi
 fi
 
+# Startup serviced services
 echo -e "${yellow}3.9 Start the Control Center service${endColor}"
-echo "systemctl enable serviced && systemctl start serviced"
-systemctl enable serviced && systemctl start serviced
+if [ "$hostos" == "redhat" ]; then
+  echo "systemctl enable serviced && systemctl start serviced"
+  systemctl enable serviced && systemctl start serviced
+elif [ "$hostos" == "ubuntu" ]; then
+  echo "sudo start serviced"
+  start serviced
+fi
 if [ $? -ne 0 ]; then
     echo -e "${red}Problem with starting of serviced${endColor}"
     exit 1
@@ -905,6 +947,8 @@ fi
 
 echo -e "${yellow}5 Tuning ${zenoss_template}${endColor}"
 
+
+# Quilt packages
 echo -e "${yellow}5.1 Installing the Quilt package${endColor}"
 echo "Creating /tmp/quilt.txt"
 cat > /tmp/quilt.txt << EOF
@@ -940,6 +984,7 @@ fi
 rm -rf /tmp/quilt.txt
 echo -e "${green}Done${endColor}"
 
+# Percona toolkit
 echo -e "${yellow}5.2 Installing the Percona Toolkit${endColor}"
 echo " serviced service list | grep -i mariadb | awk '{print $1}' | sort -r | grep -i 'mariadb' | head -n 1"
 mservice=$( serviced service list | grep -i mariadb | awk '{print $1}' | sort -r | grep -i 'mariadb' | head -n 1)
