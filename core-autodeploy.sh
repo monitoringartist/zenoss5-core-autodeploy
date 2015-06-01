@@ -120,8 +120,8 @@ if [ -f /etc/redhat-release ]; then
 # Check for Ubuntu
 elif grep -q "Ubuntu" /etc/issue; then
     if ! grep -q "14.04" /etc/issue; then
-       echo -e $notsupported
-       exit 1
+        echo -e $notsupported
+        exit 1
     fi
     hostos="ubuntu"
     # ubuntu filesystem requirements
@@ -134,9 +134,9 @@ elif grep -q "Ubuntu" /etc/issue; then
     echo 'apt-get install -y btrfs-tools'
     apt-get install -y btrfs-tools
 else
-  # Not Supported
-  echo -e $notsupported
-  exit 1
+    # Not Supported
+    echo -e $notsupported
+    exit 1
 fi
 
 echo -e "${yellow}Hardware Requirements:${endColor}
@@ -162,7 +162,7 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
     i)
       # -i impact: pull impact image
       zenoss_impact=$zenoss_impact_enterprise
-      ;;       
+      ;;
     r)
       # -r resmgr: install enterprise/commercial Zenoss version
       zenoss_package=$zenoss_package_enterprise
@@ -211,6 +211,10 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
               echo "mkfs -t ${rfs} -f --nodiscard ${dev}"
               mkfs -t ${rfs} -f --nodiscard ${dev}
               mount_parameters=$mount_parameters_btrfs
+          elif [ "${rfs}" == "ext4" ]; then
+              echo "mkfs -t ${rfs} ${dev}"
+              mkfs -t ${rfs} ${dev}
+              mount_parameters=$mount_parameters_ext4
           else
               echo "mkfs -t ${rfs} -f ${dev}"
               mkfs -t ${rfs} -f ${dev}              
@@ -222,7 +226,7 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
           fi
           # fstab
           echo "sed -i -e \"\|^$dev|d\" /etc/fstab"
-          sed -i -e "\|^$dev|d" /etc/fstab                  
+          sed -i -e "\|^$dev|d" /etc/fstab
           echo "echo \"${dev} ${path} ${rfs} ${mount_parameters}\" >> /etc/fstab"
           echo "${dev} ${path} ${rfs} ${mount_parameters}" >> /etc/fstab
           if [ $? -ne 0 ]; then
@@ -374,7 +378,7 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
           if [ "${rfs}" == "btrfs" ]; then
               echo "mkfs -t ${rfs} -f --nodiscard ${dev}"
               mkfs -t ${rfs} -f --nodiscard ${dev}
-              mount_parameters=$
+              mount_parameters=$mount_parameters_btrfs
           elif [ "${rfs}" == "ext4" ]; then
               echo "mkfs -t ${rfs} ${dev}"
               mkfs -t ${rfs} ${dev}
@@ -390,7 +394,7 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
           fi
           # fstab
           echo "sed -i -e \"\|^$dev|d\" /etc/fstab"
-          sed -i -e "\|^$dev|d" /etc/fstab                  
+          sed -i -e "\|^$dev|d" /etc/fstab
           echo "echo \"${dev} ${path} ${rfs} ${mount_parameters}\" >> /etc/fstab"
           echo "${dev} ${path} ${rfs} ${mount_parameters}" >> /etc/fstab
           if [ $? -ne 0 ]; then
@@ -423,7 +427,7 @@ fi
 echo -e "${yellow}1.2 Architecture check${endColor}"
 arch=$(uname -m)
 if [ ! "$arch" = "x86_64" ]; then
-	echo -e "${red}Not supported architecture $arch. Architecture x86_64 only is supported.${endColor}"
+  	echo -e "${red}Not supported architecture $arch. Architecture x86_64 only is supported.${endColor}"
     exit 1
 else
     echo -e "${green}Done${endColor}"
@@ -478,7 +482,7 @@ if [ "$no" -gt "1" ]; then
 else
     echo "Detected interface: ${is}"
     privateipv4=$(ip addr show | grep -A 1 $is | grep inet | awk '{print $2}' | awk -F'/' '{print $1}')
-fi    
+fi
 
 # AWS/HP Cloud public IPv4 address
 publicipv4=$(curl --max-time 10 -s http://169.254.169.254/latest/meta-data/public-ipv4 | tr '\n' ' ')
@@ -737,7 +741,7 @@ if [ $? -ne 0 ]; then
     fi
 else
     echo 'User already exists'
-fi 
+fi
 echo -e "${green}Done${endColor}"
 
 # Restart docker services
@@ -810,7 +814,7 @@ if [ "$hostos" == "redhat" ]; then
         if [ $? -ne 0 ]; then
             echo -e "${red}Problem with installing rpcbind autostart workaround${endColor}"
             exit 1  
-        fi    
+        fi
         echo -e "${green}Done${endColor}"
     fi
 fi
@@ -851,7 +855,7 @@ EOF
     echo -e "${blue}Credit: www.jangaraj.com${endColor}"
     echo -e "${blue}Get your own Zenoss 5 Core taster instance in 10 minutes: www.zenoss5taster.com${endColor}"      
     exit 0
-fi 
+fi
 
 echo -e "${blue}4 ${zenoss_installation} deployement - (`date -R`)${endColor}"
 
@@ -869,7 +873,7 @@ do
     echo "#${retry}: This is not a problem, because Control Centre service is not fully started, I'm trying in ${sleep_duration} seconds"
     echo "Message from author of autodeploy script: Keep calm and be patient! - http://www.keepcalmandposters.com/posters/38112.png"
     retry=$(( $retry + 1 ))
-    sleep $sleep_duration    
+    sleep $sleep_duration
     test=$(serviced host list 2>&1)   
 done
 if [ "$test" = "no hosts found" ]; then
@@ -891,7 +895,7 @@ else
     else 
         echo -e "${red}Problem with adding a host - check output from test: $test${endColor}"
         exit 1
-    fi  
+    fi
 fi
 
 echo -e "${yellow}4.2 Deploy ${zenoss_template} application (the deployment step can take 15-30 minutes)${endColor}"
@@ -902,17 +906,19 @@ TEMPLATEID=$(serviced template list 2>&1 | grep "${zenoss_template}" | awk '{pri
 echo 'serviced service list 2>/dev/null | wc -l'
 services=$(serviced service list 2>/dev/null | wc -l)
 if [ "$services" == "0" ]; then
-    # log progress watching from journalctl in background
-    bgjobs=$(jobs -p | wc -l)
-    ((bgjobs++))
     echo "serviced template deploy $TEMPLATEID default zenoss"
-    if [ "$hostos" == "redhat" ]; then
-      journalctl -u serviced -f -a -n 0 &
+    if [ "$hostos" == "redhat" ]; then 
+        # log progress watching from journalctl in background
+        bgjobs=$(jobs -p | wc -l)
+        ((bgjobs++))
+        journalctl -u serviced -f -a -n 0 &
     fi
     serviced template deploy $TEMPLATEID default zenoss
     rc=$?
-    # kill log watching
-    kill %${bgjobs}
+    if [ "$hostos" == "redhat" ]; then
+        # kill log watching
+        kill %${bgjobs}
+    fi
     sleep 5
     if [ $rc -ne 0 ]; then
         echo -e "${red}Problem with command: serviced template deploy $TEMPLATEID default zenoss${endColor}"
@@ -928,6 +934,7 @@ else
 fi
 
 echo -e "${yellow}5 Tuning ${zenoss_template}${endColor}"
+
 
 # Quilt packages
 echo -e "${yellow}5.1 Installing the Quilt package${endColor}"
@@ -1020,7 +1027,7 @@ if [ "$zenoss_impact" == "$zenoss_impact_enterprise" ]; then
     echo -e "${red}Problem with pulling Service Impact Docker image${endColor}"
   else
     echo -e "${green}Done${endColor}"
-  fi  
+  fi
 fi
 
 echo -e "${blue}5 Final overview - (`date -R`)${endColor}"
