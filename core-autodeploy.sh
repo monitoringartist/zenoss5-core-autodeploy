@@ -987,7 +987,7 @@ fi
 echo "serviced service stop $mservice"
 serviced service stop $mservice
 
-if [ "$docker_fs_type" == "btrfs"] && [ "$servicedvolumes_fs_type" == "btrfs" ]; then
+if [ "$docker_fs_type" == "btrfs" ] && [ "$servicedvolumes_fs_type" == "btrfs" ]; then
     echo -e "${yellow}5.3 Configuring periodic maintenance${endColor}"
     # cron on the CC master
     echo "Creating /etc/cron.weekly/zenoss-master-btrfs"
