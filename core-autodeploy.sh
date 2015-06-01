@@ -31,7 +31,7 @@ mount_parameters_ext4="defaults 0 0"
 # Docker and Zenoss Settings
 g2k=1048576
 user="ccuser"
-version="2015-05-05"
+version="2015-06-01"
 retries_max=90
 sleep_duration=10
 install_doc="http://wiki.zenoss.org/download/core/docs/Zenoss_Core_Installation_Guide_r5.0.0_latest.pdf"
@@ -67,39 +67,39 @@ prompt_continue () {
 }
 
 check_filesystem() {
-  mycontinue="no"
-  mylocation=$1
-  myfilesystem=$2
-  myminsize=$3
-
-  echo -en "${yellow} $mylocation filesystem check in progress...${endColor} "
-  fs=$(df -T | grep "$mylocation$" | awk '{print $2}')
-  # Fall back to root fs
-  if [ "$fs" == "" ]; then
-    fs=$(df -T | grep "/$" | awk '{print $2}')
-  fi
-  if [ "$fs" != "$myfilesystem" ]; then
-      echo -en "\n${red}${fs} ${mylocation} filesystem detected, but ${myfilesystem} is required. Do you want to continue (y/N)?${endColor}"
-      prompt_continue
-      mycontinue="yes"
-  fi
-  ss=$(df -T | grep "$mylocation$" | awk '{print $3}')
-  # Fall back to root disk space
-  if [ "$ss" == "" ]; then
-    ss=$(df -T | grep "/$" | awk '{print $3}')
-  fi
-  mss=$(($myminsize * $g2k))
-  if [ $ss -lt $mss ]; then
-      echo -en "\n${red}${mylocation} filesystem size is less (${ss}kB) than required ${myminsize}GB. Do you want to continue (y/N)?${endColor}"
-      prompt_continue
-      mycontinue="yes"
-  else
-    if [ "$mycontinue" == "no" ]; then
-      echo -e "${green}OK${endColor}"
-    # else
-    #   echo
+    mycontinue="no"
+    mylocation=$1
+    myfilesystem=$2
+    myminsize=$3
+  
+    echo -en "${yellow} $mylocation filesystem check in progress...${endColor} "
+    fs=$(df -T | grep "$mylocation$" | awk '{print $2}')
+    # Fall back to root fs
+    if [ "$fs" == "" ]; then
+        fs=$(df -T | grep "/$" | awk '{print $2}')
     fi
-  fi
+    if [ "$fs" != "$myfilesystem" ]; then
+        echo -en "\n${red}${fs} ${mylocation} filesystem detected, but ${myfilesystem} is required. Do you want to continue (y/N)?${endColor}"
+        prompt_continue
+        mycontinue="yes"
+    fi
+    ss=$(df -T | grep "$mylocation$" | awk '{print $3}')
+    # Fall back to root disk space
+    if [ "$ss" == "" ]; then
+      ss=$(df -T | grep "/$" | awk '{print $3}')
+    fi
+    mss=$(($myminsize * $g2k))
+    if [ $ss -lt $mss ]; then
+        echo -en "\n${red}${mylocation} filesystem size is less (${ss}kB) than required ${myminsize}GB. Do you want to continue (y/N)?${endColor}"
+        prompt_continue
+        mycontinue="yes"
+    else
+      if [ "$mycontinue" == "no" ]; then
+          echo -e "${green}OK${endColor}"
+      # else
+      #    echo
+      fi
+    fi
 }
 
 echo -e "${yellow}Autodeploy script ${version} for Control Center master host and Zenoss Core 5/Zenoss Resource Manager 5${endColor}"
@@ -113,8 +113,8 @@ hostos="unknown"
 if [ -f /etc/redhat-release ]; then
     elv=`cat /etc/redhat-release | gawk 'BEGIN {FS="release "} {print $2}' | gawk 'BEGIN {FS="."} {print $1}'`
     if [ $elv -ne 7 ]; then
-      echo -e $notsupported
-      exit 1
+        echo -e $notsupported
+        exit 1
     fi
     hostos="redhat"
 # Check for Ubuntu
@@ -221,8 +221,8 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
               mount_parameters=$mount_parameters_xfs
           fi
           if [ $? -ne 0 ]; then
-            echo -e "${red}Problem with formating ${dev}${endColor}"
-            exit 1
+              echo -e "${red}Problem with formating ${dev}${endColor}"
+              exit 1
           fi
           # fstab
           echo "sed -i -e \"\|^$dev|d\" /etc/fstab"
@@ -230,15 +230,15 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
           echo "echo \"${dev} ${path} ${rfs} ${mount_parameters}\" >> /etc/fstab"
           echo "${dev} ${path} ${rfs} ${mount_parameters}" >> /etc/fstab
           if [ $? -ne 0 ]; then
-            echo -e "${red}Problem with updating /etc/fstab for ${dev}${endColor}"
-            exit 1
+              echo -e "${red}Problem with updating /etc/fstab for ${dev}${endColor}"
+              exit 1
           fi
           # mount
           echo "mount ${path}"
           mount ${path}
           if [ $? -ne 0 ]; then
-            echo -e "${red}Problem with mounting ${path}${endColor}"
-            exit 1
+              echo -e "${red}Problem with mounting ${path}${endColor}"
+              exit 1
           fi
       fi
       ;;
@@ -286,15 +286,15 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
           echo "echo \"${dev} ${path} ${rfs} ${mount_parameters}\" >> /etc/fstab"
           echo "${dev} ${path} ${rfs} ${mount_parameters}" >> /etc/fstab
           if [ $? -ne 0 ]; then
-            echo -e "${red}Problem with updating /etc/fstab for ${dev}${endColor}"
-            exit 1
+              echo -e "${red}Problem with updating /etc/fstab for ${dev}${endColor}"
+              exit 1
           fi
           # mount
           echo "mount ${path}"
           mount ${path}
           if [ $? -ne 0 ]; then
-            echo -e "${red}Problem with mounting ${path}${endColor}"
-            exit 1
+              echo -e "${red}Problem with mounting ${path}${endColor}"
+              exit 1
           fi
       fi
       ;;
@@ -333,8 +333,8 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
               mount_parameters=$mount_parameters_xfs
           fi
           if [ $? -ne 0 ]; then
-            echo -e "${red}Problem with formating ${dev}${endColor}"
-            exit 1
+              echo -e "${red}Problem with formating ${dev}${endColor}"
+              exit 1
           fi
           # fstab
           echo "sed -i -e \"\|^$dev|d\" /etc/fstab"
@@ -342,15 +342,15 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
           echo "echo \"${dev} ${path} ${rfs} ${mount_parameters}\" >> /etc/fstab"
           echo "${dev} ${path} ${rfs} ${mount_parameters}" >> /etc/fstab
           if [ $? -ne 0 ]; then
-            echo -e "${red}Problem with updating /etc/fstab for ${dev}${endColor}"
-            exit 1
+              echo -e "${red}Problem with updating /etc/fstab for ${dev}${endColor}"
+              exit 1
           fi
           # mount
           echo "mount ${path}"
           mount ${path}
           if [ $? -ne 0 ]; then
-            echo -e "${red}Problem with mounting ${path}${endColor}"
-            exit 1
+              echo -e "${red}Problem with mounting ${path}${endColor}"
+              exit 1
           fi
       fi
       ;;
@@ -389,8 +389,8 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
               mount_parameters=$mount_parameters_xfs
           fi
           if [ $? -ne 0 ]; then
-            echo -e "${red}Problem with formating ${dev}${endColor}"
-            exit 1
+              echo -e "${red}Problem with formating ${dev}${endColor}"
+              exit 1
           fi
           # fstab
           echo "sed -i -e \"\|^$dev|d\" /etc/fstab"
@@ -398,15 +398,15 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
           echo "echo \"${dev} ${path} ${rfs} ${mount_parameters}\" >> /etc/fstab"
           echo "${dev} ${path} ${rfs} ${mount_parameters}" >> /etc/fstab
           if [ $? -ne 0 ]; then
-            echo -e "${red}Problem with updating /etc/fstab for ${dev}${endColor}"
-            exit 1
+              echo -e "${red}Problem with updating /etc/fstab for ${dev}${endColor}"
+              exit 1
           fi
           # mount
           echo "mount ${path}"
           mount ${path}
           if [ $? -ne 0 ]; then
-            echo -e "${red}Problem with mounting ${path}${endColor}"
-            exit 1
+              echo -e "${red}Problem with mounting ${path}${endColor}"
+              exit 1
           fi
       fi
       ;;
@@ -590,10 +590,11 @@ if [ $? -ne 0 ]; then
     echo -e "${red}Problem with installing dnsmasq package${endColor}"
     exit 1
 else
+    # Give dnsmasq a chance to startup
+    echo 'sleep 10'
+    sleep 10
     echo -e "${green}Done${endColor}"
 fi
-# Give dnsmasq a chance to startup
-sleep 10
 
 # Install ntp for docker
 echo -e "${yellow}2.7 Install and start the ntp package${endColor}"
@@ -935,7 +936,6 @@ fi
 
 echo -e "${yellow}5 Tuning ${zenoss_template}${endColor}"
 
-
 # Quilt packages
 echo -e "${yellow}5.1 Installing the Quilt package${endColor}"
 echo "Creating /tmp/quilt.txt"
@@ -983,8 +983,6 @@ serviced service run zope install-percona
 # exit code 1 always
 if [ $? -ne 1 ]; then
     echo -e "${red}Problem with installing the Percona Toolkit${endColor}"
-    echo "serviced service stop $mservice"
-    serviced service stop $mservice
 fi
 echo "serviced service stop $mservice"
 serviced service stop $mservice
@@ -1020,14 +1018,14 @@ else
 fi
 
 if [ "$zenoss_impact" == "$zenoss_impact_enterprise" ]; then
-  echo -e "${yellow}6 Pull Service Impact Docker image (the deployment step can take 3-5 minutes)${endColor}"
-  echo "docker pull $zenoss_impact"
-  docker pull $zenoss_impact
-  if [ $rc -ne 0 ]; then
-    echo -e "${red}Problem with pulling Service Impact Docker image${endColor}"
-  else
-    echo -e "${green}Done${endColor}"
-  fi
+    echo -e "${yellow}6 Pull Service Impact Docker image (the deployment step can take 3-5 minutes)${endColor}"
+    echo "docker pull $zenoss_impact"
+    docker pull $zenoss_impact
+    if [ $rc -ne 0 ]; then
+        echo -e "${red}Problem with pulling Service Impact Docker image${endColor}"
+    else
+        echo -e "${green}Done${endColor}"
+    fi
 fi
 
 echo -e "${blue}5 Final overview - (`date -R`)${endColor}"
