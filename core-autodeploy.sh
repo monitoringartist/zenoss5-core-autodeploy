@@ -31,7 +31,7 @@ mount_parameters_ext4="defaults 0 0"
 # Docker and Zenoss Settings
 g2k=1048576
 user="ccuser"
-version="2015-06-01"
+version="2015-06-19"
 retries_max=90
 sleep_duration=10
 install_doc="http://wiki.zenoss.org/download/core/docs/Zenoss_Core_Installation_Guide_r5.0.0_latest.pdf"
@@ -832,8 +832,8 @@ if [ "$hostos" == "redhat" ]; then
     echo "systemctl enable serviced && systemctl start serviced"
     systemctl enable serviced && systemctl start serviced
 elif [ "$hostos" == "ubuntu" ]; then
-    echo "status serviced || start serviced"
-    status serviced || start serviced
+    echo "service serviced status || start serviced"
+    service serviced status || start serviced
 fi
 if [ $? -ne 0 ]; then
     echo -e "${red}Problem with starting of serviced${endColor}"
@@ -879,7 +879,7 @@ do
     echo $test
     echo "#${retry}: This is not a problem, because Control Centre service is not fully started, I'm trying in ${sleep_duration} seconds"
     echo "Message from author of autodeploy script: Keep calm and be patient! - http://www.keepcalmandposters.com/posters/38112.png"
-    echo -n "Last log serviced line: "
+    echo -n "Last serviced log line: "
     $log_watch_last_line
     retry=$(( $retry + 1 ))
     sleep $sleep_duration
@@ -908,7 +908,7 @@ else
 fi
 
 echo -e "${yellow}4.2 Deploy ${zenoss_template} application (the deployment step can take 15-30 minutes)${endColor}"
-echo -e "${yellow}Please be patient, because all Zenoss docker images must be downloaded before first start.${endColor}"
+echo -e "${yellow}Please be patient, because all Zenoss docker images must be downloaded before first start (Could not find container for isvc logstash is not a problem).${endColor}"
 echo -e "${yellow}Progress from serviced log file is presented. No timeout for this step.${endColor}"
 echo "serviced template list 2>&1 | grep \"${zenoss_template}\" | awk '{print \$1}'"
 TEMPLATEID=$(serviced template list 2>&1 | grep "${zenoss_template}" | awk '{print $1}')
