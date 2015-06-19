@@ -37,6 +37,7 @@ sleep_duration=10
 install_doc="http://wiki.zenoss.org/download/core/docs/Zenoss_Core_Installation_Guide_r5.0.0_latest.pdf"
 install_doc_enterprise="https://www.zenoss.com/resources/documentation"
 log_watch="journalctl -u serviced -f -a -n 0"
+log_watch_last_line="journalctl -u serviced -f -a -n 1"
 zenoss_package="zenoss-core-service"
 zenoss_package_enterprise="zenoss-resmgr-service"
 zenoss_installation="Zenoss Core 5"
@@ -129,6 +130,7 @@ elif grep -q "Ubuntu" /etc/issue; then
     serviced_fs_type="ext4"
     servicedbackups_fs_type="ext4"
     log_watch="tailf /var/log/upstart/serviced.log"
+    log_watch_last_line="tail -n2 /var/log/upstart/serviced.log"
     # Pre-install btrfs-tools
     echo -e "${yellow}Pre-installing btrfs-tools${endColor}"
     echo 'apt-get install -y btrfs-tools'
@@ -830,8 +832,8 @@ if [ "$hostos" == "redhat" ]; then
     echo "systemctl enable serviced && systemctl start serviced"
     systemctl enable serviced && systemctl start serviced
 elif [ "$hostos" == "ubuntu" ]; then
-    echo "start serviced"
-    start serviced
+    echo "status serviced || start serviced"
+    status serviced || start serviced
 fi
 if [ $? -ne 0 ]; then
     echo -e "${red}Problem with starting of serviced${endColor}"
@@ -877,6 +879,8 @@ do
     echo $test
     echo "#${retry}: This is not a problem, because Control Centre service is not fully started, I'm trying in ${sleep_duration} seconds"
     echo "Message from author of autodeploy script: Keep calm and be patient! - http://www.keepcalmandposters.com/posters/38112.png"
+    echo -n "Last log serviced line: "
+    $log_watch_last_line
     retry=$(( $retry + 1 ))
     sleep $sleep_duration
     test=$(serviced host list 2>&1)   
@@ -911,19 +915,15 @@ TEMPLATEID=$(serviced template list 2>&1 | grep "${zenoss_template}" | awk '{pri
 echo 'serviced service list 2>/dev/null | wc -l'
 services=$(serviced service list 2>/dev/null | wc -l)
 if [ "$services" == "0" ]; then
-    echo "serviced template deploy $TEMPLATEID default zenoss"
-    if [ "$hostos" == "redhat" ]; then 
-        # log watching in background
-        bgjobs=$(jobs -p | wc -l)
-        ((bgjobs++))
-        $log_watch &
-    fi
+    echo "serviced template deploy $TEMPLATEID default zenoss" 
+    # log watching in background
+    bgjobs=$(jobs -p | wc -l)
+    ((bgjobs++))
+    $log_watch &
     serviced template deploy $TEMPLATEID default zenoss
     rc=$?
-    if [ "$hostos" == "redhat" ]; then
-        # kill log watching
-        kill %${bgjobs}
-    fi
+    # kill log watching
+    kill %${bgjobs}
     sleep 5
     if [ $rc -ne 0 ]; then
         echo -e "${red}Problem with command: serviced template deploy $TEMPLATEID default zenoss${endColor}"
