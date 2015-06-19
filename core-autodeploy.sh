@@ -37,7 +37,7 @@ sleep_duration=10
 install_doc="http://wiki.zenoss.org/download/core/docs/Zenoss_Core_Installation_Guide_r5.0.0_latest.pdf"
 install_doc_enterprise="https://www.zenoss.com/resources/documentation"
 log_watch="journalctl -u serviced -f -a -n 0"
-log_watch_last_line="journalctl -u serviced -f -a -n 1"
+log_watch_last_line="journalctl -u serviced -a -n 1 | tail -n 1"
 zenoss_package="zenoss-core-service"
 zenoss_package_enterprise="zenoss-resmgr-service"
 zenoss_installation="Zenoss Core 5"
@@ -597,8 +597,10 @@ if [ $? -ne 0 ]; then
     exit 1
 else
     # Give dnsmasq a chance to startup
-    echo 'sleep 10'
-    sleep 10
+    if [ "$hostos" == "ubuntu" ]; then
+        echo 'sleep 10'
+        sleep 10
+    fi    
     echo -e "${green}Done${endColor}"
 fi
 
@@ -880,7 +882,7 @@ do
     echo "#${retry}: This is not a problem, because Control Centre service is not fully started, I'm trying in ${sleep_duration} seconds"
     echo "Message from author of autodeploy script: Keep calm and be patient! - http://www.keepcalmandposters.com/posters/38112.png"
     echo -n "Last serviced log line: "
-    $log_watch_last_line
+    eval $log_watch_last_line
     retry=$(( $retry + 1 ))
     sleep $sleep_duration
     test=$(serviced host list 2>&1)

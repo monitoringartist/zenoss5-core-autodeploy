@@ -9,8 +9,8 @@ Provisioned instance has 8CPU, 30GB RAM and lot of SSD filespace.
 You will have full access to Control Center/OpenTSDB/HBase/RabbitMQ. 
 No deployment, no config, no DNS configuration. It's just click and play service. 
 
-Auto-deployment script for Zenoss Core 5 on CentOS 7.x or Red Hat Enterprise 
-Linux 7.x. Ubuntu is not supported at the moment. A 64-bit build is required.
+Auto-deployment script for Zenoss Core 5 on CentOS 7.x / Red Hat Enterprise 
+Linux 7.x / Ubuntu 14. A 64-bit build is required.
 
 The script included in this directory will automatically deploy Control Center 
 and Zenoss 5 Core (Resource Manager 5) for you. Usage of auto-deployment script: 
@@ -137,7 +137,8 @@ Troubleshooting
 
 If you have any problems, please ask Zenoss community (IRC/forum/Github issue  
 tracker) for help and provide full output (http://pastebin.com) from auto-deploy script  
-and *journalctl -u systemd -f* command please. Or follow manual installation guide.
+and *journalctl -u systemd -f* (RHEL/Centos) / *tailf /var/log/upstart/serviced.log* (Ubuntu) command please. 
+Or follow manual installation guide.
 
 Author
 ======
