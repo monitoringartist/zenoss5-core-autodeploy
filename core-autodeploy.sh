@@ -36,6 +36,7 @@ retries_max=90
 sleep_duration=10
 install_doc="http://wiki.zenoss.org/download/core/docs/Zenoss_Core_Installation_Guide_r5.0.0_latest.pdf"
 install_doc_enterprise="https://www.zenoss.com/resources/documentation"
+log_watch="journalctl -u serviced -f -a -n 0"
 zenoss_package="zenoss-core-service"
 zenoss_package_enterprise="zenoss-resmgr-service"
 zenoss_installation="Zenoss Core 5"
@@ -127,6 +128,7 @@ elif grep -q "Ubuntu" /etc/issue; then
     root_fs_min_size=60 #GB
     serviced_fs_type="ext4"
     servicedbackups_fs_type="ext4"
+    log_watch="tailf /var/log/upstart/serviced.log"
     # Pre-install btrfs-tools
     echo -e "${yellow}Pre-installing btrfs-tools${endColor}"
     echo 'apt-get install -y btrfs-tools'
@@ -826,8 +828,6 @@ if [ "$hostos" == "redhat" ]; then
     echo "systemctl enable serviced && systemctl start serviced"
     systemctl enable serviced && systemctl start serviced
 elif [ "$hostos" == "ubuntu" ]; then
-    echo -e "${yellow}Please be patient, because docker image zenoss/serviced-isvcs must be downloaded before first start.${endColor}"
-    echo "Message from author of autodeploy script: Keep calm and be patient! - http://www.keepcalmandposters.com/posters/38112.png"
     echo "start serviced"
     start serviced
 fi
@@ -911,10 +911,10 @@ services=$(serviced service list 2>/dev/null | wc -l)
 if [ "$services" == "0" ]; then
     echo "serviced template deploy $TEMPLATEID default zenoss"
     if [ "$hostos" == "redhat" ]; then 
-        # log progress watching from journalctl in background
+        # log watching in background
         bgjobs=$(jobs -p | wc -l)
         ((bgjobs++))
-        journalctl -u serviced -f -a -n 0 &
+        $log_watch &
     fi
     serviced template deploy $TEMPLATEID default zenoss
     rc=$?
