@@ -79,7 +79,7 @@ check_filesystem() {
         fs=$(df -T | grep "/$" | awk '{print $2}')
     fi
     if [ "$fs" != "$myfilesystem" ]; then
-        echo -en "\n${red}${fs} ${mylocation} filesystem detected, but ${myfilesystem} is required. Do you want to continue (y/N)?${endColor}"
+        echo -e "\n${red}${fs} ${mylocation} filesystem detected, but ${myfilesystem} is required. Do you want to continue (y/N)?${endColor}"
         prompt_continue
         mycontinue="yes"
     fi
@@ -90,14 +90,12 @@ check_filesystem() {
     fi
     mss=$(($myminsize * $g2k))
     if [ $ss -lt $mss ]; then
-        echo -en "\n${red}${mylocation} filesystem size is less (${ss}kB) than required ${myminsize}GB. Do you want to continue (y/N)?${endColor}"
+        echo -e "\n${red}${mylocation} filesystem size is less (${ss}kB) than required ${myminsize}GB. Do you want to continue (y/N)?${endColor}"
         prompt_continue
         mycontinue="yes"
     else
       if [ "$mycontinue" == "no" ]; then
           echo -e "${green}OK${endColor}"
-      # else
-      #    echo
       fi
     fi
 }
@@ -826,6 +824,8 @@ if [ "$hostos" == "redhat" ]; then
     echo "systemctl enable serviced && systemctl start serviced"
     systemctl enable serviced && systemctl start serviced
 elif [ "$hostos" == "ubuntu" ]; then
+    echo -e "${yellow}Please be patient, because docker image zenoss/serviced-isvcs must be downloaded before first start.${endColor}"
+    echo "Message from author of autodeploy script: Keep calm and be patient! - http://www.keepcalmandposters.com/posters/38112.png"
     echo "start serviced"
     start serviced
 fi
