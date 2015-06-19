@@ -1,19 +1,19 @@
-Zenoss 5 Core (Resource Manager 5) - autodeploy script
-======================================================
+Install Zenoss 5 Core / Resource Manager 5
+==========================================
 
 If you like or use this project, please provide feedback to author - Star it ★.
 
-If you want to easily discover all new features of Zenoss 5, than please use [www.zenoss5taster.com](http://www.zenoss5taster.com). 
-It will provision brand new Zenoss 5 Core instance for testing/developement in 10 minutes. 
+If you want to discover all new features of Zenoss 5, than please use [www.zenoss5taster.com](http://www.zenoss5taster.com). 
+It will provision brand new Zenoss 5 Core instance for testing/developement :watch: in 10 minutes. 
 Provisioned instance has 8CPU, 30GB RAM and lot of SSD filespace. 
 You will have full access to Control Center/OpenTSDB/HBase/RabbitMQ. 
 No deployment, no config, no DNS configuration. It's just click and play service. 
 
-Auto-deployment script for Zenoss Core 5 on CentOS 7.x / Red Hat Enterprise 
+Auto-deployment script for Zenoss 5 on CentOS 7.x / Red Hat Enterprise 
 Linux 7.x / Ubuntu 14. A 64-bit build is required.
 
-The script included in this directory will automatically deploy Control Center 
-and Zenoss 5 Core (Resource Manager 5) for you. Usage of auto-deployment script: 
+The script included in this directory will automatically install Zenoss 5 Core / 
+Resource Manager 5 and Control Center for you. Usage of auto-deployment script: 
 
 ```
 # cd /tmp
@@ -24,9 +24,7 @@ and Zenoss 5 Core (Resource Manager 5) for you. Usage of auto-deployment script:
 
 The script will take several minutes (around 15-30) to complete. When done, 
 you should be able to visit Control Center in a web browser to start 
-Zenoss 5 Core application.
-
-Click and play instance 
+Zenoss 5 application. Easy Zenoss installation. 
 
 Script requires mounted filesystems:
 
@@ -47,7 +45,7 @@ Confirmation is needed before formatting. Available options:
 # ./core-autodeploy.sh -d /dev/sdb1 -s /dev/sdb2 -v /dev/sdc1 -b /dev/sdd1
 ```
 
-For advandced users only (you are familiar with documentation, so you will be able identify some script warnings/errors, which can be ignored):
+For advandced users only (you must be familiar with documentation, so you will be able identify some script warnings/errors, which can be ignored):
 ```
 # # install Zenoss 5 Core host
 # ./core-autodeploy.sh -h '<MASTER IP>'
@@ -70,7 +68,7 @@ See [full installation log] (https://github.com/jangaraj/zenoss5-core-autodeploy
 ```
 [root@ip-172-31-8-243 tmp]# ./core-autodeploy.sh  -d /dev/xvdb1 -s /dev/xvdb2 -v /dev/xvdc1 -b /dev/xvdc2
 Autodeploy script 2015-03-07 for Control Center master host and Zenoss 5 Core
-Install guide: http://wiki.zenoss.org/download/core/docs/Zenoss_Core_Installation_Guide_r5.0.0_d1051.15.055.pdf
+Install guide: http://wiki.zenoss.org/download/core/docs/Zenoss_Core_Installation_Guide_r5.0.0_latest.pdf
 Requirements:
 Min number of available CPUs: 4
 Min size of available RAM:    20GB
@@ -80,7 +78,7 @@ Filesystem                  Type        Min size
 /var/lib/docker             btrfs       30GB
 /opt/serviced/var           xfs         30GB
 /opt/serviced/var/volumes   btrfs       1GB
-/opt/serviced/var/backups   btrfs               1GB
+/opt/serviced/var/backups   btrfs       1GB
 0 Preparing /var/lib/docker filesystem - device: /dev/xvdb1
 /dev/xvdb1 will be formated to btrfs. All current data on /dev/xvdb1 will be lost and /etc/fstab will be updated. Do you want to continue (y/n)?
 y
@@ -138,7 +136,7 @@ Troubleshooting
 If you have any problems, please ask Zenoss community (IRC/forum/Github issue  
 tracker) for help and provide full output (http://pastebin.com) from auto-deploy script  
 and *journalctl -u systemd -f* (RHEL/Centos) / *tailf /var/log/upstart/serviced.log* (Ubuntu) command please. 
-Or follow manual installation guide.
+Or follow [manual installation guide](http://wiki.zenoss.org/download/core/docs/Zenoss_Core_Installation_Guide_r5.0.0_latest.pdf).
 
 Author
 ======
