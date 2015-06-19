@@ -711,7 +711,7 @@ if [ "$hostos" == "redhat" ]; then
     echo 'echo "DOCKER_OPTS=\"-s btrfs --dns=$docker_ip\"" >> /etc/sysconfig/docker'
     echo "DOCKER_OPTS=\"-s btrfs --dns=$docker_ip\"" >> /etc/sysconfig/docker
 elif [ "$hostos" == "ubuntu" ]; then
-    echo 'sed -i -e "\|^DOCKER_OPTS=\"-s btrfs --dns=|d" /etc/default/docker'
+    echo 'sed -i -e "\|^DOCKER_OPTS=\"--dns=|d" /etc/default/docker'
     sed -i -e "\|^DOCKER_OPTS=\"-s btrfs --dns=|d" /etc/default/docker         
     echo 'echo "DOCKER_OPTS=\"-s btrfs --dns=$docker_ip\"" >> /etc/default/docker'
     echo "DOCKER_OPTS=\"-s btrfs --dns=$docker_ip\"" >> /etc/default/docker
