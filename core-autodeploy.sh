@@ -498,6 +498,8 @@ if [ "$hostname" == "localhost" ] || [ "$hostname" == "localhost.localdomain" ];
     hostname=$(echo $publicipv4 | tr '.' '-')
     hostname="ip-$hostname"
 fi
+# delete all hosts records 127.0. $hostname - ubuntu issue
+sed -i -e "\|^127.0.*$hostname|d" /etc/hosts
 echo "Hostname: $hostname"
 grep "$privateipv4 $hostname" /etc/hosts
 if [ $? -ne 0 ]; then
@@ -891,7 +893,7 @@ if [ "$test" = "no hosts found" ]; then
 else
     echo "echo \"$test\" | wc -l"
     #test2=$(echo "$test" | grep $(uname -n) | wc -l)
-    test2=$(echo "$test" | wc -l)
+    test2=$(echo "$test" | grep -v loopback | wc -l)
     if [ "$test2" -gt "1" ]; then
         echo -e "${yellow}Skipping - some host is deployed already${endColor}"
         echo -e "${green}Done${endColor}"
