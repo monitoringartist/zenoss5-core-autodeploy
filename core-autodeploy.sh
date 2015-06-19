@@ -124,7 +124,7 @@ elif grep -q "Ubuntu" /etc/issue; then
     hostos="ubuntu"
     # ubuntu filesystem requirements
     root_fs_type="ext4"
-    docker_fs_type="ext4"
+    root_fs_min_size=60 #GB
     serviced_fs_type="ext4"
     servicedbackups_fs_type="ext4"
     # Pre-install btrfs-tools
@@ -453,7 +453,9 @@ echo -e "${green}Done${endColor}"
 # Check FS requirements
 echo -e "${yellow}1.6 Filesystem configuration check${endColor}"
 check_filesystem "/" "$root_fs_type" "$root_fs_min_size"
-check_filesystem "$docker_fs_path" "$docker_fs_type" "$docker_fs_min_size"
+if [ "$hostos" == "redhat" ]; then
+    check_filesystem "$docker_fs_path" "$docker_fs_type" "$docker_fs_min_size"
+fi
 check_filesystem "$serviced_fs_path" "$serviced_fs_type" "$serviced_fs_min_size"
 check_filesystem "$servicedvolumes_fs_path" "$servicedvolumes_fs_type" "$servicedvolumes_fs_min_size"
 check_filesystem "$servicedbackups_fs_path" "$servicedbackups_fs_type" "$servicedbackups_fs_min_size"
@@ -711,7 +713,7 @@ if [ "$hostos" == "redhat" ]; then
     echo 'echo "DOCKER_OPTS=\"-s btrfs --dns=$docker_ip\"" >> /etc/sysconfig/docker'
     echo "DOCKER_OPTS=\"-s btrfs --dns=$docker_ip\"" >> /etc/sysconfig/docker
 elif [ "$hostos" == "ubuntu" ]; then
-    echo 'sed -i -e "\|^DOCKER_OPTS=\"--dns=|d" /etc/default/docker'
+    echo 'sed -i -e "\|^DOCKER_OPTS=\"-s aufs --dns=|d" /etc/default/docker'
     sed -i -e "\|^DOCKER_OPTS=\"-s btrfs --dns=|d" /etc/default/docker         
     echo 'echo "DOCKER_OPTS=\"-s btrfs --dns=$docker_ip\"" >> /etc/default/docker'
     echo "DOCKER_OPTS=\"-s btrfs --dns=$docker_ip\"" >> /etc/default/docker
