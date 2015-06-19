@@ -1,10 +1,10 @@
-Install Zenoss 5 Core / Resource Manager 5
-==========================================
+Install Zenoss 5 Core /Resource Manager 5
+=========================================
 
 If you like or use this project, please provide feedback to author - Star it ★.
 
 If you want to discover all new features of Zenoss 5, than please use [www.zenoss5taster.com](http://www.zenoss5taster.com). 
-It will provision brand new Zenoss 5 Core instance for testing/developement :watch: in 10 minutes. 
+It will provision brand new Zenoss 5 Core instance for testing/developement in :watch: 10 minutes. 
 Provisioned instance has 8CPU, 30GB RAM and lot of SSD filespace. 
 You will have full access to Control Center/OpenTSDB/HBase/RabbitMQ. 
 No deployment, no config, no DNS configuration. It's just click and play service. 
