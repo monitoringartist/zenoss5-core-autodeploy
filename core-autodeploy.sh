@@ -79,7 +79,7 @@ check_filesystem() {
         fs=$(df -T | grep "/$" | awk '{print $2}')
     fi
     if [ "$fs" != "$myfilesystem" ]; then
-        echo -e "\n${red}${fs} ${mylocation} filesystem detected, but ${myfilesystem} is required. Do you want to continue (y/N)?${endColor}"
+        echo -en "\n${red} ${fs} ${mylocation} filesystem detected, but ${myfilesystem} is required. Do you want to continue (y/N)?${endColor}"
         prompt_continue
         mycontinue="yes"
     fi
@@ -90,7 +90,7 @@ check_filesystem() {
     fi
     mss=$(($myminsize * $g2k))
     if [ $ss -lt $mss ]; then
-        echo -e "\n${red}${mylocation} filesystem size is less (${ss}kB) than required ${myminsize}GB. Do you want to continue (y/N)?${endColor}"
+        echo -en "\n${red} ${mylocation} filesystem size is less (${ss}kB) than required ${myminsize}GB. Do you want to continue (y/N)?${endColor}"
         prompt_continue
         mycontinue="yes"
     else
@@ -154,7 +154,7 @@ if [ "$languages" != "en_GB.UTF-8" ] && [ "$languages" != "en_US.UTF-8" ]; then
     echo -e "${yellow}Warning: some non US/GB English or non UTF-8 locales are detected (see output from the command locale).\nOnly en_GB.UTF-8/en_US.UTF-8 are supported in core-autodeploy.sh script.\nYou can try to continue. Do you want to continue (y/n)?${endColor}"
     prompt_continue
 fi
-          
+
 while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
   case $arg in
     i)
@@ -215,7 +215,7 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
               mount_parameters=$mount_parameters_ext4
           else
               echo "mkfs -t ${rfs} -f ${dev}"
-              mkfs -t ${rfs} -f ${dev}              
+              mkfs -t ${rfs} -f ${dev}
               mount_parameters=$mount_parameters_xfs
           fi
           if [ $? -ne 0 ]; then
@@ -672,7 +672,7 @@ fi
 # Setup host for Zenoss Enterprise
 if [ "$zenoss_package" == "$zenoss_package_enterprise" ] && [ -z "$MHOST" ]; then
     # docker login
-    echo -e "${yellow}Authenticate to the Docker Hub repository${endColor}"  
+    echo -e "${yellow}Authenticate to the Docker Hub repository${endColor}"
     mySetting=$HISTCONTROL; export HISTCONTROL=ignorespace
     myUser=$docker_registry_user
     myEmail=$docker_registry_email
@@ -780,7 +780,7 @@ else
      -e 's|^#[^S]*\(SERVICED_REGISTRY=\).|\11|' \
      -e 's|^#[^S]*\(SERVICED_AGENT=\).|\11|' \
      -e 's|^#[^S]*\(SERVICED_MASTER=\).|\11|' \
-      /etc/default/serviced  
+      /etc/default/serviced
 fi
 
 # Update serviced filesystem configuration
@@ -812,7 +812,7 @@ if [ "$hostos" == "redhat" ]; then
         echo "systemctl start rpcbind" >> /etc/rc.d/rc.local && chmod +x /etc/rc.d/rc.local
         if [ $? -ne 0 ]; then
             echo -e "${red}Problem with installing rpcbind autostart workaround${endColor}"
-            exit 1  
+            exit 1
         fi
         echo -e "${green}Done${endColor}"
     fi
