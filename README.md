@@ -1,5 +1,5 @@
-Install Zenoss 5 Core /Resource Manager 5
-=========================================
+Install Zenoss 5 Core/Resource Manager 5
+========================================
 
 If you like or use this project, please provide feedback to author - Star it ★.
 
