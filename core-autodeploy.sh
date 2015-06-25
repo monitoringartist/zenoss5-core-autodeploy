@@ -31,7 +31,7 @@ mount_parameters_ext4="defaults 0 0"
 # Docker and Zenoss Settings
 g2k=1048576
 user="ccuser"
-version="2015-06-19"
+version="2015-06-25"
 retries_max=90
 sleep_duration=10
 install_doc="http://wiki.zenoss.org/download/core/docs/Zenoss_Core_Installation_Guide_r5.0.0_latest.pdf"
@@ -91,8 +91,8 @@ check_filesystem() {
       ss=$(df -T | grep "/$" | awk '{print $3}')
     fi
     mss=$(($myminsize * $g2k))
-    if [ $ss -lt $mss ]; then
-        echo -en "\n${red} ${mylocation} filesystem size is less (${ss}kB) than required ${myminsize}GB. Do you want to continue (y/N)? ${endColor}"
+    if [ $ss -lt $mss ]; then                                             
+        echo -en "\n${red} ${mylocation} filesystem size is less ($((ss/1024/1024))GB) than required ${myminsize}GB. Do you want to continue (y/N)? ${endColor}"
         prompt_continue
         mycontinue="yes"
     else
@@ -449,7 +449,7 @@ fi
 echo -e "${yellow}1.5 RAM check${endColor}"
 rams=$(free -g | grep 'Mem' | awk '{print $2}')
 if [ $rams -lt $rams_min ]; then
-    echo -en "${red}Only ${rams} GB of RAM has been detected, but at least 20GB is recommended. Do you want to continue (y/N)? ${endColor}"
+    echo -en "${red}Only ${rams}GB of RAM has been detected, but at least 20GB is recommended. Do you want to continue (y/N)? ${endColor}"
     prompt_continue
 fi
 echo -e "${green}Done${endColor}"
