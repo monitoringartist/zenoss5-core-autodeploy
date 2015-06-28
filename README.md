@@ -26,8 +26,7 @@ The script will take several minutes (around 15-30) to complete. When done,
 you should be able to visit Control Center in a web browser to start 
 Zenoss 5 application. Easy Zenoss installation.
 
-![Zenoss 5 Core - Start of installation](https://raw.githubusercontent.com/jangaraj/zenoss5-core-autodeploy/master/doc/zenoss5-video-installation.gif)
-![Zenoss 5 Core - Start of installation](https://raw.githubusercontent.com/jangaraj/zenoss5-core-autodeploy/master/doc/zenoss5-video-installation2.gif) 
+![Zenoss 5 Core - Start of installation](https://raw.githubusercontent.com/jangaraj/zenoss5-core-autodeploy/master/doc/zenoss5-video-installation.gif) 
 
 Script requires mounted filesystems:
 
