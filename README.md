@@ -24,7 +24,10 @@ Resource Manager 5 and Control Center for you. Usage of auto-deployment script:
 
 The script will take several minutes (around 15-30) to complete. When done, 
 you should be able to visit Control Center in a web browser to start 
-Zenoss 5 application. Easy Zenoss installation. 
+Zenoss 5 application. Easy Zenoss installation.
+
+![Zenoss 5 Core - Start of installation](https://raw.githubusercontent.com/jangaraj/zenoss5-core-autodeploy/master/doc/zenoss5-video-installation.gif)
+![Zenoss 5 Core - Start of installation](https://raw.githubusercontent.com/jangaraj/zenoss5-core-autodeploy/master/doc/zenoss5-video-installation2.gif) 
 
 Script requires mounted filesystems:
 
@@ -44,8 +47,6 @@ Confirmation is needed before formatting. Available options:
 
 # ./core-autodeploy.sh -d /dev/sdb1 -s /dev/sdb2 -v /dev/sdc1 -b /dev/sdd1
 ```
-
-![Zenoss 5 Core - Start of installation](https://raw.githubusercontent.com/jangaraj/zenoss5-core-autodeploy/master/doc/zenoss5-video-installation.gif)
 
 For advandced users only (you must be familiar with documentation, so you will be able identify some script warnings/errors, which can be ignored):
 ```
