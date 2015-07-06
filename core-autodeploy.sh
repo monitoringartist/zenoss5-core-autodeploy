@@ -9,6 +9,7 @@
 cpus_min=4
 rams_min=20 #GB
 # Default filesystem requirements (RHEL 7 / CentOS 7)
+maxusage=90 #% max disk usage
 root_fs_min_size=30 #GB
 root_fs_type="xfs"
 root_fs_path="/"
@@ -31,7 +32,7 @@ mount_parameters_ext4="defaults 0 0"
 # Docker and Zenoss Settings
 g2k=1048576
 user="ccuser"
-version="2015-06-25"
+version="2015-07-06"
 retries_max=90
 sleep_duration=10
 install_doc="http://wiki.zenoss.org/download/core/docs/Zenoss_Core_Installation_Guide_r5.0.0_latest.pdf"
@@ -84,21 +85,31 @@ check_filesystem() {
         echo -en "\n${red} ${fs} ${mylocation} filesystem detected, but ${myfilesystem} is required. Do you want to continue (y/N)? ${endColor}"
         prompt_continue
         mycontinue="yes"
+    fi    
+    usage=$(df -ha | grep "$mylocation$" | awk '{print $5}' | tail -n 1 | tr -d "%")
+    # Fall back to root fs
+    if [ "$usage" == "" ]; then
+        usage=$(df -ha | grep "/$" | awk '{print $5}' | tail -n 1 | tr -d "%")
+    fi
+    if [ $usage -gt $maxusage ]; then
+        echo -en "\n${red} ${mylocation} filesystem usage (${usage}%) is more than defined maximum ${maxusage}%. Do you want to continue (y/N)? ${endColor}"
+        prompt_continue
+        mycontinue="yes"
     fi
     ss=$(df -T | grep "$mylocation$" | awk '{print $3}')
     # Fall back to root disk space
     if [ "$ss" == "" ]; then
-      ss=$(df -T | grep "/$" | awk '{print $3}')
+        ss=$(df -T | grep "/$" | awk '{print $3}')
     fi
     mss=$(($myminsize * $g2k))
-    if [ $ss -lt $mss ]; then                                             
+    if [ $ss -lt $mss ]; then
         echo -en "\n${red} ${mylocation} filesystem size is less ($((ss/1024/1024))GB) than required ${myminsize}GB. Do you want to continue (y/N)? ${endColor}"
         prompt_continue
         mycontinue="yes"
     else
-      if [ "$mycontinue" == "no" ]; then
-          echo -e "${green}OK${endColor}"
-      fi
+        if [ "$mycontinue" == "no" ]; then
+            echo -e "${green}OK${endColor}"
+        fi
     fi
 }
 
@@ -796,7 +807,7 @@ fi
 # Update serviced filesystem configuration
 echo -e "${yellow}3.7 Change the volume type for application data${endColor}"
 echo "sed -i.$(date +\"%j-%H%M%S\") -e 's|^#[^S]*\(SERVICED_FS_TYPE=\).*$|\1btrfs|' /etc/default/serviced"
-sed -i.$(date +"%j-%H%M%S") -e 's|^#[^S]*\(SERVICED_FS_TYPE=\).*$|\1btrfs|' /etc/default/serviced
+xsed -i.$(date +"%j-%H%M%S") -e 's|^#[^S]*\(SERVICED_FS_TYPE=\).*$|\1btrfs|' /etc/default/serviced
 if [ $? -ne 0 ]; then
     echo -e "${red}Problem with changing of volume type${endColor}"
     exit 1
