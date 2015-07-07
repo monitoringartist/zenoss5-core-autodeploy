@@ -807,7 +807,7 @@ fi
 # Update serviced filesystem configuration
 echo -e "${yellow}3.7 Change the volume type for application data${endColor}"
 echo "sed -i.$(date +\"%j-%H%M%S\") -e 's|^#[^S]*\(SERVICED_FS_TYPE=\).*$|\1btrfs|' /etc/default/serviced"
-xsed -i.$(date +"%j-%H%M%S") -e 's|^#[^S]*\(SERVICED_FS_TYPE=\).*$|\1btrfs|' /etc/default/serviced
+sed -i.$(date +"%j-%H%M%S") -e 's|^#[^S]*\(SERVICED_FS_TYPE=\).*$|\1btrfs|' /etc/default/serviced
 if [ $? -ne 0 ]; then
     echo -e "${red}Problem with changing of volume type${endColor}"
     exit 1
