@@ -14,7 +14,7 @@ root_fs_min_size=30 #GB
 root_fs_type="xfs"
 root_fs_path="/"
 docker_fs_min_size=30 #GB
-docker_fs_type="btrfs"
+docker_fs_type="xfs"
 docker_fs_path="/var/lib/docker"
 serviced_fs_min_size=30 #GB
 serviced_fs_type="xfs"
@@ -32,7 +32,7 @@ mount_parameters_ext4="defaults 0 0"
 # Docker and Zenoss Settings
 g2k=1048576
 user="ccuser"
-version="2015-07-06"
+version="2015-07-15"
 retries_max=90
 sleep_duration=10
 install_doc="http://wiki.zenoss.org/download/core/docs/Zenoss_Core_Installation_Guide_r5.0.0_latest.pdf"
@@ -725,12 +725,12 @@ else
 fi
 
 # Configure docker settings
-echo -e "${yellow}3.4 Add the Btrfs and DNS flags to the Docker startup options${endColor}"
+echo -e "${yellow}3.4 Add the devicemapper and DNS flags to the Docker startup options${endColor}"
 if [ "$hostos" == "redhat" ]; then
-    echo 'sed -i -e "\|^DOCKER_OPTS=\"-s btrfs --dns=|d" /etc/sysconfig/docker'
-    sed -i -e "\|^DOCKER_OPTS=\"-s btrfs --dns=|d" /etc/sysconfig/docker
-    echo 'echo "DOCKER_OPTS=\"-s btrfs --dns=$docker_ip\"" >> /etc/sysconfig/docker'
-    echo "DOCKER_OPTS=\"-s btrfs --dns=$docker_ip\"" >> /etc/sysconfig/docker
+    echo 'sed -i -e "\|^DOCKER_OPTS=\"-s devicemapper --dns=|d" /etc/sysconfig/docker'
+    sed -i -e "\|^DOCKER_OPTS=\"-s devicemapper --dns=|d" /etc/sysconfig/docker
+    echo 'echo "DOCKER_OPTS=\"-s devicemapper --dns=$docker_ip\"" >> /etc/sysconfig/docker'
+    echo "DOCKER_OPTS=\"-s devicemapper --dns=$docker_ip\"" >> /etc/sysconfig/docker
 elif [ "$hostos" == "ubuntu" ]; then
     echo 'sed -i -e "\|^DOCKER_OPTS=\"--dns=|d" /etc/default/docker'
     sed -i -e "\|^DOCKER_OPTS=\"--dns=|d" /etc/default/docker
@@ -738,7 +738,7 @@ elif [ "$hostos" == "ubuntu" ]; then
     echo "DOCKER_OPTS=\"--dns=$docker_ip\"" >> /etc/default/docker
 fi
 if [ $? -ne 0 ]; then
-    echo -e "${red}Problem with adding Btrfs and DNS flags to the Docker${endColor}"
+    echo -e "${red}Problem with adding devicemapper and DNS flags to the Docker${endColor}"
     exit 1
 else
     echo -e "${green}Done${endColor}"
@@ -1004,12 +1004,11 @@ fi
 echo "serviced service stop $mservice"
 serviced service stop $mservice
 
-if [ "$docker_fs_type" == "btrfs" ] && [ "$servicedvolumes_fs_type" == "btrfs" ]; then
+if [ "$servicedvolumes_fs_type" == "btrfs" ]; then
     echo -e "${yellow}5.3 Configuring periodic maintenance${endColor}"
     # cron on the CC master
     echo "Creating /etc/cron.weekly/zenoss-master-btrfs"
     cat > /etc/cron.weekly/zenoss-master-btrfs << EOF
-btrfs balance start ${docker_fs_path} && btrfs scrub start ${docker_fs_path}
 btrfs balance start ${servicedvolumes_fs_path} && btrfs scrub start ${servicedvolumes_fs_path}
 EOF
     chmod +x /etc/cron.weekly/zenoss-master-btrfs
