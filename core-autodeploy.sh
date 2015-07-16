@@ -666,8 +666,8 @@ if [ "$hostos" == "redhat" ]; then
     echo "yum --enablerepo=zenoss-stable install -y ${zenoss_package}"
     yum --enablerepo=zenoss-stable install -y ${zenoss_package}
 elif [ "$hostos" == "ubuntu" ]; then
-    echo 'apt-get install -y --force-yes lxc-docker-1.5.0 zenoss-core-service'
-    apt-get install -y --force-yes lxc-docker-1.5.0 zenoss-core-service
+    echo 'apt-get install -y --force-yes lxc-docker-1.5.0 ${zenoss_package}'
+    apt-get install -y --force-yes lxc-docker-1.5.0 ${zenoss_package}
 fi
 if [ $? -ne 0 ]; then
     echo -e "${red}Problem with installing Control Center, Zenoss Core and Docker${endColor}"
