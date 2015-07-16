@@ -32,7 +32,7 @@ mount_parameters_ext4="defaults 0 0"
 # Docker and Zenoss Settings
 g2k=1048576
 user="ccuser"
-version="2015-07-15"
+version="2015-07-16"
 retries_max=90
 sleep_duration=10
 install_doc="http://wiki.zenoss.org/download/core/docs/Zenoss_Core_Installation_Guide_r5.0.0_latest.pdf"
@@ -666,8 +666,8 @@ if [ "$hostos" == "redhat" ]; then
     echo "yum --enablerepo=zenoss-stable install -y ${zenoss_package}"
     yum --enablerepo=zenoss-stable install -y ${zenoss_package}
 elif [ "$hostos" == "ubuntu" ]; then
-    echo 'apt-get install -y lxc-docker-1.5.0 zenoss-core-service'
-    apt-get install -y lxc-docker-1.5.0 zenoss-core-service
+    echo 'apt-get install -y --force-yes lxc-docker-1.5.0 zenoss-core-service'
+    apt-get install -y --force-yes lxc-docker-1.5.0 zenoss-core-service
 fi
 if [ $? -ne 0 ]; then
     echo -e "${red}Problem with installing Control Center, Zenoss Core and Docker${endColor}"
