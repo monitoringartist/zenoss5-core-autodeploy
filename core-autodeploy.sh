@@ -26,7 +26,7 @@ servicedbackups_fs_min_size=1 #GB
 servicedbackups_fs_type="xfs"
 servicedbackups_fs_path="/opt/serviced/var/backups"
 # Mount parameters for fstab
-mount_parameters_btrfs="rw,noatime,nodatacow 0 0"
+mount_parameters_btrfs="rw,noatime,nodatacow,skip_balance 0 0"
 mount_parameters_xfs="defaults,noatime 0 0"
 mount_parameters_ext4="defaults 0 0"
 # Docker and Zenoss Settings
@@ -141,7 +141,7 @@ elif grep -q "Ubuntu" /etc/issue; then
     serviced_fs_type="ext4"
     servicedbackups_fs_type="ext4"
     log_watch="tailf /var/log/upstart/serviced.log"
-    log_watch_last_line="tail -n2 /var/log/upstart/serviced.log"
+    log_watch_last_line="tail -n2 /var/log/upstart/serviced.log 2>/dev/null"
     # Pre-install btrfs-tools
     echo -e "${yellow}Pre-installing btrfs-tools${endColor}"
     echo 'apt-get install -y btrfs-tools'
@@ -423,6 +423,9 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
           fi
       fi
       ;;
+    #x)
+    #  # extras installations - grafana
+    #  ;; 
   esac
 done
 
