@@ -860,17 +860,6 @@ fi
 
 # exit host installation
 if [ ! -z "$MHOST" ]; then
-    if [ "$docker_fs_type" == "btrfs" ]; then
-        echo -e "${yellow}5.3 Configuring periodic maintenance${endColor}"
-        # cron on the CC host
-        echo "Creating /etc/cron.weekly/zenoss-pool-btrfs"
-        cat > /etc/cron.weekly/zenoss-pool-btrfs << EOF
-btrfs balance start ${docker_fs_path} && btrfs scrub start ${docker_fs_path}
-EOF
-        chmod +x /etc/cron.weekly/zenoss-pool-btrfs
-        echo -e "${green}Done${endColor}"
-    fi
-
     echo -e "${green}Control Center installation on the host completed${endColor}"
     echo -e "${green}Please visit Control Center${endColor}"
     echo -e "${green}You can check status of serviced: systemctl status serviced${endColor}"
@@ -1006,17 +995,6 @@ if [ $? -ne 1 ]; then
 fi
 echo "serviced service stop $mservice"
 serviced service stop $mservice
-
-if [ "$servicedvolumes_fs_type" == "btrfs" ]; then
-    echo -e "${yellow}5.3 Configuring periodic maintenance${endColor}"
-    # cron on the CC master
-    echo "Creating /etc/cron.weekly/zenoss-master-btrfs"
-    cat > /etc/cron.weekly/zenoss-master-btrfs << EOF
-btrfs balance start ${servicedvolumes_fs_path} && btrfs scrub start ${servicedvolumes_fs_path}
-EOF
-    chmod +x /etc/cron.weekly/zenoss-master-btrfs
-    echo -e "${green}Done${endColor}"
-fi
 
 echo -e "${yellow}5.4 Deleting the RabbitMQ guest user account${endColor}"
 serviced service start $(serviced service list | grep -i rabbitmq | awk '{print $2}')
