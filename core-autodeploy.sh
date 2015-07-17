@@ -138,6 +138,7 @@ elif grep -q "Ubuntu" /etc/issue; then
     # ubuntu filesystem requirements
     root_fs_type="ext4"
     root_fs_min_size=60 #GB
+    docker_fs_type="ext4"
     serviced_fs_type="ext4"
     servicedbackups_fs_type="ext4"
     log_watch="tailf /var/log/upstart/serviced.log"
