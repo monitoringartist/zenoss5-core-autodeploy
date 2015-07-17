@@ -156,7 +156,7 @@ echo -e "${yellow}Hardware Requirements:${endColor}
 Min number of available CPUs: ${cpus_min}
 Min size of available RAM:    ${rams_min}GB
 These filesystems must be mounted with correct type and size:
-Filesystem                  Type	Min size
+Path                      Type	Min size
 ${root_fs_path}                           ${root_fs_type}		${root_fs_min_size}GB
 ${docker_fs_path}             ${docker_fs_type}	${docker_fs_min_size}GB
 ${serviced_fs_path}           ${serviced_fs_type}		${serviced_fs_min_size}GB
@@ -664,7 +664,7 @@ fi
 echo -e "${blue}3 Installing on the master host - (`date -R`)${endColor}"
 
 # Install core services
-echo -e "${yellow}3.1 Install Control Center, Zenoss Core, and Docker${endColor}"
+echo -e "${yellow}3.1 Install Control Center, Zenoss Core/Resource Manager, and Docker${endColor}"
 if [ "$hostos" == "redhat" ]; then
     echo "yum --enablerepo=zenoss-stable install -y ${zenoss_package}"
     yum --enablerepo=zenoss-stable install -y ${zenoss_package}
@@ -735,10 +735,10 @@ if [ "$hostos" == "redhat" ]; then
     echo 'echo "DOCKER_OPTS=\"-s devicemapper --dns=$docker_ip\"" >> /etc/sysconfig/docker'
     echo "DOCKER_OPTS=\"-s devicemapper --dns=$docker_ip\"" >> /etc/sysconfig/docker
 elif [ "$hostos" == "ubuntu" ]; then
-    echo 'sed -i -e "\|^DOCKER_OPTS=\"--dns=|d" /etc/default/docker'
-    sed -i -e "\|^DOCKER_OPTS=\"--dns=|d" /etc/default/docker
-    echo 'echo "DOCKER_OPTS=\"--dns=$docker_ip\"" >> /etc/default/docker'
-    echo "DOCKER_OPTS=\"--dns=$docker_ip\"" >> /etc/default/docker
+    echo 'sed -i -e "\|^DOCKER_OPTS=\"-s devicemapper --dns=|d" /etc/default/docker'
+    sed -i -e "\|^DOCKER_OPTS=\"-s devicemapper --dns=|d" /etc/default/docker
+    echo 'echo "DOCKER_OPTS=\"-s devicemapper --dns=$docker_ip\"" >> /etc/default/docker'
+    echo "DOCKER_OPTS=\"-s devicemapper --dns=$docker_ip\"" >> /etc/default/docker
 fi
 if [ $? -ne 0 ]; then
     echo -e "${red}Problem with adding devicemapper and DNS flags to the Docker${endColor}"
@@ -884,7 +884,7 @@ do
     echo $test
     echo "#${retry}: This is not a problem, because Control Centre service is not fully started, I'm trying in ${sleep_duration} seconds"
     echo "Message from author of autodeploy script: Keep calm and be patient! - http://www.keepcalmandposters.com/posters/38112.png"
-    echo -n "Last serviced log line: "
+    echo -n "Last serviced log: "
     eval $log_watch_last_line
     retry=$(( $retry + 1 ))
     sleep $sleep_duration
@@ -983,7 +983,7 @@ echo -e "${green}Done${endColor}"
 
 # Percona toolkit
 echo -e "${yellow}5.2 Installing the Percona Toolkit${endColor}"
-echo " serviced service list | grep -i mariadb | awk '{print $1}' | sort -r | grep -i 'mariadb' | head -n 1"
+echo "serviced service list | grep -i mariadb | awk '{print $1}' | sort -r | grep -i 'mariadb' | head -n 1"
 mservice=$( serviced service list | grep -i mariadb | awk '{print $1}' | sort -r | grep -i 'mariadb' | head -n 1)
 echo "serviced service start $mservice"
 serviced service start $mservice
