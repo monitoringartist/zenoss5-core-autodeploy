@@ -719,6 +719,8 @@ fi
 
 # Collect docker information
 echo -e "${yellow}3.3 Identify the IPv4 address and subnet of Docker${endColor}"
+echo "sleep 10"
+sleep 10
 echo "ip addr | grep -A 2 'docker0:' | grep inet | awk '{print \$2}' | awk -F'/' '{print \$1}'"
 docker_ip=$(ip addr | grep -A 2 'docker0:' | grep inet | awk '{print $2}' | awk -F'/' '{print $1}')
 if [ -z "$docker_ip" ]; then
@@ -849,8 +851,15 @@ if [ "$hostos" == "redhat" ]; then
     echo "systemctl enable serviced && systemctl start serviced"
     systemctl enable serviced && systemctl start serviced
 elif [ "$hostos" == "ubuntu" ]; then
-    echo "service serviced status || start serviced"
-    service serviced status || start serviced
+    echo 'service serviced status'
+    output=$(service serviced status)
+    com_ret=$?
+    echo "$output"
+    substring="stop"
+    if [ "$output" != "${output%$substring*}" ]; then
+        echo "start serviced"
+        start serviced
+    fi
 fi
 if [ $? -ne 0 ]; then
     echo -e "${red}Problem with starting of serviced${endColor}"
