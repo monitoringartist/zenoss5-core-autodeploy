@@ -51,6 +51,7 @@ docker_registry_user=""
 docker_registry_email=""
 docker_registry_password=""
 MHOST=""
+advert="See graph and dashboard solution for Zenoss 5 - Grafana 2 for Zenoss 5 - http://beta.monitoringartist.com/grafana2-for-zenoss5.php"
 
 # Magical colors of the wind
 green='\e[0;32m'
@@ -115,6 +116,7 @@ check_filesystem() {
 
 echo -e "${yellow}Autodeploy script ${version} for Control Center master host and Zenoss Core 5/Zenoss Resource Manager 5${endColor}"
 echo -e "${yellow}Get your own Zenoss 5 Core taster instance in 10 minutes: www.zenoss5taster.com${endColor}"
+echo -e "${yellow}${advert}${endColor}"
 echo -e "Install guide: ${install_doc}"
 
 # Check distro compatibility
@@ -1051,3 +1053,4 @@ fi
 echo -e "Install guide: ${install_doc}"
 echo -e "${blue}Credit: www.jangaraj.com${endColor}"
 echo -e "${blue}Get your own Zenoss 5 Core taster instance in 10 minutes: www.zenoss5taster.com${endColor}"
+echo -e "${yellow}${advert}${endColor}"
