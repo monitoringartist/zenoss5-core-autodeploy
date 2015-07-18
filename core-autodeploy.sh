@@ -51,7 +51,7 @@ docker_registry_user=""
 docker_registry_email=""
 docker_registry_password=""
 MHOST=""
-advert="See graph and dashboard solution for Zenoss 5 - Grafana 2 for Zenoss 5 - http://beta.monitoringartist.com/grafana2-for-zenoss5.php"
+advert="Ultimate graph and dashboard solution for Zenoss 5 / Grafana 2 for Zenoss 5 - http://beta.monitoringartist.com/grafana2-for-zenoss5.php"
 
 # Magical colors of the wind
 green='\e[0;32m'
