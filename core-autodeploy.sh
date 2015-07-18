@@ -83,7 +83,7 @@ check_filesystem() {
         fs=$(df -T | grep "/$" | awk '{print $2}')
     fi
     if [ "$fs" != "$myfilesystem" ]; then
-        echo -en "\n${red} ${fs} ${mylocation} filesystem detected, but ${myfilesystem} is required. Do you want to continue (y/N)? ${endColor}"
+        echo -en "\n${red} ${fs} ${mylocation} filesystem detected, but ${myfilesystem} is required. Do you want to continue (y/n)? ${endColor}"
         prompt_continue
         mycontinue="yes"
     fi    
@@ -93,7 +93,7 @@ check_filesystem() {
         usage=$(df -ha | grep "/$" | awk '{print $5}' | tail -n 1 | tr -d "%")
     fi
     if [ $usage -gt $maxusage ]; then
-        echo -en "\n${red} ${mylocation} filesystem usage (${usage}%) is more than defined maximum ${maxusage}%. Do you want to continue (y/N)? ${endColor}"
+        echo -en "\n${red} ${mylocation} filesystem usage (${usage}%) is more than defined maximum ${maxusage}%. Do you want to continue (y/n)? ${endColor}"
         prompt_continue
         mycontinue="yes"
     fi
@@ -104,7 +104,7 @@ check_filesystem() {
     fi
     mss=$(($myminsize * $g2k))
     if [ $ss -lt $mss ]; then
-        echo -en "\n${red} ${mylocation} filesystem size is less ($((ss/1024/1024))GB) than required ${myminsize}GB. Do you want to continue (y/N)? ${endColor}"
+        echo -en "\n${red} ${mylocation} filesystem size is less ($((ss/1024/1024))GB) than required ${myminsize}GB. Do you want to continue (y/n)? ${endColor}"
         prompt_continue
         mycontinue="yes"
     else
@@ -466,7 +466,7 @@ fi
 echo -e "${yellow}1.5 RAM check${endColor}"
 rams=$(free -g | grep 'Mem' | awk '{print $2}')
 if [ $rams -lt $rams_min ]; then
-    echo -en "${red}Only ${rams}GB of RAM has been detected, but at least 20GB is recommended. Do you want to continue (y/N)? ${endColor}"
+    echo -en "${red}Only ${rams}GB of RAM has been detected, but at least 20GB is recommended. Do you want to continue (y/n)? ${endColor}"
     prompt_continue
 fi
 echo -e "${green}Done${endColor}"
