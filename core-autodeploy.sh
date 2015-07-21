@@ -32,11 +32,11 @@ mount_parameters_ext4="defaults 0 0"
 # Docker and Zenoss Settings
 g2k=1048576
 user="ccuser"
-version="2015-07-16"
+version="2015-07-21"
 retries_max=90
 sleep_duration=10
-install_doc="http://wiki.zenoss.org/download/core/docs/Zenoss_Core_Installation_Guide_r5.0.0_latest.pdf"
-install_doc_enterprise="https://www.zenoss.com/resources/documentation"
+install_doc="https://www.zenoss.com/resources/documentation?field_zsd_core_value_selective=Core&field_product_value_selective=All&field_version_sort_tid_selective=All"
+install_doc_enterprise="https://www.zenoss.com/resources/documentation?field_zsd_core_value_selective=ZSD&field_product_value_selective=All&field_version_sort_tid_selective=All"
 log_watch="journalctl -u serviced -f -a -n 0"
 log_watch_last_line="journalctl -u serviced -a -n 1 | tail -n 1"
 zenoss_package="zenoss-core-service"
