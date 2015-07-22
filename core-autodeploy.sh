@@ -32,7 +32,7 @@ mount_parameters_ext4="defaults 0 0"
 # Docker and Zenoss Settings
 g2k=1048576
 user="ccuser"
-version="2015-07-21"
+version="2015-07-22"
 retries_max=90
 sleep_duration=10
 install_doc="https://www.zenoss.com/resources/documentation?field_zsd_core_value_selective=Core&field_product_value_selective=All&field_version_sort_tid_selective=All"
@@ -161,10 +161,10 @@ Min size of available RAM:    ${rams_min}GB
 These filesystems must be mounted with correct type and size:
 Path                      Type	Min size
 ${root_fs_path}                           ${root_fs_type}		${root_fs_min_size}GB
-${docker_fs_path}             ${docker_fs_type}	${docker_fs_min_size}GB
+${docker_fs_path}             ${docker_fs_type}		${docker_fs_min_size}GB
 ${serviced_fs_path}           ${serviced_fs_type}		${serviced_fs_min_size}GB
 ${servicedvolumes_fs_path}   ${servicedvolumes_fs_type}	${servicedvolumes_fs_min_size}GB
-${servicedbackups_fs_path}   ${servicedbackups_fs_type}	${servicedbackups_fs_min_size}GB"
+${servicedbackups_fs_path}   ${servicedbackups_fs_type}		${servicedbackups_fs_min_size}GB"
 
 # lang check, only en_GB.UTF-8/en_US.UTF-8 are supported
 languages=$(locale | awk -F'=' '{print $2}' | tr -d '"' | grep -v '^$' | sort | uniq | tr -d '\r' | tr -d '\n')
