@@ -159,7 +159,7 @@ echo -e "${yellow}Hardware Requirements:${endColor}
 Min number of available CPUs: ${cpus_min}
 Min size of available RAM:    ${rams_min}GB
 These filesystems must be mounted with correct type and size:
-Path                      Type	Min size
+Path                        Type	Min size
 ${root_fs_path}                           ${root_fs_type}		${root_fs_min_size}GB
 ${docker_fs_path}             ${docker_fs_type}		${docker_fs_min_size}GB
 ${serviced_fs_path}           ${serviced_fs_type}		${serviced_fs_min_size}GB
