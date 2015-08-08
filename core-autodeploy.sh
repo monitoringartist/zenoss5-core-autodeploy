@@ -32,7 +32,7 @@ mount_parameters_ext4="defaults 0 0"
 # Docker and Zenoss Settings
 g2k=1048576
 user="ccuser"
-version="2015-07-22"
+version="2015-08-08"
 retries_max=90
 sleep_duration=10
 install_doc="https://www.zenoss.com/resources/documentation?field_zsd_core_value_selective=Core&field_product_value_selective=All&field_version_sort_tid_selective=All"
@@ -876,7 +876,7 @@ if [ ! -z "$MHOST" ]; then
     echo -e "${green}Please visit Control Center${endColor}"
     echo -e "${green}You can check status of serviced: systemctl status serviced${endColor}"
     echo -e "Install guide: ${install_doc}"
-    echo -e "${blue}Credit: www.jangaraj.com${endColor}"
+    echo -e "${blue}Credit: www.monitoringartist.com${endColor}"
     echo -e "${blue}Get your own Zenoss 5 Core taster instance in 10 minutes: www.zenoss5taster.com${endColor}"
     exit 0
 fi
@@ -945,10 +945,13 @@ if [ "$services" == "0" ]; then
     if [ $rc -ne 0 ]; then
         echo -e "${red}Problem with command: serviced template deploy $TEMPLATEID default zenoss${endColor}"
         exit 1
+    else
+        echo -e "${green}Done${endColor}"
     fi
 else
     if [ "$services" -gt "0" ]; then
         echo -e "${yellow}Skipping - some services are already deployed, check: serviced service list${endColor}"
+        echo -e "${green}Done${endColor}"
     else
         echo -e "${red}Skipping deploying an application - check output from template test: $TEMPLATEID${endColor}"
         exit 1
@@ -1007,6 +1010,7 @@ if [ $? -ne 1 ]; then
 fi
 echo "serviced service stop $mservice"
 serviced service stop $mservice
+echo -e "${green}Done${endColor}"
 
 echo -e "${yellow}5.4 Deleting the RabbitMQ guest user account${endColor}"
 serviced service start $(serviced service list | grep -i rabbitmq | awk '{print $2}')
@@ -1051,6 +1055,6 @@ if [ "$output" != "${output%$substring*}" ]; then
     echo -e "${red}Please also reboot machine, because SELINUX is still active!${endColor}"
 fi
 echo -e "Install guide: ${install_doc}"
-echo -e "${blue}Credit: www.jangaraj.com${endColor}"
+echo -e "${blue}Credit: www.monitoringartist.com${endColor}"
 echo -e "${blue}Get your own Zenoss 5 Core taster instance in 10 minutes: www.zenoss5taster.com${endColor}"
 echo -e "${yellow}${advert}${endColor}"
