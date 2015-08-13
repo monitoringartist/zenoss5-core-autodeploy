@@ -13,7 +13,13 @@ Auto-deployment script for Zenoss 5 on CentOS 7.x / Red Hat Enterprise
 Linux 7.x / Ubuntu 14. A 64-bit build is required.
 
 The script included in this directory will automatically install Zenoss 5 Core / 
-Resource Manager 5 and Control Center for you. Usage of auto-deployment script: 
+Resource Manager 5 and Control Center for you. 
+
+Please donate to author, so he can continue to publish another awesome projects for free:
+
+[![Paypal donate button](http://jangaraj.com/img/github-donate-button.png)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=8LB6J222WRUZ4)
+
+Usage of auto-deployment script: 
 
 ```
 # cd /tmp
@@ -142,5 +148,9 @@ Or follow [manual installation guide](http://wiki.zenoss.org/download/core/docs/
 
 Author
 ======
- 
-[Devops Monitoring zExpert](http://www.jangaraj.com), who loves monitoring systems, which start with letter Z. Those are Zabbix and Zenoss. [LinkedIn] (http://uk.linkedin.com/in/jangaraj/).
+
+[Devops Monitoring zExpert](http://www.jangaraj.com), who loves monitoring systems, which start with letter Z. Those are Zabbix and Zenoss.
+
+Professional monitoring services:
+
+[![Monitoring Artist](http://monitoringartist.com/img/github-monitoring-artist-logo.jpg)](http://www.monitoringartist.com)
