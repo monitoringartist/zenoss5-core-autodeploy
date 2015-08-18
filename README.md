@@ -3,8 +3,9 @@ Install Zenoss 5 Core/Resource Manager 5
 
 If you like or use this project, please provide feedback to author - Star it ★.
 
-If you want to discover all new features of Zenoss 5, than please use [www.zenoss5taster.com](http://www.zenoss5taster.com). 
-It will provision brand new Zenoss 5 Core instance for testing/developement in :watch: 10 minutes. 
+If you want to discover all new features of Zenoss 5, than please use 
+[www.zenoss5taster.com](http://www.zenoss5taster.com). It will provision brand 
+new Zenoss 5 Core instance for testing/developement in :watch: 10 minutes. 
 Provisioned instance has 8CPU, 30GB RAM and lot of SSD filespace. 
 You will have full access to Control Center/OpenTSDB/HBase/RabbitMQ. 
 No deployment, no config, no DNS configuration. It's just click and play service. 
@@ -15,9 +16,11 @@ Linux 7.x / Ubuntu 14. A 64-bit build is required.
 The script included in this directory will automatically install Zenoss 5 Core / 
 Resource Manager 5 and Control Center for you. 
 
-Please donate to author, so he can continue to publish another awesome projects for free:
+Please donate to author, so he can continue to publish another awesome projects 
+for free:
 
-[![Paypal donate button](http://jangaraj.com/img/github-donate-button02.png)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=8LB6J222WRUZ4)
+[![Paypal donate button](http://jangaraj.com/img/github-donate-button02.png)]
+(https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=8LB6J222WRUZ4)
 
 Usage of auto-deployment script: 
 
@@ -43,8 +46,8 @@ Script requires mounted filesystems:
 /opt/serviced/var/backups
 ```
 
-Or you can pass a block device for automatic formatting and mounting of required filesystem(s). 
-Confirmation is needed before formatting. Available options:
+Or you can pass a block device for automatic formatting and mounting of required 
+filesystem(s). Confirmation is needed before formatting. Available options:
 
 ```
 # ./core-autodeploy.sh -d </var/lib/docker block device> -s </opt/serviced/var block device>
@@ -53,7 +56,9 @@ Confirmation is needed before formatting. Available options:
 # ./core-autodeploy.sh -d /dev/sdb1 -s /dev/sdb2 -v /dev/sdc1 -b /dev/sdd1
 ```
 
-For advandced users only (you must be familiar with documentation, so you will be able identify some script warnings/errors, which can be ignored):
+For advandced users only (you must be familiar with documentation, so you will 
+be able identify some script warnings/errors, which can be ignored):
+
 ```
 # # install Zenoss 5 Core host
 # ./core-autodeploy.sh -h '<MASTER IP>'
@@ -149,8 +154,10 @@ Or follow [manual installation guide](http://wiki.zenoss.org/download/core/docs/
 Author
 ======
 
-[Devops Monitoring zExpert](http://www.jangaraj.com), who loves monitoring systems, which start with letter Z. Those are Zabbix and Zenoss.
+[Devops Monitoring zExpert](http://www.jangaraj.com), who loves monitoring 
+systems, which start with letter Z. Those are Zabbix and Zenoss.
 
 Professional monitoring services:
 
-[![Monitoring Artist](http://monitoringartist.com/img/github-monitoring-artist-logo.jpg)](http://www.monitoringartist.com)
+[![Monitoring Artist](http://monitoringartist.com/img/github-monitoring-artist-logo.jpg)]
+(http://www.monitoringartist.com)
