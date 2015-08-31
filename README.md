@@ -62,9 +62,7 @@ Extra
 
 -x parameter provides extra projects for Control Center/Zenoss:
 
-- zabbix
-
-Deploy [Zabbix for Control Center]
+- zabbix - deploy [Zabbix for Control Center]
 (https://github.com/monitoringartist/control-center-zabbix) 
 
 Example:
