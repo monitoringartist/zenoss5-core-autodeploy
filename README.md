@@ -60,12 +60,18 @@ filesystem(s). Confirmation is needed before formatting. Available options:
 Extra
 -----
 
--x parameter provides extra experimental projects:
+-x parameter provides extra projects for Control Center/Zenoss:
 
 - zabbix
 
 Deploy [Zabbix for Control Center]
 (https://github.com/monitoringartist/control-center-zabbix) 
+
+Example:
+
+```
+# ./core-autodeploy.sh -x zabbix
+```
 
 For advandced users only (you must be familiar with documentation, so you will 
 be able identify some script warnings/errors, which can be ignored):
