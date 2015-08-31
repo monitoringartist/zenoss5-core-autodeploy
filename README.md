@@ -14,7 +14,8 @@ Auto-deployment script for Zenoss 5 on CentOS 7.x / Red Hat Enterprise
 Linux 7.x / Ubuntu 14. A 64-bit build is required.
 
 The script included in this directory will automatically install Zenoss 5 Core / 
-Resource Manager 5 and Control Center for you. 
+Resource Manager 5, Control Center and some install/deploy extra projects for 
+you. 
 
 Please donate to author, so he can continue to publish another awesome projects 
 for free:
@@ -55,6 +56,16 @@ filesystem(s). Confirmation is needed before formatting. Available options:
 
 # ./core-autodeploy.sh -d /dev/sdb1 -s /dev/sdb2 -v /dev/sdc1 -b /dev/sdd1
 ```
+
+Extra
+-----
+
+-x parameter provides extra experimental projects:
+
+- zabbix
+
+Deploy [Zabbix for Control Center]
+(https://github.com/monitoringartist/control-center-zabbix) 
 
 For advandced users only (you must be familiar with documentation, so you will 
 be able identify some script warnings/errors, which can be ignored):

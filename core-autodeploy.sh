@@ -124,8 +124,9 @@ notsupported="${red}Not supported OS version. Only RedHat 7, CentOS 7 and Ubuntu
 hostos="unknown"
 # Check for Redhat/CentOS
 if [ -f /etc/redhat-release ]; then
-    elv=`cat /etc/redhat-release | gawk 'BEGIN {FS="release "} {print $2}' | gawk 'BEGIN {FS="."} {print $1}'`
-    if [ $elv -ne 7 ]; then
+    #elv=`cat /etc/redhat-release | gawk 'BEGIN {FS="release "} {print $2}' | gawk 'BEGIN {FS="."} {print $1}'`
+    cat /etc/redhat-release | grep 7
+    if [ $? -ne 0 ]; then
         echo -e $notsupported
         exit 1
     fi
@@ -159,7 +160,7 @@ echo -e "${yellow}Hardware Requirements:${endColor}
 Min number of available CPUs: ${cpus_min}
 Min size of available RAM:    ${rams_min}GB
 These filesystems must be mounted with correct type and size:
-Path                          Type	Min size
+Path                        Type	Min size
 ${root_fs_path}                           ${root_fs_type}		${root_fs_min_size}GB
 ${docker_fs_path}             ${docker_fs_type}		${docker_fs_min_size}GB
 ${serviced_fs_path}           ${serviced_fs_type}		${serviced_fs_min_size}GB
@@ -173,7 +174,7 @@ if [ "$languages" != "en_GB.UTF-8" ] && [ "$languages" != "en_US.UTF-8" ]; then
     prompt_continue
 fi
 
-while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
+while getopts "i:r:u:e:p:h:d:s:v:b:x:" arg; do
   case $arg in
     i)
       # -i impact: pull impact image
@@ -426,9 +427,10 @@ while getopts "i:r:u:e:p:h:d:s:v:b:" arg; do
           fi
       fi
       ;;
-    #x)
-    #  # extras installations - grafana
-    #  ;; 
+    x)
+      # -x 'zabbix,influxdb,grafana'
+      EXTRA=",${OPTARG},"
+      ;;
   esac
 done
 
@@ -1041,12 +1043,59 @@ if [ "$zenoss_impact" == "$zenoss_impact_enterprise" ]; then
     fi
 fi
 
+echo -e "${yellow}7 Extra templates${endColor}"
+domains=" "
+echo -e "${yellow}Adding Zabbix 2.4 template${endColor}"
+echo "Visit: https://github.com/monitoringartist/control-center-zabbix"
+curl -O https://raw.githubusercontent.com/monitoringartist/control-center-zabbix/master/Control-Center-Zabbix-2.4-template.json
+echo "serviced template add Control-Center-Zabbix-2.4-template.json"
+serviced template add Control-Center-Zabbix-2.4-template.json 
+rm -rf Control-Center-Zabbix-2.4-template.json
+echo -e "${green}Done${endColor}"
+substring=",zabbix,"
+if [ "$EXTRA" != "${EXTRA%$substring*}" ]; then
+    echo -e "${yellow}Deploying Zabbix template${endColor}"
+    domains="${domains}zabbix.$hostname "
+    echo "serviced template list 2>&1 | grep \"Zabbix\" | awk '{print \$1}'"
+    TEMPLATEID=$(serviced template list 2>&1 | grep "Zabbix" | awk '{print $1}')
+    echo 'serviced service list 2>/dev/null | grep Zabbix | wc -l'
+    services=$(serviced service list 2>/dev/null | grep Zabbix | wc -l)
+    if [ "$services" == "0" ]; then
+        echo "serviced template deploy $TEMPLATEID default zabbix"
+        # log watching in background
+        bgjobs=$(jobs -p | wc -l)
+        ((bgjobs++))
+        $log_watch &
+        serviced template deploy $TEMPLATEID default zabbix
+        rc=$?
+        # kill log watching
+        kill %${bgjobs}
+        sleep 5
+        if [ $rc -ne 0 ]; then
+            echo -e "${red}Problem with command: serviced template deploy $TEMPLATEID default zabbix${endColor}"
+            #exit 1
+            echo -e "${green}Done${endColor} with problem"
+        else            
+            echo -e "${green}Done${endColor}"            
+        fi
+    else
+        if [ "$services" -gt "0" ]; then
+            echo -e "${yellow}Skipping - some Zabbix services are already deployed, check: serviced service list${endColor}"
+            echo -e "${green}Done${endColor}"
+        else
+            echo -e "${red}Skipping deploying an application - check output from template test: $TEMPLATEID${endColor}"
+            #exit 1
+            echo -e "${green}Done${endColor} with problem"
+        fi
+    fi        
+fi
+
 echo -e "${blue}5 Final overview - (`date -R`)${endColor}"
 echo -e "${green}Control Center & ${zenoss_installation} installation completed${endColor}"
 echo -e "${green}Set password for Control Center ${user} user: passwd ${user}${endColor}"
 echo -e "${green}Please visit Control Center https://$publicipv4/ in your favorite web browser to complete setup, log in with ${user} user${endColor}"
 echo -e "${green}Add following line to your hosts file:${endColor}"
-echo -e "${green}$publicipv4 $hostname hbase.$hostname opentsdb.$hostname rabbitmq.$hostname zenoss5.$hostname${endColor}"
+echo -e "${green}$publicipv4 $hostname hbase.$hostname opentsdb.$hostname rabbitmq.$hostname zenoss5.$hostname$domains${endColor}"
 echo -e "${green}or edit /etc/default/serviced and set SERVICED_VHOST_ALIASES to your FQDN${endColor}"
 # selinux test
 output=$(id)
