@@ -3,8 +3,13 @@
 # Script for Control Center and Zenoss Core 5 / Zenoss Resource Manager 5 deployement
 # Copyright (C) 2015 Jan Garaj - www.jangaraj.com / www.monitoringartist.com / www.zenoss5taster.com
 
-# Variables
+# Analytics
+starttimestamp=$(date +%s)
+cid=$(md5sum <<< $(hostname) | awk -F - '{print $1}' | tr -d ' ')
+curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=123234ee2&t=pageview&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
+curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Start&el=OK&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
 
+# Variables
 # Default resource requirements
 cpus_min=4
 rams_min=20 #GB
@@ -32,7 +37,7 @@ mount_parameters_ext4="defaults 0 0"
 # Docker and Zenoss Settings
 g2k=1048576
 user="ccuser"
-version="2015-08-08"
+version="2015-10-15"
 retries_max=90
 sleep_duration=10
 install_doc="https://www.zenoss.com/resources/documentation?field_zsd_core_value_selective=Core&field_product_value_selective=All&field_version_sort_tid_selective=All"
@@ -82,11 +87,12 @@ check_filesystem() {
     if [ "$fs" == "" ]; then
         fs=$(df -T | grep "/$" | awk '{print $2}')
     fi
-    if [ "$fs" != "$myfilesystem" ]; then
+    if [ "$fs" != "$myfilesystem" ]; then                                                                                                       
         echo -en "\n${red} ${fs} ${mylocation} filesystem detected, but ${myfilesystem} is required. Do you want to continue (y/n)? ${endColor}"
+        curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Wrong%20FS&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
         prompt_continue
         mycontinue="yes"
-    fi    
+    fi
     usage=$(df -ha | grep "$mylocation$" | awk '{print $5}' | tail -n 1 | tr -d "%")
     # Fall back to root fs
     if [ "$usage" == "" ]; then
@@ -94,6 +100,7 @@ check_filesystem() {
     fi
     if [ $usage -gt $maxusage ]; then
         echo -en "\n${red} ${mylocation} filesystem usage (${usage}%) is more than defined maximum ${maxusage}%. Do you want to continue (y/n)? ${endColor}"
+        curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Overutilized%20FS&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
         prompt_continue
         mycontinue="yes"
     fi
@@ -105,6 +112,7 @@ check_filesystem() {
     mss=$(($myminsize * $g2k))
     if [ $ss -lt $mss ]; then
         echo -en "\n${red} ${mylocation} filesystem size is less ($((ss/1024/1024))GB) than required ${myminsize}GB. Do you want to continue (y/n)? ${endColor}"
+        curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Underutilized%20FS&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
         prompt_continue
         mycontinue="yes"
     else
@@ -128,6 +136,7 @@ if [ -f /etc/redhat-release ]; then
     cat /etc/redhat-release | grep 7
     if [ $? -ne 0 ]; then
         echo -e $notsupported
+        curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Unsupported%20RHEL&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
         exit 1
     fi
     hostos="redhat"
@@ -135,6 +144,7 @@ if [ -f /etc/redhat-release ]; then
 elif grep -q "Ubuntu" /etc/issue; then
     if ! grep -q "14.04" /etc/issue; then
         echo -e $notsupported
+        curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Unsupported%20Ubuntu&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
         exit 1
     fi
     hostos="ubuntu"
@@ -153,6 +163,7 @@ elif grep -q "Ubuntu" /etc/issue; then
 else
     # Not Supported
     echo -e $notsupported
+    curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Unsupported%20OS&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
     exit 1
 fi
 
@@ -171,6 +182,7 @@ ${servicedbackups_fs_path}   ${servicedbackups_fs_type}		${servicedbackups_fs_mi
 languages=$(locale | awk -F'=' '{print $2}' | tr -d '"' | grep -v '^$' | sort | uniq | tr -d '\r' | tr -d '\n')
 if [ "$languages" != "en_GB.UTF-8" ] && [ "$languages" != "en_US.UTF-8" ]; then
     echo -en "${yellow}Warning: some non US/GB English or non UTF-8 locales are detected (see output from the command locale).\nOnly en_GB.UTF-8/en_US.UTF-8 are supported in core-autodeploy.sh script.\nYou can try to continue. Do you want to continue (y/n)? ${endColor}"
+    curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Locales%20warning&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
     prompt_continue
 fi
 
@@ -186,6 +198,7 @@ while getopts "i:r:u:e:p:h:d:s:v:b:x:" arg; do
       zenoss_installation=$zenoss_installation_enterprise
       zenoss_template=$zenoss_template_enterprise
       install_doc=$install_doc_enterprise
+      curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=StartResmgr&el=OK&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
       ;;
     u)
       # -u <docker registry username>
@@ -218,6 +231,7 @@ while getopts "i:r:u:e:p:h:d:s:v:b:x:" arg; do
               mkdir -p ${path}
               if [ $? -ne 0 ]; then
                   echo -e "${red}Problem with creating mountpoint ${path}${endColor}"
+                  curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Mountpoint%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
                   exit 1
               fi
           fi
@@ -239,6 +253,7 @@ while getopts "i:r:u:e:p:h:d:s:v:b:x:" arg; do
           fi
           if [ $? -ne 0 ]; then
               echo -e "${red}Problem with formating ${dev}${endColor}"
+              curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Formating%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
               exit 1
           fi
           # fstab
@@ -248,6 +263,7 @@ while getopts "i:r:u:e:p:h:d:s:v:b:x:" arg; do
           echo "${dev} ${path} ${rfs} ${mount_parameters}" >> /etc/fstab
           if [ $? -ne 0 ]; then
               echo -e "${red}Problem with updating /etc/fstab for ${dev}${endColor}"
+              curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Fstab%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
               exit 1
           fi
           # mount
@@ -255,6 +271,7 @@ while getopts "i:r:u:e:p:h:d:s:v:b:x:" arg; do
           mount ${path}
           if [ $? -ne 0 ]; then
               echo -e "${red}Problem with mounting ${path}${endColor}"
+              curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Mount%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
               exit 1
           fi
       fi
@@ -274,6 +291,7 @@ while getopts "i:r:u:e:p:h:d:s:v:b:x:" arg; do
               mkdir -p ${path}
               if [ $? -ne 0 ]; then
                   echo -e "${red}Problem with creating mountpoint ${path}${endColor}"
+                  curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Mountpoint%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
                   exit 1
               fi
           fi
@@ -295,6 +313,7 @@ while getopts "i:r:u:e:p:h:d:s:v:b:x:" arg; do
           fi
           if [ $? -ne 0 ]; then
             echo -e "${red}Problem with formating ${dev}${endColor}"
+            curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Formating%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
             exit 1
           fi
           # fstab
@@ -304,6 +323,7 @@ while getopts "i:r:u:e:p:h:d:s:v:b:x:" arg; do
           echo "${dev} ${path} ${rfs} ${mount_parameters}" >> /etc/fstab
           if [ $? -ne 0 ]; then
               echo -e "${red}Problem with updating /etc/fstab for ${dev}${endColor}"
+              curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Fstab%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
               exit 1
           fi
           # mount
@@ -311,6 +331,7 @@ while getopts "i:r:u:e:p:h:d:s:v:b:x:" arg; do
           mount ${path}
           if [ $? -ne 0 ]; then
               echo -e "${red}Problem with mounting ${path}${endColor}"
+              curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Mount%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
               exit 1
           fi
       fi
@@ -330,6 +351,7 @@ while getopts "i:r:u:e:p:h:d:s:v:b:x:" arg; do
               mkdir -p ${path}
               if [ $? -ne 0 ]; then
                   echo -e "${red}Problem with creating mountpoint ${path}${endColor}"
+                  curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Mountpoint%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
                   exit 1
               fi
           fi
@@ -351,6 +373,7 @@ while getopts "i:r:u:e:p:h:d:s:v:b:x:" arg; do
           fi
           if [ $? -ne 0 ]; then
               echo -e "${red}Problem with formating ${dev}${endColor}"
+              curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Formating%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
               exit 1
           fi
           # fstab
@@ -360,6 +383,7 @@ while getopts "i:r:u:e:p:h:d:s:v:b:x:" arg; do
           echo "${dev} ${path} ${rfs} ${mount_parameters}" >> /etc/fstab
           if [ $? -ne 0 ]; then
               echo -e "${red}Problem with updating /etc/fstab for ${dev}${endColor}"
+              curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Fstab%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
               exit 1
           fi
           # mount
@@ -367,6 +391,7 @@ while getopts "i:r:u:e:p:h:d:s:v:b:x:" arg; do
           mount ${path}
           if [ $? -ne 0 ]; then
               echo -e "${red}Problem with mounting ${path}${endColor}"
+              curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Mount%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
               exit 1
           fi
       fi
@@ -386,6 +411,7 @@ while getopts "i:r:u:e:p:h:d:s:v:b:x:" arg; do
               mkdir -p ${path}
               if [ $? -ne 0 ]; then
                   echo -e "${red}Problem with creating mountpoint ${path}${endColor}"
+                  curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Mountpoint%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
                   exit 1
               fi
           fi
@@ -407,6 +433,7 @@ while getopts "i:r:u:e:p:h:d:s:v:b:x:" arg; do
           fi
           if [ $? -ne 0 ]; then
               echo -e "${red}Problem with formating ${dev}${endColor}"
+              curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Formating%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
               exit 1
           fi
           # fstab
@@ -416,6 +443,7 @@ while getopts "i:r:u:e:p:h:d:s:v:b:x:" arg; do
           echo "${dev} ${path} ${rfs} ${mount_parameters}" >> /etc/fstab
           if [ $? -ne 0 ]; then
               echo -e "${red}Problem with updating /etc/fstab for ${dev}${endColor}"
+              curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Fstab%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
               exit 1
           fi
           # mount
@@ -423,6 +451,7 @@ while getopts "i:r:u:e:p:h:d:s:v:b:x:" arg; do
           mount ${path}
           if [ $? -ne 0 ]; then
               echo -e "${red}Problem with mounting ${path}${endColor}"
+              curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Mount%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
               exit 1
           fi
       fi
@@ -449,6 +478,7 @@ echo -e "${yellow}1.2 Architecture check${endColor}"
 arch=$(uname -m)
 if [ ! "$arch" = "x86_64" ]; then
   	echo -e "${red}Not supported architecture $arch. Architecture x86_64 only is supported.${endColor}"
+    curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Unsupported%20architecture&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
     exit 1
 else
     echo -e "${green}Done${endColor}"
@@ -459,6 +489,7 @@ echo -e "${yellow}1.4 CPU check${endColor}"
 cpus=$(nproc)
 if [ $cpus -lt $cpus_min ]; then
     echo -en "${red}Only ${cpus} CPUs have been detected, but at least $cpus_min are required. Do you want to continue (y/n)? ${endColor}"
+    curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Cpu%20warning&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
     prompt_continue
 else
     echo -e "${green}Done${endColor}"
@@ -469,6 +500,7 @@ echo -e "${yellow}1.5 RAM check${endColor}"
 rams=$(free -g | grep 'Mem' | awk '{print $2}')
 if [ $rams -lt $rams_min ]; then
     echo -en "${red}Only ${rams}GB of RAM has been detected, but at least 20GB is recommended. Do you want to continue (y/n)? ${endColor}"
+    curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=RAM%20warning&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
     prompt_continue
 fi
 echo -e "${green}Done${endColor}"
@@ -549,6 +581,7 @@ if [ "$hostos" == "redhat" ]; then
     mkdir -p /var/log/journal && systemctl restart systemd-journald
     if [ $? -ne 0 ]; then
         echo -e "${red}Problem with enabling persistent log storage${endColor}"
+        curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=PerStorage%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
         exit 1
     else
         echo -e "${green}Done${endColor}"
@@ -578,6 +611,7 @@ if [ "$hostos" == "redhat" ]; then
     substring="is already installed"
     if [ $com_ret -ne 0 ] && [ "$output" == "${output%$substring*}" ]; then
         echo -e "${red}Problem with installing Zenoss repository${endColor}"
+        curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=InstallRepo%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
         exit 1
     else
         yum clean all &>/dev/null
@@ -613,13 +647,14 @@ elif [ "$hostos" == "ubuntu" ]; then
 fi
 if [ $? -ne 0 ]; then
     echo -e "${red}Problem with installing dnsmasq package${endColor}"
+    curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=DnsmaqPkg%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
     exit 1
 else
     # Give dnsmasq a chance to startup
     if [ "$hostos" == "ubuntu" ]; then
         echo 'sleep 10'
         sleep 10
-    fi    
+    fi
     echo -e "${green}Done${endColor}"
 fi
 
@@ -634,6 +669,7 @@ elif [ "$hostos" == "ubuntu" ]; then
 fi
 if [ $? -ne 0 ]; then
     echo -e "${red}Problem with installing ntp package${endColor}"
+    curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=NtpPkg%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
     exit 1
 else
     echo -e "${green}Done${endColor}"
@@ -647,6 +683,7 @@ if [ "$hostos" == "redhat" ]; then
     echo "systemctl start ntpd" >> /etc/rc.d/rc.local && chmod +x /etc/rc.d/rc.local
     if [ $? -ne 0 ]; then
         echo -e "${red}Problem with installing ntpd autostart workaround${endColor}"
+        curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=NtpWorkaround%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
         exit 1
     else
         echo -e "${green}Done${endColor}"
@@ -692,6 +729,7 @@ if [ "$hostos" == "redhat" ]; then
     systemctl enable docker && systemctl start docker
     if [ $? -ne 0 ]; then
         echo -e "${red}Problem with starting of Docker${endColor}"
+        curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=DockerStart%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
         exit 1
     else
         echo -e "${green}Done${endColor}"
@@ -714,6 +752,7 @@ if [ "$zenoss_package" == "$zenoss_package_enterprise" ] && [ -z "$MHOST" ]; the
         sh -c "docker login -u $myUser -e $myEmail -p '$myPass'"
         if [ $? -ne 0 ]; then
             echo -e "${red}Problem with authentication to the Docker Hub${endColor}"
+            curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=DockerAuth%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
             exit 1
         fi
         export HISTCONTROL=$mySetting
@@ -729,6 +768,7 @@ echo "ip addr | grep -A 2 'docker0:' | grep inet | awk '{print \$2}' | awk -F'/'
 docker_ip=$(ip addr | grep -A 2 'docker0:' | grep inet | awk '{print $2}' | awk -F'/' '{print $1}')
 if [ -z "$docker_ip" ]; then
     echo -e "${red}Problem with identifying IPv4 of Docker${endColor}"
+    curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=DockerIPv4%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
     exit 1
 else
     echo -e "${green}Done${endColor}"
@@ -749,6 +789,7 @@ elif [ "$hostos" == "ubuntu" ]; then
 fi
 if [ $? -ne 0 ]; then
     echo -e "${red}Problem with adding devicemapper and DNS flags to the Docker${endColor}"
+    curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=DockerFlags%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
     exit 1
 else
     echo -e "${green}Done${endColor}"
@@ -785,6 +826,7 @@ elif [ "$hostos" == "ubuntu" ]; then
 fi
 if [ $? -ne 0 ]; then
     echo -e "${red}Problem with restarting of Docker${endColor}"
+    curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=DockerRestart%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
     exit 1
 else
     echo -e "${green}Done${endColor}"
@@ -820,6 +862,7 @@ echo "sed -i.$(date +\"%j-%H%M%S\") -e 's|^#[^S]*\(SERVICED_FS_TYPE=\).*$|\1btrf
 sed -i.$(date +"%j-%H%M%S") -e 's|^#[^S]*\(SERVICED_FS_TYPE=\).*$|\1btrfs|' /etc/default/serviced
 if [ $? -ne 0 ]; then
     echo -e "${red}Problem with changing of volume type${endColor}"
+    curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=ServicedConf%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
     exit 1
 else
     echo -e "${green}Done${endColor}"
@@ -836,6 +879,7 @@ if [ "$hostos" == "redhat" ]; then
         systemctl start rpcbind
         if [ $? -ne 0 ]; then
             echo -e "${red}Problem with rpcbind start${endColor}"
+            curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=RpcStart%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
             exit 1
         fi
         sed -i -e "\|^systemctl start rpcbind|d" /etc/rc.d/rc.local
@@ -843,6 +887,7 @@ if [ "$hostos" == "redhat" ]; then
         echo "systemctl start rpcbind" >> /etc/rc.d/rc.local && chmod +x /etc/rc.d/rc.local
         if [ $? -ne 0 ]; then
             echo -e "${red}Problem with installing rpcbind autostart workaround${endColor}"
+            curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=RpcWorkaround%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
             exit 1
         fi
         echo -e "${green}Done${endColor}"
@@ -867,6 +912,7 @@ elif [ "$hostos" == "ubuntu" ]; then
 fi
 if [ $? -ne 0 ]; then
     echo -e "${red}Problem with starting of serviced${endColor}"
+    curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=ServicedStart%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
     exit 1
 else
     echo -e "${green}Done${endColor}"
@@ -909,6 +955,7 @@ if [ "$test" = "no hosts found" ]; then
     serviced host add $hostname:4979 default
     if [ $? -ne 0 ]; then
         echo -e "${red}Problem with command: serviced host add $privateipv4:4979 default${endColor}"
+        curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=ServicedAddHostt%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
         exit 1
     else
         echo -e "${green}Done${endColor}"
@@ -921,6 +968,7 @@ else
         echo -e "${green}Done${endColor}"
     else
         echo -e "${red}Problem with adding a host - check output from test: $test${endColor}"
+        curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=ServicedAddHost2t%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
         exit 1
     fi
 fi
@@ -946,6 +994,7 @@ if [ "$services" == "0" ]; then
     sleep 5
     if [ $rc -ne 0 ]; then
         echo -e "${red}Problem with command: serviced template deploy $TEMPLATEID default zenoss${endColor}"
+        curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=ServicedTempDeploy%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
         exit 1
     else
         echo -e "${green}Done${endColor}"
@@ -956,6 +1005,7 @@ else
         echo -e "${green}Done${endColor}"
     else
         echo -e "${red}Skipping deploying an application - check output from template test: $TEMPLATEID${endColor}"
+        curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=ServicedTempDeploy2%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
         exit 1
     fi
 fi
@@ -1038,6 +1088,7 @@ if [ "$zenoss_impact" == "$zenoss_impact_enterprise" ]; then
     docker pull $zenoss_impact
     if [ $rc -ne 0 ]; then
         echo -e "${red}Problem with pulling Service Impact Docker image${endColor}"
+        curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=ImpactPull2%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
     else
         echo -e "${green}Done${endColor}"
     fi
@@ -1049,7 +1100,7 @@ echo -e "${yellow}Adding Zabbix 2.4 template${endColor}"
 echo "Visit: https://github.com/monitoringartist/control-center-zabbix"
 curl -O https://raw.githubusercontent.com/monitoringartist/control-center-zabbix/master/Control-Center-Zabbix-2.4-template.json
 echo "serviced template add Control-Center-Zabbix-2.4-template.json"
-serviced template add Control-Center-Zabbix-2.4-template.json 
+serviced template add Control-Center-Zabbix-2.4-template.json
 rm -rf Control-Center-Zabbix-2.4-template.json
 echo -e "${green}Done${endColor}"
 substring=",zabbix,"
@@ -1073,10 +1124,11 @@ if [ "$EXTRA" != "${EXTRA%$substring*}" ]; then
         sleep 5
         if [ $rc -ne 0 ]; then
             echo -e "${red}Problem with command: serviced template deploy $TEMPLATEID default zabbix${endColor}"
+            curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=ZabbixDeploy2%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
             #exit 1
             echo -e "${green}Done${endColor} with problem"
-        else            
-            echo -e "${green}Done${endColor}"            
+        else
+            echo -e "${green}Done${endColor}"
         fi
     else
         if [ "$services" -gt "0" ]; then
@@ -1087,7 +1139,7 @@ if [ "$EXTRA" != "${EXTRA%$substring*}" ]; then
             #exit 1
             echo -e "${green}Done${endColor} with problem"
         fi
-    fi        
+    fi
 fi
 
 echo -e "${blue}5 Final overview - (`date -R`)${endColor}"
@@ -1107,3 +1159,5 @@ echo -e "Install guide: ${install_doc}"
 echo -e "${blue}Credit: www.monitoringartist.com${endColor}"
 echo -e "${blue}Get your own Zenoss 5 Core taster instance in 10 minutes: www.zenoss5taster.com${endColor}"
 echo -e "${yellow}${advert}${endColor}"
+duration=$(($(date +%s) - $starttimestamp))
+curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Stop&el=OK&ev=${duration}&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy"
