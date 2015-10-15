@@ -961,7 +961,7 @@ if [ "$test" = "no hosts found" ]; then
     serviced host add $hostname:4979 default
     if [ $? -ne 0 ]; then
         echo -e "${red}Problem with command: serviced host add $privateipv4:4979 default${endColor}"
-        curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=ServicedAddHostt%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
+        curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=ServicedAddHost%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
         exit 1
     else
         echo -e "${green}Done${endColor}"
@@ -974,7 +974,7 @@ else
         echo -e "${green}Done${endColor}"
     else
         echo -e "${red}Problem with adding a host - check output from test: $test${endColor}"
-        curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=ServicedAddHost2t%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
+        curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=ServicedAddHost2%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
         exit 1
     fi
 fi
