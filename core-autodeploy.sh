@@ -1160,4 +1160,4 @@ echo -e "${blue}Credit: www.monitoringartist.com${endColor}"
 echo -e "${blue}Get your own Zenoss 5 Core taster instance in 10 minutes: www.zenoss5taster.com${endColor}"
 echo -e "${yellow}${advert}${endColor}"
 duration=$(($(date +%s) - $starttimestamp))
-curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Stop&el=OK&ev=${duration}&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy"
+curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Stop&el=Install%20OK%20${duration}&ev=${duration}&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy"

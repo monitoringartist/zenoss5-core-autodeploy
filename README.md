@@ -166,6 +166,11 @@ tracker) for help and provide full output (http://pastebin.com) from auto-deploy
 and *journalctl -u systemd -f* (RHEL/Centos) / *tailf /var/log/upstart/serviced.log* (Ubuntu) command please. 
 Or follow [manual installation guide](http://wiki.zenoss.org/download/core/docs/Zenoss_Core_Installation_Guide_r5.0.0_latest.pdf).
 
+Analytics note
+==============
+
+Be aware that script activities (e.g. installation issues, sucessfull installation) are tracked anonymously by Google Analytics.  
+
 Author
 ======
 
