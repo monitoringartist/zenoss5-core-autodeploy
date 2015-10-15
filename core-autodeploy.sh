@@ -89,8 +89,9 @@ check_filesystem() {
     fi
     if [ "$fs" != "$myfilesystem" ]; then                                                                                                       
         echo -en "\n${red} ${fs} ${mylocation} filesystem detected, but ${myfilesystem} is required. Do you want to continue (y/n)? ${endColor}"
-        curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Wrong%20FS&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
+        curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Wrong%20FS%20${fs}&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
         prompt_continue
+        curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Wrong%20FS%20yes%20${fs}&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
         mycontinue="yes"
     fi
     usage=$(df -ha | grep "$mylocation$" | awk '{print $5}' | tail -n 1 | tr -d "%")
@@ -102,6 +103,7 @@ check_filesystem() {
         echo -en "\n${red} ${mylocation} filesystem usage (${usage}%) is more than defined maximum ${maxusage}%. Do you want to continue (y/n)? ${endColor}"
         curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Overutilized%20FS&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
         prompt_continue
+        curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Overutilized%20FS%20yes&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
         mycontinue="yes"
     fi
     ss=$(df -T | grep "$mylocation$" | awk '{print $3}')
@@ -114,6 +116,7 @@ check_filesystem() {
         echo -en "\n${red} ${mylocation} filesystem size is less ($((ss/1024/1024))GB) than required ${myminsize}GB. Do you want to continue (y/n)? ${endColor}"
         curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Underutilized%20FS&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
         prompt_continue
+        curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Underutilized%20FS%20yes&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
         mycontinue="yes"
     else
         if [ "$mycontinue" == "no" ]; then
@@ -184,6 +187,7 @@ if [ "$languages" != "en_GB.UTF-8" ] && [ "$languages" != "en_US.UTF-8" ]; then
     echo -en "${yellow}Warning: some non US/GB English or non UTF-8 locales are detected (see output from the command locale).\nOnly en_GB.UTF-8/en_US.UTF-8 are supported in core-autodeploy.sh script.\nYou can try to continue. Do you want to continue (y/n)? ${endColor}"
     curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Locales%20warning&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
     prompt_continue
+    curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Locales%20warning%20yes&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
 fi
 
 while getopts "i:r:u:e:p:h:d:s:v:b:x:" arg; do
@@ -489,8 +493,9 @@ echo -e "${yellow}1.4 CPU check${endColor}"
 cpus=$(nproc)
 if [ $cpus -lt $cpus_min ]; then
     echo -en "${red}Only ${cpus} CPUs have been detected, but at least $cpus_min are required. Do you want to continue (y/n)? ${endColor}"
-    curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Cpu%20warning&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
+    curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=CPU%20warning%20${cpus}&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
     prompt_continue
+    curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=CPU%20warning%20yes%20${cpus}&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
 else
     echo -e "${green}Done${endColor}"
 fi
@@ -500,8 +505,9 @@ echo -e "${yellow}1.5 RAM check${endColor}"
 rams=$(free -g | grep 'Mem' | awk '{print $2}')
 if [ $rams -lt $rams_min ]; then
     echo -en "${red}Only ${rams}GB of RAM has been detected, but at least 20GB is recommended. Do you want to continue (y/n)? ${endColor}"
-    curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=RAM%20warning&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
+    curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=RAM%20warning%20${rams}GB&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
     prompt_continue
+    curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=RAM%20warning%20yes%20${rams}GB&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
 fi
 echo -e "${green}Done${endColor}"
 
@@ -1160,4 +1166,4 @@ echo -e "${blue}Credit: www.monitoringartist.com${endColor}"
 echo -e "${blue}Get your own Zenoss 5 Core taster instance in 10 minutes: www.zenoss5taster.com${endColor}"
 echo -e "${yellow}${advert}${endColor}"
 duration=$(($(date +%s) - $starttimestamp))
-curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Stop&el=Install%20OK%20${duration}&ev=${duration}&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy"
+curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Stop%20OK&el=Install%20OK%20${duration}&ev=${duration}&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy"
