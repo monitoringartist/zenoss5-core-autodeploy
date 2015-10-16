@@ -89,9 +89,9 @@ check_filesystem() {
     fi
     if [ "$fs" != "$myfilesystem" ]; then                                                                                                       
         echo -en "\n${red} ${fs} ${mylocation} filesystem detected, but ${myfilesystem} is required. Do you want to continue (y/n)? ${endColor}"
-        curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Wrong%20FS%20${fs}&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
+        curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Wrong%20FS%20${mylocation}%20${fs}&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
         prompt_continue
-        curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Wrong%20FS%20yes%20${fs}&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
+        curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Wrong%20FS%20${mylocation}%20yes%20${fs}&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
         mycontinue="yes"
     fi
     usage=$(df -ha | grep "$mylocation$" | awk '{print $5}' | tail -n 1 | tr -d "%")
@@ -101,9 +101,9 @@ check_filesystem() {
     fi
     if [ $usage -gt $maxusage ]; then
         echo -en "\n${red} ${mylocation} filesystem usage (${usage}%) is more than defined maximum ${maxusage}%. Do you want to continue (y/n)? ${endColor}"
-        curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Overutilized%20FS&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
+        curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Overutilized%20FS%20${mylocation}&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
         prompt_continue
-        curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Overutilized%20FS%20yes&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
+        curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Overutilized%20FS%20${mylocation}%20yes&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
         mycontinue="yes"
     fi
     ss=$(df -T | grep "$mylocation$" | awk '{print $3}')
@@ -114,9 +114,9 @@ check_filesystem() {
     mss=$(($myminsize * $g2k))
     if [ $ss -lt $mss ]; then
         echo -en "\n${red} ${mylocation} filesystem size is less ($((ss/1024/1024))GB) than required ${myminsize}GB. Do you want to continue (y/n)? ${endColor}"
-        curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Underutilized%20FS&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
+        curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Underutilized%20FS%20${mylocation}&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
         prompt_continue
-        curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Underutilized%20FS%20yes&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
+        curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Underutilized%20FS%20${mylocation}%20yes&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
         mycontinue="yes"
     else
         if [ "$mycontinue" == "no" ]; then
