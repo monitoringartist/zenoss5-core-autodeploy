@@ -1167,3 +1167,16 @@ echo -e "${blue}Get your own Zenoss 5 Core taster instance in 10 minutes: www.ze
 echo -e "${yellow}${advert}${endColor}"
 duration=$(($(date +%s) - $starttimestamp))
 curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Stop%20OK&el=Install%20OK%20${duration}&ev=${duration}&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy"
+curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Stat&ea=OS&el=${hostos}&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
+curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Stat&ea=Duration&el=sec&ev=${duration}&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
+curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Stat&ea=CPU&el=count&ev=${cpus}&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
+curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Stat&ea=RAM&el=GB&ev=${rams}&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
+if [ "$hostos" == "redhat" ]; then
+    serviced_version=serviced%20$(rpm -qi serviced | grep Version | awk -F: '{print $2}' | tr -d ' ')
+    zenoss_version=${zenoss_package}%20$(rpm -qi $zenoss_package | grep Version | awk -F: '{print $2}' | tr -d ' ')
+else
+    serviced_version=serviced%20$(dpkg -s serviced | grep Version | awk -F: '{print $2}' | tr -d ' ')
+    zenoss_version=${zenoss_package}%20$(dpkg -s $zenoss_package | grep Version | awk -F: '{print $2}' | tr -d ' ')
+fi
+curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Stat&ea=Zenoss%20version&el=${zenoss_version}&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
+curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Stat&ea=Serviced%20version&el=${serviced_version}&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
