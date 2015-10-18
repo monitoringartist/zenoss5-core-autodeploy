@@ -37,7 +37,7 @@ mount_parameters_ext4="defaults 0 0"
 # Docker and Zenoss Settings
 g2k=1048576
 user="ccuser"
-version="2015-10-15"
+version="2015-10-18"
 retries_max=90
 sleep_duration=10
 install_doc="https://www.zenoss.com/resources/documentation?field_zsd_core_value_selective=Core&field_product_value_selective=All&field_version_sort_tid_selective=All"
@@ -1180,3 +1180,5 @@ else
 fi
 curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Stat&ea=Zenoss%20version&el=${zenoss_version}&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
 curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Stat&ea=Serviced%20version&el=${serviced_version}&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
+# finish ring
+printf '\a'; sleep 0.1; printf '\a'; sleep 0.1; printf '\a'; sleep 0.1; printf '\a';
