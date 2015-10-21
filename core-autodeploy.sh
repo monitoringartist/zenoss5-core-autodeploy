@@ -51,7 +51,7 @@ zenoss_installation_enterprise="Zenoss Resource Manager 5"
 zenoss_template="Zenoss.core"
 zenoss_template_enterprise="Zenoss.resmgr"
 zenoss_impact=""
-zenoss_impact_enterprise="zenoss/impact_5.0:5.0.0.0.0"
+zenoss_impact_enterprise="zenoss/impact_5.0:5.0.3.0.0"
 docker_registry_user=""
 docker_registry_email=""
 docker_registry_password=""
@@ -507,7 +507,7 @@ if [ $rams -lt $rams_min ]; then
     echo -en "${red}Only ${rams}GB of RAM has been detected, but at least 20GB is recommended. Do you want to continue (y/n)? ${endColor}"
     curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=RAM%20warning%20${rams}GB&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
     prompt_continue
-    curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=RAM%20warning%20${rams}%20yesGB&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
+    curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=RAM%20warning%20${rams}GB%20yes&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
 fi
 echo -e "${green}Done${endColor}"
 
