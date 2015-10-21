@@ -37,7 +37,7 @@ mount_parameters_ext4="defaults 0 0"
 # Docker and Zenoss Settings
 g2k=1048576
 user="ccuser"
-version="2015-10-18"
+version="2015-10-21"
 retries_max=90
 sleep_duration=10
 install_doc="https://www.zenoss.com/resources/documentation?field_zsd_core_value_selective=Core&field_product_value_selective=All&field_version_sort_tid_selective=All"
@@ -91,7 +91,7 @@ check_filesystem() {
         echo -en "\n${red} ${fs} ${mylocation} filesystem detected, but ${myfilesystem} is required. Do you want to continue (y/n)? ${endColor}"
         curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Wrong%20FS%20${mylocation}%20${fs}&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
         prompt_continue
-        curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Wrong%20FS%20${mylocation}%20yes%20${fs}&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
+        curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Wrong%20FS%20${mylocation}%20${fs}%20yes&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
         mycontinue="yes"
     fi
     usage=$(df -ha | grep "$mylocation$" | awk '{print $5}' | tail -n 1 | tr -d "%")
@@ -495,7 +495,7 @@ if [ $cpus -lt $cpus_min ]; then
     echo -en "${red}Only ${cpus} CPUs have been detected, but at least $cpus_min are required. Do you want to continue (y/n)? ${endColor}"
     curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=CPU%20warning%20${cpus}&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
     prompt_continue
-    curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=CPU%20warning%20yes%20${cpus}&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
+    curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=CPU%20warning%20${cpus}%20yes&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
 else
     echo -e "${green}Done${endColor}"
 fi
@@ -507,7 +507,7 @@ if [ $rams -lt $rams_min ]; then
     echo -en "${red}Only ${rams}GB of RAM has been detected, but at least 20GB is recommended. Do you want to continue (y/n)? ${endColor}"
     curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=RAM%20warning%20${rams}GB&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
     prompt_continue
-    curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=RAM%20warning%20yes%20${rams}GB&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
+    curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=RAM%20warning%20${rams}%20yesGB&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
 fi
 echo -e "${green}Done${endColor}"
 
