@@ -63,7 +63,10 @@ Extra
 -x parameter provides extra projects for Control Center/Zenoss:
 
 - zabbix - deploy [Zabbix for Control Center]
-(https://github.com/monitoringartist/control-center-zabbix) 
+(https://github.com/monitoringartist/control-center-zabbix)
+
+- elasticsearch - deploy [Elasticsearch for Control Center]
+(https://github.com/monitoringartist/control-center-elasticsearch) 
 
 Example:
 
@@ -174,10 +177,10 @@ Be aware that script activities (e.g. installation issues, sucessfull installati
 Author
 ======
 
-[Devops Monitoring zExpert](http://www.jangaraj.com), who loves monitoring 
+[Devops Monitoring zExpert](http://www.jangaraj.com 'DevOps / Docker / Zabbix / Zenoss / Monitoring'), who loves monitoring 
 systems, which start with letter Z. Those are Zabbix and Zenoss.
 
 Professional monitoring services:
 
 [![Monitoring Artist](http://monitoringartist.com/img/github-monitoring-artist-logo.jpg)]
-(http://www.monitoringartist.com)
+(http://www.monitoringartist.com 'DevOps / Docker / Zabbix / Zenoss / Monitoring')

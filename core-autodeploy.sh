@@ -37,7 +37,7 @@ mount_parameters_ext4="defaults 0 0"
 # Docker and Zenoss Settings
 g2k=1048576
 user="ccuser"
-version="2015-10-21"
+version="2015-10-24"
 retries_max=90
 sleep_duration=10
 install_doc="https://www.zenoss.com/resources/documentation?field_zsd_core_value_selective=Core&field_product_value_selective=All&field_version_sort_tid_selective=All"
@@ -461,7 +461,7 @@ while getopts "i:r:u:e:p:h:d:s:v:b:x:" arg; do
       fi
       ;;
     x)
-      # -x 'zabbix,influxdb,grafana'
+      # -x 'zabbix,influxdb,grafana,elasticsearch'
       EXTRA=",${OPTARG},"
       ;;
   esac
@@ -1109,44 +1109,60 @@ echo "serviced template add Control-Center-Zabbix-2.4-template.json"
 serviced template add Control-Center-Zabbix-2.4-template.json
 rm -rf Control-Center-Zabbix-2.4-template.json
 echo -e "${green}Done${endColor}"
-substring=",zabbix,"
-if [ "$EXTRA" != "${EXTRA%$substring*}" ]; then
-    echo -e "${yellow}Deploying Zabbix template${endColor}"
-    domains="${domains}zabbix.$hostname "
-    echo "serviced template list 2>&1 | grep \"Zabbix\" | awk '{print \$1}'"
-    TEMPLATEID=$(serviced template list 2>&1 | grep "Zabbix" | awk '{print $1}')
-    echo 'serviced service list 2>/dev/null | grep Zabbix | wc -l'
-    services=$(serviced service list 2>/dev/null | grep Zabbix | wc -l)
-    if [ "$services" == "0" ]; then
-        echo "serviced template deploy $TEMPLATEID default zabbix"
-        # log watching in background
-        bgjobs=$(jobs -p | wc -l)
-        ((bgjobs++))
-        $log_watch &
-        serviced template deploy $TEMPLATEID default zabbix
-        rc=$?
-        # kill log watching
-        kill %${bgjobs}
-        sleep 5
-        if [ $rc -ne 0 ]; then
-            echo -e "${red}Problem with command: serviced template deploy $TEMPLATEID default zabbix${endColor}"
-            curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=ZabbixDeploy2%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
-            #exit 1
-            echo -e "${green}Done${endColor} with problem"
+
+echo -e "${yellow}Adding Elasticsearch 1.7 template${endColor}"
+echo "Visit: https://github.com/monitoringartist/control-center-elasticsearch"
+curl -O https://raw.githubusercontent.com/monitoringartist/control-center-elasticsearch/master/Control-Center-Eleasticsearch-1.7-template.json
+echo "serviced template add Control-Center-Eleasticsearch-1.7-template.json"
+serviced template add Control-Center-Eleasticsearch-1.7-template.json
+rm -rf Control-Center-Eleasticsearch-1.7-template.json
+echo -e "${green}Done${endColor}"
+
+# loop for extra template deployement
+declare -a extras=("zabbix" "elasticsearch")
+for extraapp in "${extras[@]}"
+do
+    echo "$extraapp"
+    substring=",${extraapp},"
+    if [ "$EXTRA" != "${EXTRA%$substring*}" ]; then
+        echo -e "${yellow}Deploying ${extraapp} template${endColor}"
+        domains="${domains}${extraapp}.$hostname "
+        echo "serviced template list 2>&1 | grep -i \"${extraapp}\" | awk '{print \$1}'"
+        TEMPLATEID=$(serviced template list 2>&1 | grep -i "${extraapp}" | awk '{print $1}')
+        echo 'serviced service list 2>/dev/null | grep -i ${extraapp} | wc -l'
+        services=$(serviced service list 2>/dev/null | grep -i ${extraapp} | wc -l)
+        if [ "$services" == "0" ]; then
+            echo "serviced template deploy $TEMPLATEID default ${extraapp}"
+            # log watching in background
+            bgjobs=$(jobs -p | wc -l)
+            ((bgjobs++))
+            $log_watch &
+            serviced template deploy $TEMPLATEID default ${extraapp}
+            rc=$?
+            # kill log watching
+            kill %${bgjobs}
+            sleep 5
+            if [ $rc -ne 0 ]; then
+                echo -e "${red}Problem with command: serviced template deploy $TEMPLATEID default ${extraapp}${endColor}"
+                curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Extra%20error%20${extraapp}&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
+                #exit 1
+                echo -e "${green}Done${endColor} with problem"
+            else
+                curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Extra%20OK%20${extraapp}&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
+                echo -e "${green}Done${endColor}"
+            fi
         else
-            echo -e "${green}Done${endColor}"
+            if [ "$services" -gt "0" ]; then
+                echo -e "${yellow}Skipping - some ${extraapp} services are already deployed, check: serviced service list${endColor}"
+                echo -e "${green}Done${endColor}"
+            else
+                echo -e "${red}Skipping deploying an application - check output from template test: $TEMPLATEID${endColor}"
+                #exit 1
+                echo -e "${green}Done${endColor} with problem"
+            fi
         fi
-    else
-        if [ "$services" -gt "0" ]; then
-            echo -e "${yellow}Skipping - some Zabbix services are already deployed, check: serviced service list${endColor}"
-            echo -e "${green}Done${endColor}"
-        else
-            echo -e "${red}Skipping deploying an application - check output from template test: $TEMPLATEID${endColor}"
-            #exit 1
-            echo -e "${green}Done${endColor} with problem"
-        fi
-    fi
-fi
+    fi   
+done
 
 echo -e "${blue}5 Final overview - (`date -R`)${endColor}"
 echo -e "${green}Control Center & ${zenoss_installation} installation completed${endColor}"
