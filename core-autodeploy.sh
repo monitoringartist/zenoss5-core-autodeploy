@@ -1108,6 +1108,7 @@ curl -O https://raw.githubusercontent.com/monitoringartist/control-center-zabbix
 echo "serviced template add Control-Center-Zabbix-2.4-template.json"
 serviced template add Control-Center-Zabbix-2.4-template.json
 rm -rf Control-Center-Zabbix-2.4-template.json
+curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Extra%20template&el=zabbix&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
 echo -e "${green}Done${endColor}"
 
 echo -e "${yellow}Adding Elasticsearch 1.7 template${endColor}"
@@ -1116,13 +1117,13 @@ curl -O https://raw.githubusercontent.com/monitoringartist/control-center-elasti
 echo "serviced template add Control-Center-Eleasticsearch-1.7-template.json"
 serviced template add Control-Center-Eleasticsearch-1.7-template.json
 rm -rf Control-Center-Eleasticsearch-1.7-template.json
+curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Extra%20template&el=elasticsearch&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
 echo -e "${green}Done${endColor}"
 
 # loop for extra template deployement
 declare -a extras=("zabbix" "elasticsearch")
 for extraapp in "${extras[@]}"
 do
-    echo "$extraapp"
     substring=",${extraapp},"
     if [ "$EXTRA" != "${EXTRA%$substring*}" ]; then
         echo -e "${yellow}Deploying ${extraapp} template${endColor}"
