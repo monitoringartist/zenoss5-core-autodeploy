@@ -37,7 +37,7 @@ mount_parameters_ext4="defaults 0 0"
 # Docker and Zenoss Settings
 g2k=1048576
 user="ccuser"
-version="2015-10-24"
+version="2015-10-28"
 retries_max=90
 sleep_duration=10
 install_doc="https://www.zenoss.com/resources/documentation?field_zsd_core_value_selective=Core&field_product_value_selective=All&field_version_sort_tid_selective=All"
@@ -1111,12 +1111,12 @@ rm -rf Control-Center-Zabbix-2.4-template.json
 curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Extra%20template&el=zabbix&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
 echo -e "${green}Done${endColor}"
 
-echo -e "${yellow}Adding Elasticsearch 1.7 template${endColor}"
+echo -e "${yellow}Adding Elasticsearch 2.0 template${endColor}"
 echo "Visit: https://github.com/monitoringartist/control-center-elasticsearch"
-curl -O https://raw.githubusercontent.com/monitoringartist/control-center-elasticsearch/master/Control-Center-Eleasticsearch-1.7-template.json
-echo "serviced template add Control-Center-Eleasticsearch-1.7-template.json"
-serviced template add Control-Center-Eleasticsearch-1.7-template.json
-rm -rf Control-Center-Eleasticsearch-1.7-template.json
+curl -O https://raw.githubusercontent.com/monitoringartist/control-center-elasticsearch/master/Control-Center-Eleasticsearch-2.0-template.json
+echo "serviced template add Control-Center-Eleasticsearch-2.0-template.json"
+serviced template add Control-Center-Eleasticsearch-2.0-template.json
+rm -rf Control-Center-Eleasticsearch-2.0-template.json
 curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Extra%20template&el=elasticsearch&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
 echo -e "${green}Done${endColor}"
 
