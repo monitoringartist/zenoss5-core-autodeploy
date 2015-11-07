@@ -2,6 +2,7 @@
 
 # Script for Control Center and Zenoss Core 5 / Zenoss Resource Manager 5 deployement
 # Copyright (C) 2015 Jan Garaj - www.jangaraj.com / www.monitoringartist.com / www.zenoss5taster.com
+version="2015-11-07"
 
 # Analytics
 starttimestamp=$(date +%s)
@@ -37,7 +38,6 @@ mount_parameters_ext4="defaults 0 0"
 # Docker and Zenoss Settings
 g2k=1048576
 user="ccuser"
-version="2015-10-28"
 retries_max=90
 sleep_duration=10
 install_doc="https://www.zenoss.com/resources/documentation?field_zsd_core_value_selective=Core&field_product_value_selective=All&field_version_sort_tid_selective=All"
@@ -1120,8 +1120,17 @@ rm -rf Control-Center-Eleasticsearch-2.0-template.json
 curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Extra%20template&el=elasticsearch&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
 echo -e "${green}Done${endColor}"
 
+echo -e "${yellow}Adding Zenoss-Searcher template${endColor}"
+echo "Visit: https://github.com/monitoringartist/control-center-zenoss-searcher"
+curl -O https://raw.githubusercontent.com/monitoringartist/control-center-zenoss-searcher/master/Control-Center-Zenoss-Searcher-template.json
+echo "serviced template add Control-Center-Zenoss-Searcher-template.json"
+serviced template add Control-Center-Zenoss-Searcher-template.json
+rm -rf Control-Center-Zenoss-Searcher-template.json
+curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Extra%20template&el=zenoss-searcher&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
+echo -e "${green}Done${endColor}"
+
 # loop for extra template deployement
-declare -a extras=("zabbix" "elasticsearch")
+declare -a extras=("zabbix" "elasticsearch" "zenoss-searcher")
 for extraapp in "${extras[@]}"
 do
     substring=",${extraapp},"
