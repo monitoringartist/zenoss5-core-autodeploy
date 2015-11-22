@@ -59,12 +59,15 @@ Extra
 (https://github.com/monitoringartist/control-center-zabbix)
 
 - elasticsearch - deploy [Elasticsearch for Control Center]
-(https://github.com/monitoringartist/control-center-elasticsearch) 
+(https://github.com/monitoringartist/control-center-elasticsearch)
+
+- zenoss-searcher - deploy [Zenoss searcher for Control Center]
+(https://github.com/monitoringartist/control-center-zenoss-searcher) 
 
 Example:
 
 ```
-# ./core-autodeploy.sh -x zabbix
+# ./core-autodeploy.sh -x zabbix,elasticsearch,zenoss-searcher
 ```
 
 For advandced users only (you must be familiar with documentation, so you will 
