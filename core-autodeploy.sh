@@ -2,7 +2,7 @@
 
 # Script for Control Center and Zenoss Core 5 / Zenoss Resource Manager 5 deployement
 # Copyright (C) 2015 Jan Garaj - www.jangaraj.com / www.monitoringartist.com / www.zenoss5taster.com
-version="2015-11-07"
+version="2015-11-22"
 
 # Analytics
 starttimestamp=$(date +%s)
@@ -82,10 +82,10 @@ check_filesystem() {
     myminsize=$3
 
     echo -en "${yellow} $mylocation filesystem check in progress...${endColor} "
-    fs=$(df -T | grep "$mylocation$" | awk '{print $2}')
+    fs=$(df -TP | grep "$mylocation$" | awk '{print $2}')
     # Fall back to root fs
     if [ "$fs" == "" ]; then
-        fs=$(df -T | grep "/$" | awk '{print $2}')
+        fs=$(df -TP | grep "/$" | awk '{print $2}')
     fi
     if [ "$fs" != "$myfilesystem" ]; then                                                                                                       
         echo -en "\n${red} ${fs} ${mylocation} filesystem detected, but ${myfilesystem} is required. Do you want to continue (y/n)? ${endColor}"
@@ -106,10 +106,10 @@ check_filesystem() {
         curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Overutilized%20FS%20${mylocation}%20yes&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
         mycontinue="yes"
     fi
-    ss=$(df -T | grep "$mylocation$" | awk '{print $3}')
+    ss=$(df -TP | grep "$mylocation$" | awk '{print $3}')
     # Fall back to root disk space
     if [ "$ss" == "" ]; then
-        ss=$(df -T | grep "/$" | awk '{print $3}')
+        ss=$(df -TP | grep "/$" | awk '{print $3}')
     fi
     mss=$(($myminsize * $g2k))
     if [ $ss -lt $mss ]; then
@@ -126,9 +126,10 @@ check_filesystem() {
 }
 
 echo -e "${yellow}Autodeploy script ${version} for Control Center master host and Zenoss Core 5/Zenoss Resource Manager 5${endColor}"
-echo -e "${yellow}Get your own Zenoss 5 Core taster instance in 10 minutes: www.zenoss5taster.com${endColor}"
 echo -e "${yellow}${advert}${endColor}"
 echo -e "Install guide: ${install_doc}"
+echo -en "${yellow}You should to read 'How to install Zenoss 5 successfuly' first - http://bit.ly/zenoss5. OK (y/n)? ${endColor}"
+prompt_continue
 
 # Check distro compatibility
 notsupported="${red}Not supported OS version. Only RedHat 7, CentOS 7 and Ubuntu 14.04 are supported by Zenoss at the moment.${endColor}"
@@ -225,7 +226,7 @@ while getopts "i:r:u:e:p:h:d:s:v:b:x:" arg; do
       rfs=$docker_fs_type
       dev=$OPTARG
       echo -e "${yellow}0 Preparing ${path} filesystem - device: ${dev}${endColor}"
-      fs=$(df -T | grep ' \/var\/lib\/docker$' | awk '{print $2}')
+      fs=$(df -TP | grep ' \/var\/lib\/docker$' | awk '{print $2}')
       if [ ! -z "$fs" ]; then
           echo -e "${path} filesystem is already mounted, skipping creating this filesystem"
       else
@@ -285,7 +286,7 @@ while getopts "i:r:u:e:p:h:d:s:v:b:x:" arg; do
       rfs=$serviced_fs_type
       dev=$OPTARG
       echo -e "${yellow}0 Preparing ${path} filesystem - device: ${dev}${endColor}"
-      fs=$(df -T | grep ' \/opt\/serviced\/var$' | awk '{print $2}')
+      fs=$(df -TP | grep ' \/opt\/serviced\/var$' | awk '{print $2}')
       if [ ! -z "$fs" ]; then
           echo -e "${path} filesystem is already mounted, skipping creating this filesystem"
       else
@@ -345,7 +346,7 @@ while getopts "i:r:u:e:p:h:d:s:v:b:x:" arg; do
       rfs=$servicedvolumes_fs_type
       dev=$OPTARG
       echo -e "${yellow}0 Preparing ${path} filesystem - device: ${dev}${endColor}"
-      fs=$(df -T | grep ' \/opt\/serviced\/var\/volumes$' | awk '{print $2}')
+      fs=$(df -TP | grep ' \/opt\/serviced\/var\/volumes$' | awk '{print $2}')
       if [ ! -z "$fs" ]; then
           echo -e "${path} filesystem is already mounted, skipping creating this filesystem"
       else
@@ -405,7 +406,7 @@ while getopts "i:r:u:e:p:h:d:s:v:b:x:" arg; do
       rfs=$servicedbackups_fs_type
       dev=$OPTARG
       echo -e "${yellow}0 Preparing ${path} filesystem - device: ${dev}${endColor}"
-      fs=$(df -T | grep ' \/opt\/serviced\/var\/backups$' | awk '{print $2}')
+      fs=$(df -TP | grep ' \/opt\/serviced\/var\/backups$' | awk '{print $2}')
       if [ ! -z "$fs" ]; then
           echo -e "${path} filesystem is already mounted, skipping creating this filesystem"
       else
