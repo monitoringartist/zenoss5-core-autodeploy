@@ -3,6 +3,8 @@ Install Zenoss 5 Core/Resource Manager 5
 
 If you like or use this project, please provide feedback to author - Star it ★.
 
+Please read [How to install Zenoss 5 successfully](http://bit.ly/zenoss5).
+
 Auto-deployment script for Zenoss 5 on CentOS 7.x / Red Hat Enterprise 
 Linux 7.x / Ubuntu 14. A 64-bit build is required.
 
@@ -173,10 +175,10 @@ Be aware that script activities (e.g. installation issues, sucessfull installati
 Author
 ======
 
-[Devops Monitoring zExpert](http://www.jangaraj.com 'DevOps / Docker / Zabbix / Zenoss / Monitoring'), who loves monitoring 
+[Devops Monitoring zExpert](http://www.jangaraj.com 'DevOps / Docker / Kubernetes / Zabbix / Zenoss / Monitoring'), who loves monitoring 
 systems, which start with letter Z. Those are Zabbix and Zenoss.
 
 Professional monitoring services:
 
 [![Monitoring Artist](http://monitoringartist.com/img/github-monitoring-artist-logo.jpg)]
-(http://www.monitoringartist.com 'DevOps / Docker / Zabbix / Zenoss / Monitoring')
+(http://www.monitoringartist.com 'DevOps / Docker / Kubernetes / Zabbix / Zenoss / Monitoring')
