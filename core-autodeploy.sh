@@ -2,7 +2,7 @@
 
 # Script for Control Center and Zenoss Core 5 / Zenoss Resource Manager 5 deployement
 # Copyright (C) 2015 Jan Garaj - www.jangaraj.com / www.monitoringartist.com / www.zenoss5taster.com
-version="2015-11-22"
+version="2015-12-09"
 
 # Analytics
 starttimestamp=$(date +%s)
@@ -36,6 +36,7 @@ mount_parameters_btrfs="rw,noatime,nodatacow,skip_balance 0 0"
 mount_parameters_xfs="defaults,noatime 0 0"
 mount_parameters_ext4="defaults 0 0"
 # Docker and Zenoss Settings
+docker_version=1.8.2
 g2k=1048576
 user="ccuser"
 retries_max=90
@@ -87,7 +88,7 @@ check_filesystem() {
     if [ "$fs" == "" ]; then
         fs=$(df -TP | grep "/$" | awk '{print $2}')
     fi
-    if [ "$fs" != "$myfilesystem" ]; then                                                                                                       
+    if [ "$fs" != "$myfilesystem" ]; then
         echo -en "\n${red} ${fs} ${mylocation} filesystem detected, but ${myfilesystem} is required. Do you want to continue (y/n)? ${endColor}"
         curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Wrong%20FS%20${mylocation}%20${fs}&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
         prompt_continue
@@ -609,8 +610,8 @@ else
 fi
 
 # Setup software repositories
+echo -e "${yellow}2.5 Zenoss/Docker repositories config${endColor}"
 if [ "$hostos" == "redhat" ]; then
-    echo -e "${yellow}2.5 Download and install the Zenoss repository package${endColor}"
     echo 'rpm -ivh http://get.zenoss.io/yum/zenoss-repo-1-1.x86_64.rpm'
     output=$(rpm -ivh http://get.zenoss.io/yum/zenoss-repo-1-1.x86_64.rpm 2>&1)
     com_ret=$?
@@ -624,12 +625,39 @@ if [ "$hostos" == "redhat" ]; then
         yum clean all &>/dev/null
         echo -e "${green}Done${endColor}"
     fi
+    # Docker repository
+    echo '/etc/yum.repos.d/docker-main.repo'
+    cat > /etc/yum.repos.d/docker-main.repo << EOF
+    [docker-main-repo]
+    name=Docker main Repository
+    baseurl=https://yum.dockerproject.org/repo/main/centos/7
+    enabled=1
+    gpgcheck=1
+    gpgkey=https://yum.dockerproject.org/gpg
+    EOF
+    echo 'yum -y -q install docker-engine-${docker_version}'
+    yum -y -q install docker-engine-${docker_version}
+    if [ $? -ne 0 ]; then
+        echo -e "${red}Problem with Docker installation${endColor}"
+        exit 1
+    else
+        echo -e "${green}Done${endColor}"
+    fi
 elif [ "$hostos" == "ubuntu" ]; then
     # Docker repository
-    echo 'echo "deb http://get.docker.com/ubuntu docker main" > /etc/apt/sources.list.d/docker.list'
-    echo "deb http://get.docker.com/ubuntu docker main" > /etc/apt/sources.list.d/docker.list
-    echo 'apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8950F966E92D8576A8BA88D21E9'
-    apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8950F966E92D8576A8BA88D21E9
+    echo 'apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D'
+    apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+    echo 'curl -sO http://apt.dockerproject.org/repo/pool/main/d/docker-engine/docker-engine_${docker_version}-0~trusty_amd64.deb'
+    curl -sO http://apt.dockerproject.org/repo/pool/main/d/docker-engine/docker-engine_${docker_version}-0~trusty_amd64.deb
+    echo 'dpkg -i docker-engine_${docker_version}-0~trusty_amd64.deb'
+    dpkg -i docker-engine_${docker_version}-0~trusty_amd64.deb
+    if [ $? -ne 0 ]; then
+        echo -e "${red}Problem with Docker installation${endColor}"
+        exit 1
+    else
+        echo -e "${green}Done${endColor}"
+    fi
+    rm -rf docker-engine_${docker_version}-0~trusty_amd64.deb
     # Zenoss repository
     echo 'echo "deb [ arch=amd64 ] http://get.zenoss.io/apt/ubuntu trusty universe" > /etc/apt/sources.list.d/zenoss.list'
     echo "deb [ arch=amd64 ] http://get.zenoss.io/apt/ubuntu trusty universe" > /etc/apt/sources.list.d/zenoss.list
@@ -718,8 +746,8 @@ if [ "$hostos" == "redhat" ]; then
     echo "yum --enablerepo=zenoss-stable install -y ${zenoss_package}"
     yum --enablerepo=zenoss-stable install -y ${zenoss_package}
 elif [ "$hostos" == "ubuntu" ]; then
-    echo 'apt-get install -y --force-yes lxc-docker-1.5.0 ${zenoss_package}'
-    apt-get install -y --force-yes lxc-docker-1.5.0 ${zenoss_package}
+    echo 'apt-get install -y --force-yes ${zenoss_package}'
+    apt-get install -y --force-yes ${zenoss_package}
 fi
 if [ $? -ne 0 ]; then
     echo -e "${red}Problem with installing Control Center, Zenoss Core and Docker${endColor}"
@@ -1172,7 +1200,7 @@ do
                 echo -e "${green}Done${endColor} with problem"
             fi
         fi
-    fi   
+    fi
 done
 
 echo -e "${blue}5 Final overview - (`date -R`)${endColor}"
