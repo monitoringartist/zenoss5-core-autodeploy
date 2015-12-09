@@ -628,14 +628,14 @@ if [ "$hostos" == "redhat" ]; then
     # Docker repository
     echo '/etc/yum.repos.d/docker-main.repo'
     cat > /etc/yum.repos.d/docker-main.repo << EOF
-    [docker-main-repo]
-    name=Docker main Repository
-    baseurl=https://yum.dockerproject.org/repo/main/centos/7
-    enabled=1
-    gpgcheck=1
-    gpgkey=https://yum.dockerproject.org/gpg
-    EOF
-    echo 'yum -y -q install docker-engine-${docker_version}'
+[docker-main-repo]
+name=Docker main Repository
+baseurl=https://yum.dockerproject.org/repo/main/centos/7
+enabled=1
+gpgcheck=1
+gpgkey=https://yum.dockerproject.org/gpg
+EOF
+    echo "yum -y -q install docker-engine-${docker_version}""
     yum -y -q install docker-engine-${docker_version}
     if [ $? -ne 0 ]; then
         echo -e "${red}Problem with Docker installation${endColor}"
