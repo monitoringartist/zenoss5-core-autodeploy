@@ -639,6 +639,7 @@ EOF
     yum -y -q install docker-engine-${docker_version}
     if [ $? -ne 0 ]; then
         echo -e "${red}Problem with Docker installation${endColor}"
+        curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=InstallDockerRepo%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
         exit 1
     else
         echo -e "${green}Done${endColor}"
@@ -653,6 +654,7 @@ elif [ "$hostos" == "ubuntu" ]; then
     dpkg -i docker-engine_${docker_version}-0~trusty_amd64.deb
     if [ $? -ne 0 ]; then
         echo -e "${red}Problem with Docker installation${endColor}"
+        curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=InstallDockerRepo%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
         exit 1
     else
         echo -e "${green}Done${endColor}"
