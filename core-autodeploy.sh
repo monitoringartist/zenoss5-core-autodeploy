@@ -635,8 +635,7 @@ enabled=1
 gpgcheck=1
 gpgkey=https://yum.dockerproject.org/gpg
 EOF
-
-    echo "yum -y -q install docker-engine-${docker_version}""
+    echo "yum -y -q install docker-engine-${docker_version}"
     yum -y -q install docker-engine-${docker_version}
     if [ $? -ne 0 ]; then
         echo -e "${red}Problem with Docker installation${endColor}"
