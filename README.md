@@ -3,7 +3,8 @@ Install Zenoss 5 Core/Resource Manager 5
 
 If you like or use this project, please provide feedback to author - Star it ★.
 
-Please read [How to install Zenoss 5 successfully](http://bit.ly/zenoss5).
+Please read [How to install Zenoss 5 successfully](http://bit.ly/zenoss5). 
+More than 2000 sucessfull Zenoss 5 installations = 2300 hours of Zenoss 5 installation (Dec 2015). 
 
 Auto-deployment script for Zenoss 5 on CentOS 7.x / Red Hat Enterprise 
 Linux 7.x / Ubuntu 14. A 64-bit build is required.
