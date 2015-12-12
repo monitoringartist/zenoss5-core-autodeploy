@@ -64,12 +64,16 @@ Extra
 (https://github.com/monitoringartist/control-center-elasticsearch)
 
 - zenoss-searcher - deploy [Zenoss searcher for Control Center]
-(https://github.com/monitoringartist/control-center-zenoss-searcher) 
+(https://github.com/monitoringartist/control-center-zenoss-searcher)
+
+- grafana-demo - deploy [Grafana demo for Control Center]
+(https://github.com/monitoringartist/control-center-grafana-demo), 
+[Full version](http://monitoringartist.com/product/grafana-2-for-zenoss-5/) 
 
 Example:
 
 ```
-# ./core-autodeploy.sh -x zabbix,elasticsearch,zenoss-searcher
+# ./core-autodeploy.sh -x zabbix,elasticsearch,zenoss-searcher,grafana-demo
 ```
 
 For advandced users only (you must be familiar with documentation, so you will 

@@ -2,7 +2,7 @@
 
 # Script for Control Center and Zenoss Core 5 / Zenoss Resource Manager 5 deployement
 # Copyright (C) 2015 Jan Garaj - www.jangaraj.com / www.monitoringartist.com / www.zenoss5taster.com
-version="2015-12-09"
+version="2015-12-12"
 
 # Analytics
 starttimestamp=$(date +%s)
@@ -1160,8 +1160,17 @@ rm -rf Control-Center-Zenoss-Searcher-template.json
 curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Extra%20template&el=zenoss-searcher&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
 echo -e "${green}Done${endColor}"
 
+echo -e "${yellow}Adding Grafana-Demo template${endColor}"
+echo "Visit: https://github.com/monitoringartist/control-center-grafana-demo"
+curl -O https://raw.githubusercontent.com/monitoringartist/control-center-grafana-demo/master/Control-Center-Grafana-Demo-template.json
+echo "serviced template add Control-Center-Grafana-Demo-template.json"
+serviced template add Control-Center-Grafana-Demo-template.json
+rm -rf Control-Center-Grafana-Demo-template.json
+curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Extra%20template&el=grafana-demo&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
+echo -e "${green}Done${endColor}"
+
 # loop for extra template deployement
-declare -a extras=("zabbix" "elasticsearch" "zenoss-searcher")
+declare -a extras=("zabbix" "elasticsearch" "zenoss-searcher" "grafana-demo")
 for extraapp in "${extras[@]}"
 do
     substring=",${extraapp},"
