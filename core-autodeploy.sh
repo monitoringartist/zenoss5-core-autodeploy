@@ -2,7 +2,7 @@
 
 # Script for Control Center and Zenoss Core 5 / Zenoss Resource Manager 5 deployement
 # Copyright (C) 2015 Jan Garaj - www.jangaraj.com / www.monitoringartist.com / www.zenoss5taster.com
-version="2015-12-12"
+version="2015-12-13"
 
 # Analytics
 starttimestamp=$(date +%s)
@@ -626,17 +626,22 @@ if [ "$hostos" == "redhat" ]; then
         echo -e "${green}Done${endColor}"
     fi
     # Docker repository
-    echo '/etc/yum.repos.d/docker-main.repo'
-    cat > /etc/yum.repos.d/docker-main.repo << EOF
-[docker-main-repo]
+    echo '/etc/yum.repos.d/docker.repo'
+    cat > /etc/yum.repos.d/docker.repo << EOF
+[docker-repo]
 name=Docker main Repository
 baseurl=https://yum.dockerproject.org/repo/main/centos/7
-enabled=1
+enabled=0
 gpgcheck=1
 gpgkey=https://yum.dockerproject.org/gpg
 EOF
-    echo "yum -y -q install docker-engine-${docker_version}"
-    yum -y -q install docker-engine-${docker_version}
+    echo "yum -y -q --enablerepo=docker install docker-engine-${docker_version}"
+    yum -y -q --enablerepo=docker install docker-engine-${docker_version}
+    ## TODO systemd and $DOCKER_OPTS:
+    ##/lib/systemd/system/docker.service
+    ##EnvironmentFile=-/etc/sysconfig/docker
+    #grep -q '^EnvironmentFile=' /lib/systemd/system/docker.service && sed -i 's/^EnvironmentFile=.*/EnvironmentFile=-\/etc\/sysconfig\/docker/' /lib/systemd/system/docker.service || echo 'option=value' >> file
+    #sed -i -e 's/^ExecStart=.*/ExecStart=\/usr\/bin\/docker daemon $DOCKER_OPTS -H fd:\/\//g' /lib/systemd/system/docker.service    
     if [ $? -ne 0 ]; then
         echo -e "${red}Problem with Docker installation${endColor}"
         curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=InstallDockerRepo%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
@@ -1160,6 +1165,15 @@ rm -rf Control-Center-Zenoss-Searcher-template.json
 curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Extra%20template&el=zenoss-searcher&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
 echo -e "${green}Done${endColor}"
 
+echo -e "${yellow}Adding Jenkins template${endColor}"
+echo "Visit: https://github.com/monitoringartist/control-center-jenkins"
+curl -O https://raw.githubusercontent.com/monitoringartist/control-center-jenkins/master/Control-Center-Jenkins-template.json
+echo "serviced template add Control-Center-Jenkins-template.json"
+serviced template add Control-Center-Jenkins-template.json
+rm -rf Control-Center-Jenkins-template.json
+curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Extra%20template&el=jenkins&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
+echo -e "${green}Done${endColor}"
+
 echo -e "${yellow}Adding Grafana-Demo template${endColor}"
 echo "Visit: https://github.com/monitoringartist/control-center-grafana-demo"
 curl -O https://raw.githubusercontent.com/monitoringartist/control-center-grafana-demo/master/Control-Center-Grafana-Demo-template.json
@@ -1170,7 +1184,7 @@ curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-6889
 echo -e "${green}Done${endColor}"
 
 # loop for extra template deployement
-declare -a extras=("zabbix" "elasticsearch" "zenoss-searcher" "grafana-demo")
+declare -a extras=("zabbix" "elasticsearch" "zenoss-searcher" "jenkins" "grafana-demo")
 for extraapp in "${extras[@]}"
 do
     substring=",${extraapp},"
@@ -1218,7 +1232,7 @@ echo -e "${blue}5 Final overview - (`date -R`)${endColor}"
 echo -e "${green}Control Center & ${zenoss_installation} installation completed${endColor}"
 echo -e "${green}Set password for Control Center ${user} user: passwd ${user}${endColor}"
 echo -e "${green}Please visit Control Center https://$publicipv4/ in your favorite web browser to complete setup, log in with ${user} user${endColor}"
-echo -e "${green}Add following line to your hosts file:${endColor}"
+echo -e "${green}Add following line to your hosts file (Install guide - \"Configuring name resolution on ...\"):${endColor}"
 echo -e "${green}$publicipv4 $hostname hbase.$hostname opentsdb.$hostname rabbitmq.$hostname zenoss5.$hostname$domains${endColor}"
 echo -e "${green}or edit /etc/default/serviced and set SERVICED_VHOST_ALIASES to your FQDN${endColor}"
 # selinux test

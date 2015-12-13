@@ -67,6 +67,9 @@ Extra
 - zenoss-searcher - deploy [Zenoss searcher for Control Center]
 (https://github.com/monitoringartist/control-center-zenoss-searcher)
 
+- jenkins - deploy [Jenkins for Control Center]
+(https://github.com/monitoringartist/control-center-jenkins)
+
 - grafana-demo - deploy [Grafana demo for Control Center]
 (https://github.com/monitoringartist/control-center-grafana-demo), 
 [Full version](http://monitoringartist.com/product/grafana-2-for-zenoss-5/) 
@@ -74,7 +77,7 @@ Extra
 Example:
 
 ```
-# ./core-autodeploy.sh -x zabbix,elasticsearch,zenoss-searcher,grafana-demo
+# ./core-autodeploy.sh -x zabbix,elasticsearch,zenoss-searcher,jenkins,grafana-demo
 ```
 
 For advandced users only (you must be familiar with documentation, so you will 
