@@ -2,7 +2,7 @@
 
 # Script for Control Center and Zenoss Core 5 / Zenoss Resource Manager 5 deployement
 # Copyright (C) 2015 Jan Garaj - www.jangaraj.com / www.monitoringartist.com / www.zenoss5taster.com
-version="2015-12-13"
+version="2015-12-15"
 
 # Analytics
 starttimestamp=$(date +%s)
