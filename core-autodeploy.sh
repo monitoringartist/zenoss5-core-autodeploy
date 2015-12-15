@@ -628,7 +628,7 @@ if [ "$hostos" == "redhat" ]; then
     # Docker repository
     echo '/etc/yum.repos.d/docker.repo'
     cat > /etc/yum.repos.d/docker.repo << EOF
-[docker-repo]
+[docker]
 name=Docker main Repository
 baseurl=https://yum.dockerproject.org/repo/main/centos/7
 enabled=0
@@ -636,17 +636,17 @@ gpgcheck=1
 gpgkey=https://yum.dockerproject.org/gpg
 EOF
     echo "yum -y -q --enablerepo=docker install docker-engine-${docker_version}"
-    yum -y -q --enablerepo=docker install docker-engine-${docker_version}
-    ## TODO systemd and $DOCKER_OPTS:
-    ##/lib/systemd/system/docker.service
-    ##EnvironmentFile=-/etc/sysconfig/docker
-    #grep -q '^EnvironmentFile=' /lib/systemd/system/docker.service && sed -i 's/^EnvironmentFile=.*/EnvironmentFile=-\/etc\/sysconfig\/docker/' /lib/systemd/system/docker.service || echo 'option=value' >> file
-    #sed -i -e 's/^ExecStart=.*/ExecStart=\/usr\/bin\/docker daemon $DOCKER_OPTS -H fd:\/\//g' /lib/systemd/system/docker.service    
+    yum -y -q --enablerepo=docker install docker-engine-${docker_version}    
     if [ $? -ne 0 ]; then
         echo -e "${red}Problem with Docker installation${endColor}"
         curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=InstallDockerRepo%20error&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
         exit 1
     else
+        echo '/lib/systemd/system/docker.service optimization'
+        grep -q '^EnvironmentFile=' /lib/systemd/system/docker.service && sed -i 's/^EnvironmentFile=.*/EnvironmentFile=-\/etc\/sysconfig\/docker/' /lib/systemd/system/docker.service || sed -i '/^\[Service\]/a EnvironmentFile=-\/etc\/sysconfig\/docker' /lib/systemd/system/docker.service    
+        sed -i -e 's/^ExecStart=.*/ExecStart=\/usr\/bin\/docker daemon $DOCKER_OPTS -H fd:\/\//g' /lib/systemd/system/docker.service
+        echo 'systemctl daemon-reload'
+        systemctl daemon-reload    
         echo -e "${green}Done${endColor}"
     fi
 elif [ "$hostos" == "ubuntu" ]; then
