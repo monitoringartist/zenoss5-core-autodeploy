@@ -70,6 +70,9 @@ Extra
 - jenkins - deploy [Jenkins for Control Center]
 (https://github.com/monitoringartist/control-center-jenkins)
 
+- gerrit - deploy [Gerrit for Control Center]
+(https://github.com/monitoringartist/control-center-gerrit)
+
 - grafana-demo - deploy [Grafana demo for Control Center]
 (https://github.com/monitoringartist/control-center-grafana-demo), 
 [Full version](http://monitoringartist.com/product/grafana-2-for-zenoss-5/) 
