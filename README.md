@@ -58,6 +58,10 @@ Extra
 
 -x parameter provides extra projects for Control Center/Zenoss:
 
+- grafana-demo - deploy [Grafana demo for Control Center]
+(https://github.com/monitoringartist/control-center-grafana-demo), 
+[Full version](http://monitoringartist.com/product/grafana-2-for-zenoss-5/)
+
 - zabbix - deploy [Zabbix for Control Center]
 (https://github.com/monitoringartist/control-center-zabbix)
 
@@ -72,15 +76,11 @@ Extra
 
 - gerrit - deploy [Gerrit for Control Center]
 (https://github.com/monitoringartist/control-center-gerrit)
-
-- grafana-demo - deploy [Grafana demo for Control Center]
-(https://github.com/monitoringartist/control-center-grafana-demo), 
-[Full version](http://monitoringartist.com/product/grafana-2-for-zenoss-5/) 
-
+ 
 Example:
 
 ```
-# ./core-autodeploy.sh -x zabbix,elasticsearch,zenoss-searcher,jenkins,grafana-demo
+# ./core-autodeploy.sh -x grafana-demo,zabbix,elasticsearch,zenoss-searcher,jenkins,gerrit
 ```
 
 For advandced users only (you must be familiar with documentation, so you will 
