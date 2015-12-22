@@ -28,6 +28,14 @@ Usage of auto-deployment script:
 # ./core-autodeploy.sh
 ```
 
+**User feedback:**
+
+> I tried to use your script to deploy zenoss 5 and docker wont start. I'm very disappointed. 
+
+I agree. This script is not magic Unicorn, which will solve all Zenoss 5 deployment problems 
+(wrong filesystems types, not compatible OS, ...). That's the reason, why script prints 
+link to [manual installation guide](http://www.zenoss.com/resources/documentation), which is your safe option for Zenoss 5 installation.
+
 The script will take several minutes (around 15-30) to complete. When done, 
 you should be able to visit Control Center in a web browser to start 
 Zenoss 5 application. Easy Zenoss installation.
