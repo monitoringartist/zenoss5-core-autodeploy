@@ -954,7 +954,7 @@ fi
 #cd /etc/ssl/certs/serviced
 #mkdir -p /tmp/ssl
 #docker run --name simp_le -v /tmp/ssl:/usr/share/nginx/html:ro -p 80:80 -d nginx
-#simp_le -f key.pem -f cert.pem -f fullchain.pem -d ccmaster.jangaraj.com:/tmp/ssl -f account_key.json
+#simp_le -f key.pem -f cert.pem -f fullchain.pem -d ccmaster.domain.com:/tmp/ssl -f account_key.json
 #docker rm -f simp_le
 #docker rmi -f nginx
 #rm -rf /tmp/ssl
