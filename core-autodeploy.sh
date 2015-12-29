@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Script for Control Center and Zenoss Core 5 / Zenoss Resource Manager 5 deployement
-# Copyright (C) 2015 Jan Garaj - www.jangaraj.com / www.monitoringartist.com / www.zenoss5taster.com
-version="2015-12-20"
+# Copyright (C) 2015 Jan Garaj - www.monitoringartist.com / www.jangaraj.com
+version="2015-12-29"
 
 # Analytics
 starttimestamp=$(date +%s)
@@ -52,12 +52,12 @@ zenoss_installation_enterprise="Zenoss Resource Manager 5"
 zenoss_template="Zenoss.core"
 zenoss_template_enterprise="Zenoss.resmgr"
 zenoss_impact=""
-zenoss_impact_enterprise="zenoss/impact_5.0:5.0.3.0.0"
+zenoss_impact_enterprise="zenoss/impact_5.0:5.0.5.0.0"
 docker_registry_user=""
 docker_registry_email=""
 docker_registry_password=""
 MHOST=""
-advert="Ultimate graph and dashboard solution for Zenoss 5 / Grafana 2 for Zenoss 5 - http://beta.monitoringartist.com/grafana2-for-zenoss5.php"
+advert="Ultimate graph and dashboard solution for Zenoss 5 / Grafana 2 for Zenoss 5 - http://bit.ly/zenoss5grafana"
 
 # Magical colors of the wind
 green='\e[0;32m'
@@ -936,6 +936,29 @@ if [ "$hostos" == "redhat" ]; then
     fi
 fi
 
+### TODO generate free Let's encrypt certificate for serviced
+#yum install -y git
+#cd /opt
+#git clone https://github.com/kuba/simp_le
+#cd simp_le
+#./bootstrap.sh
+#./venv.sh
+#ln -s $(pwd)/venv/bin/simp_le /usr/local/sbin/simp_le
+#
+#mkdir -p /etc/ssl/certs/serviced
+#cd /etc/ssl/certs/serviced
+#mkdir -p /tmp/ssl
+#docker run --name simp_le -v /tmp/ssl:/usr/share/nginx/html:ro -p 80:80 -d nginx
+#simp_le -f key.pem -f cert.pem -f fullchain.pem -d ccmaster.jangaraj.com:/tmp/ssl -f account_key.json
+#docker rm -f simp_le
+#docker rmi -f nginx
+#rm -rf /tmp/ssl
+#
+#vi /etc/default/serviced
+#SERVICED_KEY_FILE=/etc/ssl/certs/serviced/key.pem
+#SERVICED_CERT_FILE=/etc/ssl/certs/serviced/cert.pem
+### TODO cron for auto cert update - probably with serviced restart
+
 # Startup serviced services
 echo -e "${yellow}3.9 Start the Control Center service${endColor}"
 if [ "$hostos" == "redhat" ]; then
@@ -1054,11 +1077,11 @@ fi
 
 echo -e "${yellow}5 Tuning ${zenoss_template}${endColor}"
 
-# Quilt packages
-echo -e "${yellow}5.1 Installing the Quilt package${endColor}"
-echo "Creating /tmp/quilt.txt"
-cat > /tmp/quilt.txt << EOF
-DESCRIPTION quilt.txt -- add Quilt to a Zenoss image
+# Additional packages
+echo -e "${yellow}5.1 Installing additional packages: quilt, fping, mtr${endColor}"
+echo "Creating /tmp/packages.txt"
+cat > /tmp/packages.txt << EOF
+DESCRIPTION packages.txt -- add quilt, fping, mtr to a Zenoss image
 VERSION zenoss-quilt-1.0
 REQUIRE_SVC
 SNAPSHOT
@@ -1068,26 +1091,26 @@ SVC_EXEC COMMIT ${zenoss_template} yum install -y epel-release
 # Download repository metadata
 SVC_EXEC COMMIT ${zenoss_template} yum makecache -y
 # Install quilt
-SVC_EXEC COMMIT ${zenoss_template} yum install -y quilt
+SVC_EXEC COMMIT ${zenoss_template} yum install -y quilt fping mtr
 # Remove EPEL
 SVC_EXEC COMMIT ${zenoss_template} yum erase -y epel-release
 # Clean up yum caches
 SVC_EXEC COMMIT ${zenoss_template} yum clean all
 EOF
 
-echo "Syntax verification of /tmp/quilt.txt"
-serviced script parse /tmp/quilt.txt
+echo "Syntax verification of /tmp/packages.txt"
+serviced script parse /tmp/packages.txt
 if [ $? -ne 0 ]; then
-    echo -e "${red}Problem with syntax verification of /tmp/quilt.txt${endColor}"
-    rm -rf /tmp/quilt.txt
+    echo -e "${red}Problem with syntax verification of /tmp/packages.txt${endColor}"
+    rm -rf /tmp/packages.txt
 fi
-echo "Installing the Quilt package"
-serviced script run /tmp/quilt.txt --service ${zenoss_template}
+echo "Installing additional package"
+serviced script run /tmp/packages.txt --service ${zenoss_template}
 if [ $? -ne 0 ]; then
-    echo -e "${red}Problem with installing the Quilt package${endColor}"
-    rm -rf /tmp/quilt.txt
+    echo -e "${red}Problem with installing additional packages${endColor}"
+    rm -rf /tmp/packages.txt
 fi
-rm -rf /tmp/quilt.txt
+rm -rf /tmp/packages.txt
 echo -e "${green}Done${endColor}"
 
 # Percona toolkit
