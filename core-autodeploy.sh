@@ -82,7 +82,7 @@ check_filesystem() {
     myfilesystem=$2
     myminsize=$3
 
-    echo -en "${yellow} $mylocation filesystem check in progress...${endColor} "
+    echo -en "${yellow} $mylocation filesystem check in progress...${endColor}"
     fs=$(df -TP | grep "$mylocation$" | awk '{print $2}')
     # Fall back to root fs
     if [ "$fs" == "" ]; then
@@ -92,6 +92,11 @@ check_filesystem() {
         echo -en "\n${red} ${fs} ${mylocation} filesystem detected, but ${myfilesystem} is required. Do you want to continue (y/n)? ${endColor}"
         curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Wrong%20FS%20${mylocation}%20${fs}&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
         prompt_continue
+        if [ "$mylocation" == "$servicedvolumes_fs_path" ]; then
+            echo -en "${red}No, No and No. Author of autodeployement script refuses to make this exception. Please use manual deployement!!!${endColor}"
+            curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Wrong%20FS%20${mylocation}%20${fs}%20NO&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
+            exit 1        
+        fi
         curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Wrong%20FS%20${mylocation}%20${fs}%20yes&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
         mycontinue="yes"
     fi
