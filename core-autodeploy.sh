@@ -2,7 +2,7 @@
 
 # Script for Control Center and Zenoss Core 5 / Zenoss Resource Manager 5 deployement
 # Copyright (C) 2015 Jan Garaj - www.monitoringartist.com / www.jangaraj.com
-version="2015-12-29"
+version="2016-01-16"
 
 # Analytics
 starttimestamp=$(date +%s)
@@ -557,7 +557,7 @@ else
     privateipv4=$(ip addr show | grep -A 1 $is | grep inet | awk '{print $2}' | awk -F'/' '{print $1}')
 fi
 
-# AWS/HP Cloud public IPv4 address
+# AWS public IPv4 address
 publicipv4=$(curl --max-time 10 -s http://169.254.169.254/latest/meta-data/public-ipv4 | tr '\n' ' ')
 if [[ ! $publicipv4 =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
     publicipv4=$privateipv4
