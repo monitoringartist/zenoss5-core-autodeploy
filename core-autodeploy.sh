@@ -154,7 +154,7 @@ if [ -f /etc/redhat-release ]; then
 elif grep -q "Ubuntu" /etc/issue; then
 
     # Sorry guys - Ubuntu is disabled atm
-    echo -e "${red}Combination Ubuntu and Zenoss/Control Center has a unresolved installation issue - search ubuntu in https://jira.zenoss.com/ ${endColor}"
+    echo -e "${red}Combination Ubuntu and Zenoss/Control Center has a unresolved installation issue - https://jira.zenoss.com/browse/CC-1705 ${endColor}"
     exit 1
     
     if ! grep -q "14.04" /etc/issue; then
