@@ -153,10 +153,6 @@ if [ -f /etc/redhat-release ]; then
 # Check for Ubuntu
 elif grep -q "Ubuntu" /etc/issue; then
 
-    # Sorry guys - Ubuntu is disabled atm
-    echo -e "${red}Combination Ubuntu and Zenoss/Control Center has a unresolved installation issue - https://jira.zenoss.com/browse/CC-1705 ${endColor}"
-    exit 1
-    
     if ! grep -q "14.04" /etc/issue; then
         echo -e $notsupported
         curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Unsupported%20Ubuntu&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
