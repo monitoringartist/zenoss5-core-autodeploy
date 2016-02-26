@@ -1166,12 +1166,12 @@ fi
 
 echo -e "${yellow}7 Extra templates${endColor}"
 domains=" "
-echo -e "${yellow}Adding Zabbix 2.4 template${endColor}"
+echo -e "${yellow}Adding Zabbix 3.0 template${endColor}"
 echo "Visit: https://github.com/monitoringartist/control-center-zabbix"
-curl -O https://raw.githubusercontent.com/monitoringartist/control-center-zabbix/master/Control-Center-Zabbix-2.4-template.json
-echo "serviced template add Control-Center-Zabbix-2.4-template.json"
-serviced template add Control-Center-Zabbix-2.4-template.json
-rm -rf Control-Center-Zabbix-2.4-template.json
+curl -O https://raw.githubusercontent.com/monitoringartist/control-center-zabbix/master/Control-Center-Zabbix-3.0-template.json
+echo "serviced template add Control-Center-Zabbix-3.0-template.json"
+serviced template add Control-Center-Zabbix-3.0-template.json
+rm -rf Control-Center-Zabbix-3.0-template.json
 curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Extra%20template&el=zabbix&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
 echo -e "${green}Done${endColor}"
 
