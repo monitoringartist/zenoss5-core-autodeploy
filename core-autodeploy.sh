@@ -36,7 +36,7 @@ mount_parameters_btrfs="rw,noatime,nodatacow,skip_balance 0 0"
 mount_parameters_xfs="defaults,noatime 0 0"
 mount_parameters_ext4="defaults 0 0"
 # Docker and Zenoss Settings
-docker_version=1.8.2
+docker_version=1.9.0
 g2k=1048576
 user="ccuser"
 retries_max=90
