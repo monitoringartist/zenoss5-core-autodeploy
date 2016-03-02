@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Script for Control Center and Zenoss Core 5 / Zenoss Resource Manager 5 deployement
-# Copyright (C) 2015 Jan Garaj - www.monitoringartist.com / www.jangaraj.com
-version="2016-01-16"
+# Copyright (C) 2016 Jan Garaj - www.monitoringartist.com / www.jangaraj.com
+version="2016-03-02"
 
 # Analytics
 starttimestamp=$(date +%s)
@@ -135,6 +135,7 @@ echo -e "${yellow}Autodeploy script ${version} for Control Center master host an
 echo -e "${yellow}${advert}${endColor}"
 echo -e "Install guide: ${install_doc}"
 echo -en "${yellow}You should to read 'How to install Zenoss 5 successfuly' first - http://bit.ly/zenoss5. OK (y/n)? ${endColor}"
+echo -en "${red}This autodeploy script was not tested/prepared for current Zenoss version 5.1.x. Do you really want to continue (y/n)?${endColor}"
 prompt_continue
 
 # Check distro compatibility
