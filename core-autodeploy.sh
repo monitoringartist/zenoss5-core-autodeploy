@@ -138,7 +138,7 @@ echo -en "${yellow}You should to read 'How to install Zenoss 5 successfuly' firs
 prompt_continue
 
 # Check distro compatibility
-notsupported="${red}Not supported OS version. Only RedHat 7, CentOS 7 and Ubuntu 14.04 are supported by Zenoss at the moment.${endColor}"
+notsupported="${red}Not supported OS version. Only RedHat 7 and CentOS 7 are supported by Zenoss at the moment.${endColor}"
 hostos="unknown"
 # Check for Redhat/CentOS
 if [ -f /etc/redhat-release ]; then
@@ -150,9 +150,8 @@ if [ -f /etc/redhat-release ]; then
         exit 1
     fi
     hostos="redhat"
-# Check for Ubuntu
-elif grep -q "Ubuntu" /etc/issue; then
-
+# Check for Ubuntu - Ubuntu is no longer a supported platform for Zenoss Core 5.1.1 or higher.
+elif grep -q "notsupportedUbuntu" /etc/issue; then
     if ! grep -q "14.04" /etc/issue; then
         echo -e $notsupported
         curl -ks -o /dev/null "http://www.google-analytics.com/r/collect?v=1&tid=UA-68890375-1&cid=${cid}&t=event&ec=Installation&ea=Error&el=Unsupported%20Ubuntu&ev=1&dp=%2F&dl=http%3A%2F%2Fgithub.com%2Fmonitoringartist%2Fzenoss5-core-autodeploy" &> /dev/null
