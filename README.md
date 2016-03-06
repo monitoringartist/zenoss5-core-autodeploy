@@ -11,7 +11,12 @@ Linux 7.x / Ubuntu 14. A 64-bit build is required.
 
 The script included in this directory will automatically install Zenoss 5 Core / 
 Resource Manager 5, Control Center and some install/deploy extra projects for 
-you. 
+you.
+
+*Note: This autodeploy script was not tested with Zenoss 5.1.x version! 
+Developement of this project is driven by customer. If you are just user, then 
+you can still create pull request with your support of Zenoss 5.1.x. 
+All PRs will be reviewed.*  
 
 Please donate to author, so he can continue to publish another awesome projects 
 for free:
