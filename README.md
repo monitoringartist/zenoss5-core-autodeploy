@@ -1,6 +1,8 @@
 Install Zenoss 5 Core/Resource Manager 5
 ========================================
 
+![Unsupported](https://img.shields.io/badge/development_status-unsupported-red.svg)
+
 If you like or use this project, please provide feedback to author - Star it ★.
 
 Please read [How to install Zenoss 5 successfully](http://bit.ly/zenoss5). 
