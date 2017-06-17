@@ -23,8 +23,7 @@ All PRs will be reviewed.*
 Please donate to author, so he can continue to publish another awesome projects 
 for free:
 
-[![Paypal donate button](http://jangaraj.com/img/github-donate-button02.png)]
-(https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=8LB6J222WRUZ4)
+[![Paypal donate button](http://jangaraj.com/img/github-donate-button02.png)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=8LB6J222WRUZ4)
 
 Usage of auto-deployment script: 
 
